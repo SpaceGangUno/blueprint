@@ -1,6 +1,6 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
+import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X, RefreshCcw } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
 import { auth, db, subscribeToUserClients } from '../../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -21,6 +21,40 @@ interface NewClientForm {
   description: string;
   status: ClientStatus;
 }
+
+// Loading Skeleton Component
+const LoadingSkeleton = () => (
+  <div className="space-y-4">
+    <div className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+      <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+    </div>
+    {[1, 2, 3].map(i => (
+      <div key={i} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+        <div className="flex justify-between mb-4">
+          <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-5 bg-gray-200 rounded w-16"></div>
+        </div>
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    ))}
+  </div>
+);
+
+// Error Display Component
+const ErrorDisplay = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+  <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+    <div className="text-red-600 mb-4">{error}</div>
+    <button
+      onClick={onRetry}
+      className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+    >
+      <RefreshCcw className="w-4 h-4 mr-2" />
+      Retry
+    </button>
+  </div>
+);
 
 // Memoized client card component
 const ClientCard = memo(({ client, statusIcons, statusColors }: {
@@ -88,21 +122,56 @@ export default function ClientBoard() {
     status: 'Active'
   });
 
+  const setupSubscriptions = useCallback(async () => {
+    setState(prev => ({ ...prev, loading: true, error: '' }));
+    
+    try {
+      if (!auth.currentUser) {
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Authentication required'
+        }));
+        return;
+      }
+
+      return subscribeToUserClients(
+        auth.currentUser.uid,
+        (clients) => {
+          setState(prev => ({
+            ...prev,
+            clients,
+            loading: false,
+            error: ''
+          }));
+        },
+        (error) => {
+          console.error('Subscription error:', error);
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error: error.message || 'Failed to load clients'
+          }));
+        }
+      );
+    } catch (err: any) {
+      console.error('Setup error:', err);
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: err.message || 'Failed to setup client subscription'
+      }));
+    }
+  }, []);
+
   useEffect(() => {
     let unsubscribeAuth: (() => void) | undefined;
     let unsubscribeClients: (() => void) | undefined;
 
-    const setupSubscriptions = async () => {
-      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const initialize = async () => {
+      unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          // Subscribe to clients when user is authenticated
-          unsubscribeClients = subscribeToUserClients(user.uid, (clients) => {
-            setState(prev => ({
-              ...prev,
-              clients,
-              loading: false
-            }));
-          });
+          unsubscribeClients = await setupSubscriptions();
         } else {
           setState(prev => ({
             ...prev,
@@ -113,14 +182,13 @@ export default function ClientBoard() {
       });
     };
 
-    setupSubscriptions();
+    initialize();
 
-    // Cleanup subscriptions
     return () => {
       unsubscribeAuth?.();
       unsubscribeClients?.();
     };
-  }, []);
+  }, [setupSubscriptions]);
 
   const statusIcons = {
     'Active': <Clock className="w-5 h-5 text-blue-500" />,
@@ -160,16 +228,6 @@ export default function ClientBoard() {
         createdAt: new Date().toISOString(),
         userId: auth.currentUser.uid
       };
-      
-      // Optimistic update
-      const tempId = Date.now().toString();
-      setState(prev => ({
-        ...prev,
-        clients: [{
-          id: tempId,
-          ...newClientData
-        } as Client, ...prev.clients]
-      }));
       
       await addDoc(clientsCollection, newClientData);
       
@@ -218,24 +276,11 @@ export default function ClientBoard() {
   }
 
   if (state.loading) {
-    return (
-      <div className="space-y-4">
-        <div className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
-            <div className="flex justify-between mb-4">
-              <div className="h-5 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-5 bg-gray-200 rounded w-16"></div>
-            </div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
-        ))}
-      </div>
-    );
+    return <LoadingSkeleton />;
+  }
+
+  if (state.error) {
+    return <ErrorDisplay error={state.error} onRetry={setupSubscriptions} />;
   }
 
   return (
@@ -264,12 +309,6 @@ export default function ClientBoard() {
           </button>
         </div>
       </div>
-
-      {state.error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-          {state.error}
-        </div>
-      )}
       
       {filteredClients.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-8 text-center">
