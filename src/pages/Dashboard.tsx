@@ -7,6 +7,7 @@ import {
 import Overview from '../components/dashboard/Overview';
 import ClientBoard from '../components/dashboard/ClientBoard';
 import ClientDashboard from '../components/dashboard/ClientDashboard';
+import ProjectDetails from '../components/dashboard/ProjectDetails';
 import Messages from '../components/dashboard/Messages';
 import TeamView from '../components/dashboard/TeamView';
 
@@ -91,7 +92,8 @@ export default function Dashboard() {
           <Routes>
             <Route path="/" element={<Overview />} />
             <Route path="/clients" element={<ClientBoard />} />
-            <Route path="/client/:clientId/*" element={<ClientDashboard />} />
+            <Route path="/client/:clientId" element={<ClientDashboard />} />
+            <Route path="/client/:clientId/project/:projectId/*" element={<ProjectDetails />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/team" element={<TeamView />} />
           </Routes>
