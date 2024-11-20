@@ -17,10 +17,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Mock admin credentials for demo
+// Admin credentials
 const ADMIN_CREDENTIALS = {
-  email: 'admin@blueprintstudios.com',
-  password: 'admin123'
+  email: 'isaacmazile@gmail.com',
+  password: 'Im934456'
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
       setUser({
         id: '1',
-        name: 'Admin User',
+        name: 'Isaac Mazile',
         email: ADMIN_CREDENTIALS.email,
         role: 'admin'
       });
