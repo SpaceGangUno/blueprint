@@ -2,16 +2,17 @@ import { useState, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X, RefreshCcw } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
-import { auth, db, subscribeToUserClients } from '../../config/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { db, subscribeToUserClients } from '../../config/firebase';
+import { useAuth } from '../../context/AuthContext';
 
 interface Client {
   id: string;
   name: string;
   description: string;
-  status: 'Active' | 'On Hold' | 'Completed';
+  status: ClientStatus;
   lastActivity: string;
   projectCount: number;
+  userId: string;
 }
 
 type ClientStatus = 'Active' | 'On Hold' | 'Completed';
@@ -107,6 +108,7 @@ ClientCard.displayName = 'ClientCard';
 
 // Main component
 export default function ClientBoard() {
+  const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState({
     clients: [] as Client[],
     loading: true,
@@ -126,7 +128,7 @@ export default function ClientBoard() {
     setState(prev => ({ ...prev, loading: true, error: '' }));
     
     try {
-      if (!auth.currentUser) {
+      if (!user) {
         setState(prev => ({
           ...prev,
           loading: false,
@@ -136,7 +138,7 @@ export default function ClientBoard() {
       }
 
       return subscribeToUserClients(
-        auth.currentUser.uid,
+        user.id,
         (clients) => {
           setState(prev => ({
             ...prev,
@@ -162,14 +164,13 @@ export default function ClientBoard() {
         error: err.message || 'Failed to setup client subscription'
       }));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    let unsubscribeAuth: (() => void) | undefined;
     let unsubscribeClients: (() => void) | undefined;
 
     const initialize = async () => {
-      unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (!authLoading) {
         if (user) {
           unsubscribeClients = await setupSubscriptions();
         } else {
@@ -179,16 +180,15 @@ export default function ClientBoard() {
             loading: false
           }));
         }
-      });
+      }
     };
 
     initialize();
 
     return () => {
-      unsubscribeAuth?.();
       unsubscribeClients?.();
     };
-  }, [setupSubscriptions]);
+  }, [user, authLoading, setupSubscriptions]);
 
   const statusIcons = {
     'Active': <Clock className="w-5 h-5 text-blue-500" />,
@@ -205,7 +205,7 @@ export default function ClientBoard() {
   const handleNewClient = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!auth.currentUser) {
+    if (!user) {
       setState(prev => ({
         ...prev,
         error: 'Please sign in to add clients'
@@ -226,7 +226,7 @@ export default function ClientBoard() {
         lastActivity: new Date().toISOString(),
         projectCount: 0,
         createdAt: new Date().toISOString(),
-        userId: auth.currentUser.uid
+        userId: user.id
       };
       
       await addDoc(clientsCollection, newClientData);
@@ -265,7 +265,11 @@ export default function ClientBoard() {
     ? state.clients 
     : state.clients.filter(client => client.status === state.filterStatus);
 
-  if (!auth.currentUser) {
+  if (authLoading || state.loading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (!user) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8 text-center">
         <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -273,10 +277,6 @@ export default function ClientBoard() {
         <p className="text-gray-600">Please sign in to view and manage clients.</p>
       </div>
     );
-  }
-
-  if (state.loading) {
-    return <LoadingSkeleton />;
   }
 
   if (state.error) {
