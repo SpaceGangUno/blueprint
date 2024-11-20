@@ -8,6 +8,7 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Services from './pages/Services';
+import TeamInvite from './pages/TeamInvite';
 import { AuthProvider } from './context/AuthContext';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/team-invite" element={<TeamInvite />} />
             <Route
               path="/*"
               element={
