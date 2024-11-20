@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, Code, Palette, Briefcase, BarChart, Users, Clock, Zap, Target, ArrowRight } from 'lucide-react';
+import { Lightbulb, Code, Palette, Briefcase, BarChart, Users, Clock, Zap, Target, ArrowRight, ChevronDown } from 'lucide-react';
 import ServiceCard from '../components/ServiceCard';
 import QuoteRequest from '../components/QuoteRequest';
 import ClientBanner from '../components/ClientBanner';
@@ -92,12 +92,12 @@ export default function Home() {
               </button>
             </div>
           </div>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <div className="w-8 h-8 border-2 border-white rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+          <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 animate-bounce hover:bg-white/20 transition-colors cursor-pointer">
+            <ChevronDown className="w-6 h-6 text-white" />
           </div>
         </div>
       </section>
