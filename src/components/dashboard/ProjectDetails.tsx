@@ -3,7 +3,7 @@ import { useParams, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { MessageSquare, Image, FileText, CheckSquare, Plus, X, Edit2, Save, Trash2, Upload } from 'lucide-react';
 import type { Project, Task, MiniTask, MoodboardItem } from '../../types';
 
-function ProjectDetails() {
+export default function ProjectDetails() {
   const { clientId, projectId } = useParams();
   const location = useLocation();
   const [project, setProject] = useState<Project>({
@@ -63,6 +63,32 @@ function ProjectDetails() {
         <Route path="/moodboard" element={<ProjectMoodboard project={project} setProject={setProject} />} />
         <Route path="/comments" element={<ProjectComments project={project} />} />
       </Routes>
+    </div>
+  );
+}
+
+function ProjectOverview({ project }: { project: Project }) {
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-lg font-semibold mb-4">Project Details</h2>
+      <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <dt className="text-sm font-medium text-gray-500">Status</dt>
+          <dd className="mt-1 text-sm text-gray-900">{project.status}</dd>
+        </div>
+        <div>
+          <dt className="text-sm font-medium text-gray-500">Deadline</dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {new Date(project.deadline).toLocaleDateString()}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-sm font-medium text-gray-500">Tasks Progress</dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {project.tasks.filter(t => t.status === 'Completed').length} / {project.tasks.length} completed
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
@@ -314,6 +340,7 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<MoodboardItem | null>(null);
   const [note, setNote] = useState('');
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -328,8 +355,29 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
     e.preventDefault();
     setIsDragging(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    await handleFiles(files);
+    // Handle file drops
+    if (e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      await handleFiles(files);
+      return;
+    }
+
+    // Handle image repositioning
+    if (draggedItem) {
+      const board = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - board.left - dragOffset.x;
+      const y = e.clientY - board.top - dragOffset.y;
+
+      setProject({
+        ...project,
+        moodboard: project.moodboard.map(item =>
+          item.id === draggedItem
+            ? { ...item, position: { x, y } }
+            : item
+        )
+      });
+      setDraggedItem(null);
+    }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -351,8 +399,8 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
           imageUrl: e.target?.result as string,
           note: '',
           position: {
-            x: Math.random() * 500, // Random initial position
-            y: Math.random() * 500
+            x: Math.random() * 300 + 100, // More centered initial position
+            y: Math.random() * 300 + 100
           }
         };
 
@@ -387,25 +435,25 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
     setNote('');
   };
 
-  const handleDragStart = (id: string) => {
-    setDraggedItem(id);
-  };
-
-  const handleImageDrag = (e: React.DragEvent, id: string) => {
-    if (!draggedItem) return;
-
-    const board = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - board.left;
-    const y = e.clientY - board.top;
-
-    setProject({
-      ...project,
-      moodboard: project.moodboard.map(item =>
-        item.id === id
-          ? { ...item, position: { x, y } }
-          : item
-      )
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    const target = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - target.left,
+      y: e.clientY - target.top
     });
+    setDraggedItem(id);
+    
+    // Add visual feedback during drag
+    const img = e.currentTarget.querySelector('img');
+    if (img) {
+      const ghost = img.cloneNode(true) as HTMLImageElement;
+      ghost.style.opacity = '0.5';
+      ghost.style.position = 'absolute';
+      ghost.style.left = '-9999px';
+      document.body.appendChild(ghost);
+      e.dataTransfer.setDragImage(ghost, dragOffset.x, dragOffset.y);
+      setTimeout(() => document.body.removeChild(ghost), 0);
+    }
   };
 
   const deleteImage = (id: string) => {
@@ -415,6 +463,20 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
     });
     setSelectedImage(null);
     setNote('');
+  };
+
+  const addQuickNote = (item: MoodboardItem) => {
+    const quickNote = prompt('Add a quick note:', item.note);
+    if (quickNote !== null) {
+      setProject({
+        ...project,
+        moodboard: project.moodboard.map(mItem =>
+          mItem.id === item.id
+            ? { ...mItem, note: quickNote }
+            : mItem
+        )
+      });
+    }
   };
 
   return (
@@ -455,14 +517,16 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
         {project.moodboard.map(item => (
           <div
             key={item.id}
-            className="absolute cursor-move"
+            className={`absolute cursor-move transition-transform ${
+              draggedItem === item.id ? 'opacity-50 scale-105' : ''
+            }`}
             style={{
               left: item.position.x,
-              top: item.position.y
+              top: item.position.y,
+              transform: draggedItem === item.id ? 'scale(1.05)' : 'scale(1)'
             }}
             draggable
-            onDragStart={() => handleDragStart(item.id)}
-            onDrag={(e) => handleImageDrag(e, item.id)}
+            onDragStart={(e) => handleDragStart(e, item.id)}
           >
             <div className="relative group">
               <img
@@ -476,12 +540,22 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
                   {item.note}
                 </div>
               )}
-              <button
-                onClick={() => deleteImage(item.id)}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => addQuickNote(item)}
+                  className="p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                  title="Add Quick Note"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => deleteImage(item.id)}
+                  className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  title="Delete Image"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -492,12 +566,20 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
             <h3 className="text-lg font-semibold mb-4">Add Note</h3>
+            <div className="mb-4">
+              <img
+                src={selectedImage.imageUrl}
+                alt="Selected"
+                className="w-32 h-32 object-cover rounded-lg mx-auto"
+              />
+            </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg mb-4"
               rows={3}
               placeholder="Add a note to this image..."
+              autoFocus
             />
             <div className="flex justify-end space-x-3">
               <button
@@ -519,32 +601,6 @@ function ProjectMoodboard({ project, setProject }: { project: Project; setProjec
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ProjectOverview({ project }: { project: Project }) {
-  return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold mb-4">Project Details</h2>
-      <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Status</dt>
-          <dd className="mt-1 text-sm text-gray-900">{project.status}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Deadline</dt>
-          <dd className="mt-1 text-sm text-gray-900">
-            {new Date(project.deadline).toLocaleDateString()}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Tasks Progress</dt>
-          <dd className="mt-1 text-sm text-gray-900">
-            {project.tasks.filter(t => t.status === 'Completed').length} / {project.tasks.length} completed
-          </dd>
-        </div>
-      </dl>
     </div>
   );
 }
@@ -573,5 +629,3 @@ function ProjectComments({ project }: { project: Project }) {
     </div>
   );
 }
-
-export default ProjectDetails;
