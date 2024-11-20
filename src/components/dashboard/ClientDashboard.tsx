@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
   Building2, 
@@ -9,6 +9,7 @@ import {
   Folder,
   X
 } from 'lucide-react';
+import { getClient } from '../../config/firebase';
 
 interface Project {
   id: string;
@@ -36,17 +37,21 @@ interface NewTask {
   dueDate: string;
 }
 
+interface Client {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  lastActivity: string;
+}
+
 export default function ClientDashboard() {
   const { clientId } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   
-  const [client] = useState({
-    id: clientId,
-    name: 'Acme Corporation',
-    description: 'Global technology and innovation company',
-    status: 'Active',
-    lastActivity: '2024-03-15'
-  });
+  const [client, setClient] = useState<Client | null>(null);
 
   const [projects, setProjects] = useState<Project[]>([
     {
@@ -72,6 +77,24 @@ export default function ClientDashboard() {
       dueDate: '2024-03-15'
     }
   ]);
+
+  useEffect(() => {
+    if (clientId) {
+      fetchClientData();
+    }
+  }, [clientId]);
+
+  const fetchClientData = async () => {
+    try {
+      setLoading(true);
+      const clientData = await getClient(clientId!);
+      setClient(clientData as Client);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [newProject, setNewProject] = useState<NewProject>({
@@ -120,6 +143,22 @@ export default function ClientDashboard() {
         : task
     ));
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error || !client) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+        {error || 'Client not found'}
+      </div>
+    );
+  }
 
   return (
     <div>

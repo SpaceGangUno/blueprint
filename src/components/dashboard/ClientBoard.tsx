@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
+import { addClient, getClients } from '../../config/firebase';
 
 interface Client {
   id: string;
@@ -20,24 +21,9 @@ interface NewClientForm {
 }
 
 export default function ClientBoard() {
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: '1',
-      name: 'Acme Corporation',
-      description: 'Global technology and innovation company',
-      status: 'Active',
-      lastActivity: '2024-03-15',
-      projectCount: 2
-    },
-    {
-      id: '2',
-      name: 'Stellar Industries',
-      description: 'Manufacturing and industrial solutions provider',
-      status: 'On Hold',
-      lastActivity: '2024-03-10',
-      projectCount: 1
-    }
-  ]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [newClient, setNewClient] = useState<NewClientForm>({
@@ -46,6 +32,22 @@ export default function ClientBoard() {
     status: 'Active'
   });
   const [filterStatus, setFilterStatus] = useState<'all' | ClientStatus>('all');
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      const fetchedClients = await getClients();
+      setClients(fetchedClients as Client[]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const statusIcons = {
     'Active': <Clock className="w-5 h-5 text-blue-500" />,
@@ -59,25 +61,31 @@ export default function ClientBoard() {
     'Completed': 'bg-green-100 text-green-800 border-green-200'
   };
 
-  const handleNewClient = (e: React.FormEvent) => {
+  const handleNewClient = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = (clients.length + 1).toString();
-    const clientToAdd: Client = {
-      id: newId,
-      name: newClient.name,
-      description: newClient.description,
-      status: newClient.status,
-      lastActivity: new Date().toISOString().split('T')[0],
-      projectCount: 0
-    };
-    setClients([...clients, clientToAdd]);
-    setShowNewClientModal(false);
-    setNewClient({ name: '', description: '', status: 'Active' });
+    try {
+      const result = await addClient(newClient);
+      if (result.success) {
+        await fetchClients(); // Refresh the client list
+        setShowNewClientModal(false);
+        setNewClient({ name: '', description: '', status: 'Active' });
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   const filteredClients = filterStatus === 'all' 
     ? clients 
     : clients.filter(client => client.status === filterStatus);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -105,6 +113,12 @@ export default function ClientBoard() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+          {error}
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredClients.map(client => (
@@ -155,7 +169,15 @@ export default function ClientBoard() {
       {showNewClientModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Add New Client</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Client</h2>
+              <button
+                onClick={() => setShowNewClientModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
             <form onSubmit={handleNewClient}>
               <div className="space-y-4">
                 <div>
