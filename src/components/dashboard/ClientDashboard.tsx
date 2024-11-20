@@ -6,7 +6,8 @@ import {
   Plus, 
   ListTodo, 
   BarChart3,
-  Folder
+  Folder,
+  X
 } from 'lucide-react';
 
 interface Project {
@@ -24,6 +25,17 @@ interface Task {
   dueDate: string;
 }
 
+interface NewProject {
+  title: string;
+  description: string;
+  deadline: string;
+}
+
+interface NewTask {
+  title: string;
+  dueDate: string;
+}
+
 export default function ClientDashboard() {
   const { clientId } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
@@ -36,7 +48,7 @@ export default function ClientDashboard() {
     lastActivity: '2024-03-15'
   });
 
-  const [projects] = useState<Project[]>([
+  const [projects, setProjects] = useState<Project[]>([
     {
       id: '1',
       title: 'Website Redesign',
@@ -46,7 +58,7 @@ export default function ClientDashboard() {
     }
   ]);
 
-  const [tasks] = useState<Task[]>([
+  const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
       title: 'Review homepage design',
@@ -60,6 +72,54 @@ export default function ClientDashboard() {
       dueDate: '2024-03-15'
     }
   ]);
+
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [newProject, setNewProject] = useState<NewProject>({
+    title: '',
+    description: '',
+    deadline: ''
+  });
+
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [newTask, setNewTask] = useState<NewTask>({
+    title: '',
+    dueDate: ''
+  });
+
+  const handleNewProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    const projectToAdd: Project = {
+      id: (projects.length + 1).toString(),
+      title: newProject.title,
+      description: newProject.description,
+      status: 'In Progress',
+      deadline: newProject.deadline
+    };
+    setProjects([...projects, projectToAdd]);
+    setShowNewProjectModal(false);
+    setNewProject({ title: '', description: '', deadline: '' });
+  };
+
+  const handleNewTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    const taskToAdd: Task = {
+      id: (tasks.length + 1).toString(),
+      title: newTask.title,
+      status: 'pending',
+      dueDate: newTask.dueDate
+    };
+    setTasks([...tasks, taskToAdd]);
+    setShowNewTaskModal(false);
+    setNewTask({ title: '', dueDate: '' });
+  };
+
+  const toggleTaskStatus = (taskId: string) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId
+        ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' }
+        : task
+    ));
+  };
 
   return (
     <div>
@@ -76,7 +136,10 @@ export default function ClientDashboard() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+            <button 
+              onClick={() => setShowNewProjectModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </button>
@@ -155,7 +218,10 @@ export default function ClientDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Projects</h2>
-              <button className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+              <button 
+                onClick={() => setShowNewProjectModal(true)}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
                 Add Project
               </button>
             </div>
@@ -185,7 +251,10 @@ export default function ClientDashboard() {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Tasks</h2>
-              <button className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+              <button 
+                onClick={() => setShowNewTaskModal(true)}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
                 Add Task
               </button>
             </div>
@@ -199,8 +268,8 @@ export default function ClientDashboard() {
                     <input
                       type="checkbox"
                       checked={task.status === 'completed'}
+                      onChange={() => toggleTaskStatus(task.id)}
                       className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      onChange={() => {}}
                     />
                     <span className={task.status === 'completed' ? 'line-through text-gray-500' : ''}>
                       {task.title}
@@ -215,6 +284,138 @@ export default function ClientDashboard() {
           </div>
         )}
       </div>
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Project</h2>
+              <button
+                onClick={() => setShowNewProjectModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleNewProject}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Project Title
+                  </label>
+                  <input
+                    type="text"
+                    value={newProject.title}
+                    onChange={(e) => setNewProject({...newProject, title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    rows={3}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Deadline
+                  </label>
+                  <input
+                    type="date"
+                    value={newProject.deadline}
+                    onChange={(e) => setNewProject({...newProject, deadline: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowNewProjectModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add Project
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* New Task Modal */}
+      {showNewTaskModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Task</h2>
+              <button
+                onClick={() => setShowNewTaskModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleNewTask}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Task Title
+                  </label>
+                  <input
+                    type="text"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowNewTaskModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

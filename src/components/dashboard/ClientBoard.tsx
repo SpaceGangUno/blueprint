@@ -11,8 +11,16 @@ interface Client {
   projectCount: number;
 }
 
+type ClientStatus = 'Active' | 'On Hold' | 'Completed';
+
+interface NewClientForm {
+  name: string;
+  description: string;
+  status: ClientStatus;
+}
+
 export default function ClientBoard() {
-  const [clients] = useState<Client[]>([
+  const [clients, setClients] = useState<Client[]>([
     {
       id: '1',
       name: 'Acme Corporation',
@@ -31,6 +39,14 @@ export default function ClientBoard() {
     }
   ]);
 
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [newClient, setNewClient] = useState<NewClientForm>({
+    name: '',
+    description: '',
+    status: 'Active'
+  });
+  const [filterStatus, setFilterStatus] = useState<'all' | ClientStatus>('all');
+
   const statusIcons = {
     'Active': <Clock className="w-5 h-5 text-blue-500" />,
     'On Hold': <AlertCircle className="w-5 h-5 text-yellow-500" />,
@@ -43,6 +59,26 @@ export default function ClientBoard() {
     'Completed': 'bg-green-100 text-green-800 border-green-200'
   };
 
+  const handleNewClient = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newId = (clients.length + 1).toString();
+    const clientToAdd: Client = {
+      id: newId,
+      name: newClient.name,
+      description: newClient.description,
+      status: newClient.status,
+      lastActivity: new Date().toISOString().split('T')[0],
+      projectCount: 0
+    };
+    setClients([...clients, clientToAdd]);
+    setShowNewClientModal(false);
+    setNewClient({ name: '', description: '', status: 'Active' });
+  };
+
+  const filteredClients = filterStatus === 'all' 
+    ? clients 
+    : clients.filter(client => client.status === filterStatus);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -51,17 +87,27 @@ export default function ClientBoard() {
           <p className="text-gray-600 mt-1">Manage and track your client relationships</p>
         </div>
         <div className="flex space-x-4">
-          <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-            Filter
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | ClientStatus)}
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            <option value="all">All Clients</option>
+            <option value="Active">Active</option>
+            <option value="On Hold">On Hold</option>
+            <option value="Completed">Completed</option>
+          </select>
+          <button 
+            onClick={() => setShowNewClientModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+          >
             New Client
           </button>
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {clients.map(client => (
+        {filteredClients.map(client => (
           <Link
             key={client.id}
             to={`/dashboard/client/${client.id}`}
@@ -104,6 +150,72 @@ export default function ClientBoard() {
           </Link>
         ))}
       </div>
+
+      {/* New Client Modal */}
+      {showNewClientModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Add New Client</h2>
+            <form onSubmit={handleNewClient}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Client Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newClient.name}
+                    onChange={(e) => setNewClient({...newClient, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={newClient.description}
+                    onChange={(e) => setNewClient({...newClient, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    rows={3}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={newClient.status}
+                    onChange={(e) => setNewClient({...newClient, status: e.target.value as ClientStatus})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowNewClientModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add Client
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
