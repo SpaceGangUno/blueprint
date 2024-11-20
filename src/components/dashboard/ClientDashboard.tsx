@@ -8,11 +8,10 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { doc, getDoc, collection, query, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
+import { db, type Client, type ClientStatus } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
-// Interfaces
 interface Project {
   id: string;
   title: string;
@@ -35,15 +34,6 @@ interface Project {
   }[];
 }
 
-interface Client {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  lastActivity: string;
-  userId: string;
-}
-
 interface NewProjectForm {
   title: string;
   description: string;
@@ -51,7 +41,7 @@ interface NewProjectForm {
   deadline: string;
 }
 
-// Loading Skeleton Components
+// Loading Skeleton Component
 const LoadingSkeleton = () => (
   <div className="space-y-4">
     <div className="animate-pulse bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -126,7 +116,7 @@ const ProjectCard = ({ project, clientId }: { project: Project; clientId: string
 export default function ClientDashboard() {
   const { clientId } = useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [client, setClient] = useState<Client | null>(null);
@@ -160,30 +150,25 @@ export default function ClientDashboard() {
         ...clientSnap.data()
       } as Client;
 
+      // Check access permissions
+      if (!isAdmin && user.role !== 'team_member' && clientData.userId !== user.id) {
+        throw new Error('You do not have permission to access this client');
+      }
+
       setClient(clientData);
 
-      // Update to use nested collection path
+      // Fetch projects using nested collection
       const projectsQuery = query(
         collection(db, `clients/${clientId}/projects`),
         orderBy('createdAt', 'desc'),
-        limit(5)
+        limit(20)
       );
 
       const projectsSnap = await getDocs(projectsQuery);
-      const projectsData = projectsSnap.docs.map(doc => {
-        const data = doc.data() as DocumentData;
-        return {
-          id: doc.id,
-          title: data.title || '',
-          description: data.description || '',
-          status: data.status || 'In Progress',
-          deadline: data.deadline || '',
-          clientId: clientId,
-          createdAt: data.createdAt || '',
-          userId: data.userId || '',
-          tasks: data.tasks || []
-        } as Project;
-      });
+      const projectsData = projectsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Project));
 
       setProjects(projectsData);
     } catch (err: any) {
@@ -196,7 +181,7 @@ export default function ClientDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [clientId, user]);
+  }, [clientId, user, isAdmin]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -219,14 +204,14 @@ export default function ClientDashboard() {
     setSubmitting(true);
     
     try {
-      // Update to use nested collection path
+      // Use nested collection path
       const projectsCollection = collection(db, `clients/${clientId}/projects`);
       const projectData = {
         ...newProject,
         clientId,
         userId: user.id,
         createdAt: new Date().toISOString(),
-        tasks: [] // Initialize empty tasks array for new projects
+        tasks: []
       };
       
       await addDoc(projectsCollection, projectData);
@@ -236,7 +221,7 @@ export default function ClientDashboard() {
         lastActivity: new Date().toISOString()
       }, { merge: true });
       
-      // Refresh projects
+      // Refresh data
       fetchData();
       
       setShowNewProjectModal(false);

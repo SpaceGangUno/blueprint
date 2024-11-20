@@ -2,20 +2,8 @@ import { useState, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X, RefreshCcw } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db, subscribeToUserClients } from '../../config/firebase';
+import { db, subscribeToUserClients, subscribeToAllClients, type Client, type ClientStatus } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
-
-interface Client {
-  id: string;
-  name: string;
-  description: string;
-  status: ClientStatus;
-  lastActivity: string;
-  projectCount: number;
-  userId: string;
-}
-
-type ClientStatus = 'Active' | 'On Hold' | 'Completed';
 
 interface NewClientForm {
   name: string;
@@ -106,9 +94,8 @@ const ClientCard = memo(({ client, statusIcons, statusColors }: {
 
 ClientCard.displayName = 'ClientCard';
 
-// Main component
 export default function ClientBoard() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [state, setState] = useState({
     clients: [] as Client[],
     loading: true,
@@ -137,8 +124,13 @@ export default function ClientBoard() {
         return;
       }
 
-      return subscribeToUserClients(
-        user.id,
+      // Use different subscription based on user role
+      const subscriptionFunction = isAdmin || user.role === 'team_member'
+        ? subscribeToAllClients
+        : (callback: (clients: Client[]) => void, errorCallback?: (error: Error) => void) => 
+            subscribeToUserClients(user.id, callback, errorCallback);
+
+      return subscriptionFunction(
         (clients) => {
           setState(prev => ({
             ...prev,
@@ -164,7 +156,7 @@ export default function ClientBoard() {
         error: err.message || 'Failed to setup client subscription'
       }));
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
     let unsubscribeClients: (() => void) | undefined;

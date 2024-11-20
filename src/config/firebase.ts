@@ -212,6 +212,40 @@ export const subscribeToTeamMembers = (
   );
 };
 
+// Subscribe to all clients for team members
+export const subscribeToAllClients = (
+  callback: (clients: Client[]) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  const clientsQuery = query(
+    collection(db, 'clients'),
+    orderBy('lastActivity', 'desc'),
+    limit(20)
+  );
+
+  return onSnapshot(
+    clientsQuery,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const clients = snapshot.docs.map(doc => {
+        const client = {
+          id: doc.id,
+          ...doc.data()
+        } as Client;
+        
+        // Update cache
+        clientCache.set(client.id, client);
+        
+        return client;
+      });
+      callback(clients);
+    },
+    error => {
+      console.error('Error fetching clients:', error);
+      errorCallback?.(error);
+    }
+  );
+};
+
 // Optimized client data subscriptions with caching
 export const subscribeToUserClients = (
   userId: string,
