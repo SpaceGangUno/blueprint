@@ -24,6 +24,7 @@ export interface Task {
     name: string;
     avatar?: string;
   };
+  documents: DocumentItem[];
 }
 
 export interface MiniTask {
