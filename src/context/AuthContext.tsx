@@ -5,7 +5,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface User {
   id: string;
@@ -27,6 +27,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const ADMIN_EMAIL = 'isaacmazile@gmail.com';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,23 +36,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
-        if (firebaseUser) {
+        if (firebaseUser && firebaseUser.email) {
           // Get user profile from Firestore
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUser({
               id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              role: userData.role as User['role'],
+              email: firebaseUser.email,
+              role: userData.role,
               createdAt: userData.createdAt,
               updatedAt: userData.updatedAt,
               inviteId: userData.inviteId,
               passwordUpdated: userData.passwordUpdated
             });
           } else {
-            setUser(null);
-            console.error('No user document found');
+            // If no user document exists but it's the admin email, create admin user
+            if (firebaseUser.email === ADMIN_EMAIL) {
+              const adminData = {
+                id: firebaseUser.uid,
+                email: firebaseUser.email,
+                role: 'admin' as const,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                passwordUpdated: true
+              };
+              await setDoc(doc(db, 'users', firebaseUser.uid), adminData);
+              setUser(adminData);
+            } else {
+              setUser(null);
+              console.error('No user document found');
+            }
           }
         } else {
           setUser(null);
@@ -71,19 +87,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       
+      if (!firebaseUser.email) {
+        throw new Error('User email not found');
+      }
+
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setUser({
           id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          role: userData.role as User['role'],
+          email: firebaseUser.email,
+          role: userData.role,
           createdAt: userData.createdAt,
           updatedAt: userData.updatedAt,
           inviteId: userData.inviteId,
           passwordUpdated: userData.passwordUpdated
         });
+      } else if (email === ADMIN_EMAIL) {
+        // Create admin user if it doesn't exist
+        const adminData = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          role: 'admin' as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          passwordUpdated: true
+        };
+        await setDoc(doc(db, 'users', firebaseUser.uid), adminData);
+        setUser(adminData);
       } else {
         throw new Error('User document not found');
       }

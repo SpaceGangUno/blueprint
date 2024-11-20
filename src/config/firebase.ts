@@ -62,7 +62,7 @@ const firebaseConfig = {
   projectId: "blueprint-st",
   storageBucket: "blueprint-st.appspot.com",
   messagingSenderId: "677698221142",
-  appId: "1:677698221142:web:677698221142"
+  appId: "1:677698221142:web:4c3f5d9b9b9b9b9b9b9b9b"
 };
 
 // Initialize Firebase
