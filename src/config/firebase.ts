@@ -62,7 +62,8 @@ const firebaseConfig = {
   projectId: "blueprint-st",
   storageBucket: "blueprint-st.appspot.com",
   messagingSenderId: "677698221142",
-  appId: "1:677698221142:web:4c3f5d9b9b9b9b9b9b9b9b"
+  appId: "1:677698221142:web:4c3f5d9b9b9b9b9b9b9b9b",
+  measurementId: "G-MEASUREMENT_ID"
 };
 
 // Initialize Firebase
@@ -139,16 +140,6 @@ export const ensureAdminUser = async (email: string, password: string): Promise<
     throw error;
   }
 };
-
-// Initialize admin user immediately
-(async () => {
-  try {
-    await ensureAdminUser('isaacmazile@gmail.com', 'Im934456');
-    console.log('Admin user initialization complete');
-  } catch (error) {
-    console.error('Failed to initialize admin user:', error);
-  }
-})();
 
 // Team invite function with improved error handling
 export const sendTeamInvite = async (email: string): Promise<{ success: boolean; message: string }> => {
