@@ -1,7 +1,359 @@
-// ... previous imports and functions remain the same ...
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  Loader,
+  X,
+  Plus,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Calendar,
+  FileText,
+  Paperclip,
+  Edit2,
+  Save
+} from 'lucide-react';
+import type { Project, Task, MiniTask, SubTaskFile } from '../../types';
+import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
+import { auth, db } from '../../config/firebase';
+import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useAuth } from '../../context/AuthContext';
+
+type TeamMemberWithId = UserProfile & { id: string };
 
 export default function ProjectDetails() {
-  // ... previous state declarations and functions remain the same ...
+  const { clientId, projectId } = useParams<{ clientId: string; projectId: string }>();
+  const navigate = useNavigate();
+  const { loading: authLoading, user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
+  const [showAssigneeModal, setShowAssigneeModal] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [expandedTasks, setExpandedTasks] = useState<string[]>([]);
+  const [expandedSubTasks, setExpandedSubTasks] = useState<string[]>([]);
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
+  const [addingSubTaskToId, setAddingSubTaskToId] = useState<string | null>(null);
+  const [editingSubTaskId, setEditingSubTaskId] = useState<string | null>(null);
+  const [editingSubTaskText, setEditingSubTaskText] = useState('');
+  const [editingSubTaskNotes, setEditingSubTaskNotes] = useState('');
+  const [uploadingFiles, setUploadingFiles] = useState<{ [key: string]: boolean }>({});
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!auth.currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    if (!clientId || !projectId) {
+      setError('Invalid project URL');
+      return;
+    }
+
+    const unsubscribe = onSnapshot(
+      doc(db, `clients/${clientId}/projects/${projectId}`),
+      (doc) => {
+        if (doc.exists()) {
+          setProject({
+            id: doc.id,
+            ...doc.data()
+          } as Project);
+          setLoading(false);
+        } else {
+          setError('Project not found');
+          setLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Error fetching project:', error);
+        setError('Error loading project');
+        setLoading(false);
+      }
+    );
+
+    const teamUnsubscribe = subscribeToTeamMembers(
+      (members) => {
+        setTeamMembers(members as TeamMemberWithId[]);
+      },
+      (error) => {
+        console.error('Error fetching team members:', error);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+      teamUnsubscribe();
+    };
+  }, [clientId, projectId, navigate]);
+
+  const updateProject = async (updates: Partial<Project>) => {
+    if (!clientId || !projectId || !project) return;
+
+    try {
+      const projectRef = doc(db, `clients/${clientId}/projects/${projectId}`);
+      await updateDoc(projectRef, {
+        ...updates,
+        lastUpdated: serverTimestamp()
+      });
+    } catch (err) {
+      console.error('Error updating project:', err);
+      setError('Failed to update project');
+    }
+  };
+
+  const addTask = async () => {
+    if (!project || !newTaskTitle.trim()) return;
+
+    const now = new Date().toISOString();
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: newTaskTitle.trim(),
+      description: newTaskDescription.trim(),
+      status: 'Todo',
+      createdAt: now,
+      updatedAt: now,
+      miniTasks: [],
+      documents: []
+    };
+
+    const updatedTasks = [...project.tasks, newTask];
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setShowNewTaskModal(false);
+  };
+
+  const addSubTask = async (taskId: string) => {
+    if (!project || !newSubTaskTitle.trim()) return;
+
+    const now = new Date().toISOString();
+    const newSubTask: MiniTask = {
+      id: Date.now().toString(),
+      title: newSubTaskTitle.trim(),
+      completed: false,
+      createdAt: now,
+      updatedAt: now,
+      notes: '',
+      files: []
+    };
+
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            miniTasks: [...task.miniTasks, newSubTask],
+            updatedAt: now
+          }
+        : task
+    );
+
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+    setNewSubTaskTitle('');
+    setAddingSubTaskToId(null);
+  };
+
+  const toggleSubTaskCompletion = async (taskId: string, subTaskId: string) => {
+    if (!project) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            updatedAt: now,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === subTaskId
+                ? { 
+                    ...subTask, 
+                    completed: !subTask.completed,
+                    updatedAt: now
+                  }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+  };
+
+  const toggleSubTaskExpansion = (subTaskId: string) => {
+    setExpandedSubTasks(prev =>
+      prev.includes(subTaskId)
+        ? prev.filter(id => id !== subTaskId)
+        : [...prev, subTaskId]
+    );
+  };
+
+  const startEditingSubTask = (taskId: string, subTask: MiniTask) => {
+    setEditingSubTaskId(subTask.id);
+    setEditingSubTaskText(subTask.title);
+    setEditingSubTaskNotes(subTask.notes || '');
+    setSelectedTaskId(taskId);
+  };
+
+  const saveSubTaskEdit = async () => {
+    if (!project || !selectedTaskId || !editingSubTaskId) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === selectedTaskId
+        ? {
+            ...task,
+            updatedAt: now,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === editingSubTaskId
+                ? {
+                    ...subTask,
+                    title: editingSubTaskText,
+                    notes: editingSubTaskNotes,
+                    updatedAt: now
+                  }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+
+    setEditingSubTaskId(null);
+    setEditingSubTaskText('');
+    setEditingSubTaskNotes('');
+    setSelectedTaskId(null);
+  };
+
+  const handleNotesChange = async (taskId: string, subTaskId: string, notes: string) => {
+    if (!project) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            updatedAt: now,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === subTaskId
+                ? {
+                    ...subTask,
+                    notes,
+                    updatedAt: now
+                  }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+  };
+
+  const handleFileUpload = async (taskId: string, subTaskId: string, files: FileList) => {
+    if (!project || !user) return;
+
+    setUploadingFiles(prev => ({ ...prev, [subTaskId]: true }));
+    setUploadError(null);
+
+    const storage = getStorage();
+    const now = new Date().toISOString();
+    const newFiles: SubTaskFile[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileRef = ref(storage, `projects/${projectId}/subtasks/${subTaskId}/${file.name}`);
+        
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        newFiles.push({
+          id: Date.now().toString() + i,
+          name: file.name,
+          url: downloadUrl,
+          type: file.type,
+          uploadedBy: user.email || 'unknown',
+          uploadedAt: now,
+          size: file.size
+        });
+      }
+
+      const updatedTasks = project.tasks.map(task =>
+        task.id === taskId
+          ? {
+              ...task,
+              updatedAt: now,
+              miniTasks: task.miniTasks.map(subTask =>
+                subTask.id === subTaskId
+                  ? {
+                      ...subTask,
+                      files: [...(subTask.files || []), ...newFiles],
+                      updatedAt: now
+                    }
+                  : subTask
+              )
+            }
+          : task
+      );
+
+      await updateProject({
+        tasks: updatedTasks,
+        lastUpdated: now
+      });
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      setUploadError('Failed to upload file. Please try again.');
+    } finally {
+      setUploadingFiles(prev => ({ ...prev, [subTaskId]: false }));
+    }
+  };
+
+  const assignTask = async (taskId: string, member: TeamMemberWithId) => {
+    if (!project) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            updatedAt: now,
+            assignee: {
+              id: member.id,
+              name: member.email.split('@')[0],
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`
+            }
+          }
+        : task
+    );
+
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+    setShowAssigneeModal(false);
+    setSelectedTaskId(null);
+  };
 
   const renderSubTask = (parentTask: Task, subTask: MiniTask) => {
     const isExpanded = expandedSubTasks.includes(subTask.id);
