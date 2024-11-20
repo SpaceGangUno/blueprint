@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useParams, Routes, Route, Link } from 'react-router-dom';
+import { useParams, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { MessageSquare, Image, FileText, CheckSquare, Plus, X, Edit2, Save, Trash2 } from 'lucide-react';
 import type { Project, Task, MiniTask } from '../../types';
 
 export default function ProjectDetails() {
-  const { id } = useParams();
+  const { clientId, projectId } = useParams();
+  const location = useLocation();
   const [project, setProject] = useState<Project>({
-    id: id || '1',
+    id: projectId || '1',
     title: 'Website Redesign',
     description: 'Complete overhaul of company website with modern design',
     status: 'In Progress',
@@ -23,6 +24,8 @@ export default function ProjectDetails() {
     { name: 'Comments', path: 'comments', icon: MessageSquare }
   ];
 
+  const getBasePath = () => `/dashboard/client/${clientId}/project/${projectId}`;
+
   return (
     <div>
       <div className="mb-6">
@@ -32,20 +35,25 @@ export default function ProjectDetails() {
 
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex space-x-8">
-          {tabs.map(tab => (
-            <Link
-              key={tab.name}
-              to={`/dashboard/project/${id}/${tab.path}`}
-              className={`
-                border-b-2 border-transparent pb-4 px-1
-                hover:border-gray-300 hover:text-gray-700
-                flex items-center space-x-2
-              `}
-            >
-              <tab.icon className="w-5 h-5" />
-              <span>{tab.name}</span>
-            </Link>
-          ))}
+          {tabs.map(tab => {
+            const isActive = location.pathname === `${getBasePath()}/${tab.path}` ||
+                           (tab.path === '' && location.pathname === getBasePath());
+            return (
+              <Link
+                key={tab.name}
+                to={`${getBasePath()}/${tab.path}`}
+                className={`
+                  border-b-2 pb-4 px-1
+                  hover:border-gray-300 hover:text-gray-700
+                  flex items-center space-x-2
+                  ${isActive ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'}
+                `}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span>{tab.name}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
