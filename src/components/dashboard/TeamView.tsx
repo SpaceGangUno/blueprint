@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, X } from 'lucide-react';
 import { sendTeamInvite, subscribeToTeamMembers, UserProfile } from '../../config/firebase';
+import { auth } from '../../config/firebase';
 
 interface TeamMemberWithId extends UserProfile {
   id: string;
@@ -15,9 +16,12 @@ export default function TeamView() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    // Subscribe to team members
+    // Only subscribe if user is authenticated
+    if (!auth.currentUser) return;
+
     const unsubscribe = subscribeToTeamMembers(
       (members) => {
+        console.log('Received team members:', members); // Debug log
         setTeamMembers(members as TeamMemberWithId[]);
       },
       (error) => {
@@ -26,14 +30,18 @@ export default function TeamView() {
       }
     );
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [auth.currentUser]); // Add auth.currentUser as dependency
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail) {
       setError('Please enter an email address');
+      return;
+    }
+
+    if (!auth.currentUser) {
+      setError('You must be logged in to invite team members');
       return;
     }
 
@@ -84,6 +92,12 @@ export default function TeamView() {
         </button>
       </div>
 
+      {error && !showInviteModal && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {teamMembers.map(member => (
           <div key={member.id} className="bg-white rounded-lg shadow-lg p-6">
@@ -127,6 +141,12 @@ export default function TeamView() {
             </div>
           </div>
         ))}
+
+        {teamMembers.length === 0 && !error && (
+          <div className="col-span-2 text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">No team members found. Add your first team member to get started.</p>
+          </div>
+        )}
       </div>
 
       {/* Invite Modal */}
