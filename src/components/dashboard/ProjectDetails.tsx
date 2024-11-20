@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
   MessageSquare, 
-  Image, 
+  Image as ImageIcon, 
   FileText, 
   CheckSquare, 
   Plus, 
@@ -13,9 +13,16 @@ import {
   Upload,
   File as FileIcon,
   Send,
-  Paperclip
+  Paperclip,
+  UserPlus,
+  Move
 } from 'lucide-react';
 import type { Project, Task, MiniTask, MoodboardItem, DocumentItem, Comment } from '../../types';
+import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
+import { auth } from '../../config/firebase';
+
+// Extend UserProfile to include id as it's added by subscribeToTeamMembers
+type TeamMemberWithId = UserProfile & { id: string };
 
 export default function ProjectDetails() {
   const { clientId, projectId } = useParams();
@@ -31,12 +38,34 @@ export default function ProjectDetails() {
     documents: []
   });
 
+  const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
   const [newComment, setNewComment] = useState('');
   const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
-  const commentFileInputRef = useRef<HTMLInputElement>(null);
-  const documentFileInputRef = useRef<HTMLInputElement>(null);
   const [showAddTask, setShowAddTask] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [showAssigneeModal, setShowAssigneeModal] = useState(false);
+  const [isDraggingMoodboard, setIsDraggingMoodboard] = useState(false);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+
+  const commentFileInputRef = useRef<HTMLInputElement>(null);
+  const documentFileInputRef = useRef<HTMLInputElement>(null);
+  const moodboardFileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!auth.currentUser) return;
+
+    const unsubscribe = subscribeToTeamMembers(
+      (members) => {
+        setTeamMembers(members as TeamMemberWithId[]);
+      },
+      (error) => {
+        console.error('Error fetching team members:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [auth.currentUser]);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -56,6 +85,53 @@ export default function ProjectDetails() {
         documents: [...project.documents, ...newDocuments]
       });
     }
+  };
+
+  const handleMoodboardUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      
+      const newMoodboardItems: MoodboardItem[] = files.map(file => ({
+        id: Date.now().toString(),
+        imageUrl: URL.createObjectURL(file),
+        note: '',
+        position: {
+          x: Math.random() * 400, // Random initial position
+          y: Math.random() * 400
+        }
+      }));
+
+      setProject({
+        ...project,
+        moodboard: [...project.moodboard, ...newMoodboardItems]
+      });
+    }
+  };
+
+  const handleMoodboardDragStart = (itemId: string) => {
+    setIsDraggingMoodboard(true);
+    setDraggedItemId(itemId);
+  };
+
+  const handleMoodboardDragEnd = (e: React.DragEvent, itemId: string) => {
+    setIsDraggingMoodboard(false);
+    setDraggedItemId(null);
+
+    const moodboardContainer = document.getElementById('moodboard-container');
+    if (!moodboardContainer) return;
+
+    const rect = moodboardContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setProject({
+      ...project,
+      moodboard: project.moodboard.map(item => 
+        item.id === itemId
+          ? { ...item, position: { x, y } }
+          : item
+      )
+    });
   };
 
   const handleCommentSubmit = (e: React.FormEvent) => {
@@ -108,6 +184,26 @@ export default function ProjectDetails() {
     });
     setNewTask({ title: '', description: '' });
     setShowAddTask(false);
+  };
+
+  const assignTask = (taskId: string, member: TeamMemberWithId) => {
+    setProject({
+      ...project,
+      tasks: project.tasks.map(task =>
+        task.id === taskId
+          ? {
+              ...task,
+              assignee: {
+                id: member.id,
+                name: member.email.split('@')[0],
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`
+              }
+            }
+          : task
+      )
+    });
+    setShowAssigneeModal(false);
+    setSelectedTaskId(null);
   };
 
   return (
@@ -194,17 +290,39 @@ export default function ProjectDetails() {
               {project.tasks.map(task => (
                 <div key={task.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <div>
+                    <div className="flex-grow">
                       <h3 className="font-semibold">{task.title}</h3>
                       <p className="text-gray-600 text-sm">{task.description}</p>
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
-                      task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {task.status}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      {task.assignee ? (
+                        <div className="flex items-center space-x-2">
+                          <img
+                            src={task.assignee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assignee.name)}`}
+                            alt={task.assignee.name}
+                            className="w-6 h-6 rounded-full"
+                          />
+                          <span className="text-sm text-gray-600">{task.assignee.name}</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedTaskId(task.id);
+                            setShowAssigneeModal(true);
+                          }}
+                          className="p-1 text-gray-500 hover:text-gray-700"
+                        >
+                          <UserPlus className="w-5 h-5" />
+                        </button>
+                      )}
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
+                        task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {task.status}
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-2">
                     <div className="text-sm text-gray-500">
@@ -217,8 +335,67 @@ export default function ProjectDetails() {
           </div>
         </div>
 
-        {/* Documents Section */}
+        {/* Moodboard Section */}
         <div className="col-span-12 lg:col-span-4">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Moodboard</h2>
+              <button
+                onClick={() => moodboardFileInputRef.current?.click()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+              >
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Add Image
+              </button>
+              <input
+                ref={moodboardFileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleMoodboardUpload}
+              />
+            </div>
+            <div 
+              id="moodboard-container"
+              className="relative h-[600px] border rounded-lg bg-gray-50 overflow-hidden"
+              style={{ cursor: isDraggingMoodboard ? 'move' : 'default' }}
+            >
+              {project.moodboard.map(item => (
+                <div
+                  key={item.id}
+                  draggable
+                  onDragStart={() => handleMoodboardDragStart(item.id)}
+                  onDragEnd={(e) => handleMoodboardDragEnd(e, item.id)}
+                  className="absolute cursor-move"
+                  style={{
+                    left: `${item.position.x}px`,
+                    top: `${item.position.y}px`
+                  }}
+                >
+                  <div className="relative group">
+                    <img
+                      src={item.imageUrl}
+                      alt="Moodboard item"
+                      className="w-32 h-32 object-cover rounded-lg shadow-lg"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity rounded-lg flex items-center justify-center">
+                      <Move className="w-6 h-6 text-white opacity-0 group-hover:opacity-100" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {project.moodboard.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                  <p>Add images to your moodboard</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Documents Section */}
+        <div className="col-span-12 lg:col-span-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Documents</h2>
@@ -366,6 +543,45 @@ export default function ProjectDetails() {
           </div>
         </div>
       </div>
+
+      {/* Assignee Modal */}
+      {showAssigneeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Assign Task</h2>
+              <button
+                onClick={() => {
+                  setShowAssigneeModal(false);
+                  setSelectedTaskId(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {teamMembers.map(member => (
+                <button
+                  key={member.id}
+                  onClick={() => selectedTaskId && assignTask(selectedTaskId, member)}
+                  className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg"
+                >
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`}
+                    alt={member.email}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex-grow text-left">
+                    <p className="font-medium">{member.email.split('@')[0]}</p>
+                    <p className="text-sm text-gray-500">{member.email}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

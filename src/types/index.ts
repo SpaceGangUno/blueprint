@@ -19,6 +19,11 @@ export interface Task {
   description: string;
   status: 'Todo' | 'In Progress' | 'Completed';
   miniTasks: MiniTask[];
+  assignee?: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
 }
 
 export interface MiniTask {
