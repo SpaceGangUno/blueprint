@@ -68,6 +68,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'client' | 'admin';
+  role: 'client' | 'admin' | 'team_member';
   avatar?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  inviteId?: string;
+  passwordUpdated?: boolean;
 }

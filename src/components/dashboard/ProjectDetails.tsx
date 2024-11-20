@@ -1,32 +1,49 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  MessageSquare, 
-  Image as ImageIcon, 
-  FileText, 
-  CheckSquare, 
-  Plus, 
-  X, 
-  Edit2, 
-  Save, 
-  Trash2, 
-  Upload,
-  File as FileIcon,
-  Send,
-  Paperclip,
-  UserPlus,
-  Move,
-  ListPlus,
-  Loader
+  Loader,
+  X,
+  Plus
 } from 'lucide-react';
-import type { Project, Task, MiniTask, MoodboardItem, DocumentItem, Comment } from '../../types';
+import type { Project, Task } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
 import { auth, db } from '../../config/firebase';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 
 // Extend UserProfile to include id as it's added by subscribeToTeamMembers
 type TeamMemberWithId = UserProfile & { id: string };
+
+interface DocumentItem {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+interface MoodboardItem {
+  id: string;
+  imageUrl: string;
+  note: string;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+interface Comment {
+  id: string;
+  userId: string;
+  content: string;
+  timestamp: string;
+  attachments: Array<{
+    type: 'image' | 'document';
+    url: string;
+    name: string;
+  }>;
+}
 
 export default function ProjectDetails() {
   const { clientId, projectId } = useParams();
@@ -341,7 +358,6 @@ export default function ProjectDetails() {
     );
   }
 
-  // Rest of the JSX remains the same...
   return (
     <div className="space-y-6">
       {/* Project Header */}
@@ -359,10 +375,6 @@ export default function ProjectDetails() {
             {project.status}
           </span>
         </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-6">
-        {/* ... Rest of the sections (Tasks, Moodboard, Documents, Comments) remain the same ... */}
       </div>
 
       {/* Assignee Modal */}
