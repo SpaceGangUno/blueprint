@@ -5,9 +5,10 @@ import {
   Calendar, 
   Plus, 
   RefreshCcw,
-  X
+  X,
+  ArrowRight
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, DocumentData } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,6 +22,17 @@ interface Project {
   clientId: string;
   createdAt: string;
   userId: string;
+  tasks: {
+    id: string;
+    title: string;
+    description: string;
+    status: 'Todo' | 'In Progress' | 'Completed';
+    miniTasks: {
+      id: string;
+      title: string;
+      completed: boolean;
+    }[];
+  }[];
 }
 
 interface Client {
@@ -78,23 +90,38 @@ const ErrorDisplay = ({ error, onRetry }: { error: string; onRetry: () => void }
 );
 
 // Project Card Component
-const ProjectCard = ({ project }: { project: Project }) => (
-  <div className="border border-gray-200 rounded-lg p-4">
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="font-medium text-gray-900">{project.title}</h3>
-        <p className="text-gray-600 text-sm mt-1">{project.description}</p>
+const ProjectCard = ({ project, clientId }: { project: Project; clientId: string }) => {
+  const navigate = useNavigate();
+  const completedTasks = project.tasks?.filter(t => t.status === 'Completed').length || 0;
+  const totalTasks = project.tasks?.length || 0;
+
+  return (
+    <div 
+      onClick={() => navigate(`/dashboard/client/${clientId}/project/${project.id}`)}
+      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors"
+    >
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-medium text-gray-900">{project.title}</h3>
+          <p className="text-gray-600 text-sm mt-1">{project.description}</p>
+        </div>
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+          {project.status}
+        </span>
       </div>
-      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-        {project.status}
-      </span>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center text-sm text-gray-500">
+          <Calendar className="w-4 h-4 mr-2" />
+          <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-500">
+          <span>{completedTasks} / {totalTasks} tasks completed</span>
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </div>
+      </div>
     </div>
-    <div className="mt-4 flex items-center text-sm text-gray-500">
-      <Calendar className="w-4 h-4 mr-2" />
-      <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
-    </div>
-  </div>
-);
+  );
+};
 
 export default function ClientDashboard() {
   const { clientId } = useParams();
@@ -144,10 +171,20 @@ export default function ClientDashboard() {
       );
 
       const projectsSnap = await getDocs(projectsQuery);
-      const projectsData = projectsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Project[];
+      const projectsData = projectsSnap.docs.map(doc => {
+        const data = doc.data() as DocumentData;
+        return {
+          id: doc.id,
+          title: data.title || '',
+          description: data.description || '',
+          status: data.status || 'In Progress',
+          deadline: data.deadline || '',
+          clientId: data.clientId || '',
+          createdAt: data.createdAt || '',
+          userId: data.userId || '',
+          tasks: data.tasks || []
+        } as Project;
+      });
 
       setProjects(projectsData);
     } catch (err: any) {
@@ -188,7 +225,8 @@ export default function ClientDashboard() {
         ...newProject,
         clientId,
         userId: user.id,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        tasks: [] // Initialize empty tasks array for new projects
       };
       
       await addDoc(projectsCollection, projectData);
@@ -269,7 +307,7 @@ export default function ClientDashboard() {
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Projects</h2>
         <div className="space-y-4">
           {projects.map((project: Project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard key={project.id} project={project} clientId={clientId!} />
           ))}
           {projects.length === 0 && (
             <div className="text-center py-8 text-gray-500">
