@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
-import { addClient, getClients } from '../../config/firebase';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface Client {
   id: string;
@@ -40,10 +41,20 @@ export default function ClientBoard() {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const fetchedClients = await getClients();
-      setClients(fetchedClients as Client[]);
+      setError('');
+      
+      const clientsCollection = collection(db, 'clients');
+      const querySnapshot = await getDocs(clientsCollection);
+      
+      const fetchedClients = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Client[];
+      
+      setClients(fetchedClients);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching clients:', err);
+      setError('Failed to load clients. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -63,15 +74,30 @@ export default function ClientBoard() {
 
   const handleNewClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     try {
-      const result = await addClient(newClient);
-      if (result.success) {
-        await fetchClients(); // Refresh the client list
-        setShowNewClientModal(false);
-        setNewClient({ name: '', description: '', status: 'Active' });
-      }
+      const clientsCollection = collection(db, 'clients');
+      const newClientData = {
+        ...newClient,
+        lastActivity: new Date().toISOString(),
+        projectCount: 0,
+        createdAt: new Date().toISOString()
+      };
+      
+      const docRef = await addDoc(clientsCollection, newClientData);
+      
+      // Add the new client to the local state
+      setClients(prevClients => [...prevClients, {
+        id: docRef.id,
+        ...newClientData
+      } as Client]);
+      
+      setShowNewClientModal(false);
+      setNewClient({ name: '', description: '', status: 'Active' });
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error adding client:', err);
+      setError('Failed to add client. Please try again.');
     }
   };
 

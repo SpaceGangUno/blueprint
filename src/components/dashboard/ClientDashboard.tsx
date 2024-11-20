@@ -9,7 +9,8 @@ import {
   Folder,
   X
 } from 'lucide-react';
-import { getClient } from '../../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 interface Project {
   id: string;
@@ -87,10 +88,22 @@ export default function ClientDashboard() {
   const fetchClientData = async () => {
     try {
       setLoading(true);
-      const clientData = await getClient(clientId!);
-      setClient(clientData as Client);
+      setError('');
+      
+      const clientDoc = doc(db, 'clients', clientId!);
+      const docSnap = await getDoc(clientDoc);
+      
+      if (docSnap.exists()) {
+        setClient({
+          id: docSnap.id,
+          ...docSnap.data()
+        } as Client);
+      } else {
+        setError('Client not found');
+      }
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching client:', err);
+      setError('Failed to load client details. Please try again.');
     } finally {
       setLoading(false);
     }
