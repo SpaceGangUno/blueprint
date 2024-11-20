@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Building2, 
@@ -7,12 +7,14 @@ import {
   ListTodo, 
   BarChart3,
   Folder,
-  X
+  X,
+  ChevronDown
 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, startAfter } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Interfaces moved to types file
 interface Project {
   id: string;
   title: string;
@@ -37,7 +39,20 @@ interface Client {
   userId: string;
 }
 
-// Memoized Modal Component
+// Loading Skeleton Components
+const SkeletonCard = () => (
+  <div className="animate-pulse">
+    <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
+  </div>
+);
+
+const LoadingSkeleton = () => (
+  <div className="space-y-4">
+    {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+  </div>
+);
+
+// Memoized Components
 const Modal = memo(({ title, onClose, children }: {
   title: string;
   onClose: () => void;
@@ -59,9 +74,6 @@ const Modal = memo(({ title, onClose, children }: {
   </div>
 ));
 
-Modal.displayName = 'Modal';
-
-// Memoized Task Component
 const TaskItem = memo(({ task, onToggle }: {
   task: Task;
   onToggle: (id: string) => void;
@@ -84,9 +96,6 @@ const TaskItem = memo(({ task, onToggle }: {
   </div>
 ));
 
-TaskItem.displayName = 'TaskItem';
-
-// Memoized Project Card Component
 const ProjectCard = memo(({ project }: { project: Project }) => (
   <div className="border border-gray-200 rounded-lg p-4">
     <div className="flex justify-between items-start">
@@ -105,7 +114,8 @@ const ProjectCard = memo(({ project }: { project: Project }) => (
   </div>
 ));
 
-ProjectCard.displayName = 'ProjectCard';
+// Constants
+const ITEMS_PER_PAGE = 5;
 
 export default function ClientDashboard() {
   const { clientId } = useParams();
@@ -119,8 +129,11 @@ export default function ClientDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Memoized form state
+  // Form state
   const [newProject, setNewProject] = useState(() => ({
     title: '',
     description: '',
@@ -132,7 +145,7 @@ export default function ClientDashboard() {
     dueDate: ''
   }));
 
-  // Memoized computed values
+  // Memoized values
   const completedTasksCount = useMemo(() => 
     tasks.filter(t => t.status === 'completed').length,
     [tasks]
@@ -143,7 +156,43 @@ export default function ClientDashboard() {
     [tasks]
   );
 
-  // Memoized callbacks
+  // Load more data
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || !clientId) return;
+
+    try {
+      setLoadingMore(true);
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('clientId', '==', clientId),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(ITEMS_PER_PAGE)
+      );
+
+      const snapshot = await getDocs(projectsQuery);
+      
+      if (snapshot.empty) {
+        setHasMore(false);
+        return;
+      }
+
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      
+      const newProjects = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Project[];
+
+      setProjects(prev => [...prev, ...newProjects]);
+    } catch (err) {
+      console.error('Error loading more projects:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [clientId, hasMore, lastVisible, loadingMore]);
+
+  // Callbacks
   const toggleTaskStatus = useCallback((taskId: string) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
@@ -163,7 +212,7 @@ export default function ClientDashboard() {
       status: 'In Progress',
       deadline: newProject.deadline
     };
-    setProjects(prev => [...prev, projectToAdd]);
+    setProjects(prev => [projectToAdd, ...prev]);
     setShowNewProjectModal(false);
     setNewProject({ title: '', description: '', deadline: '' });
   }, [projects.length, newProject]);
@@ -176,17 +225,17 @@ export default function ClientDashboard() {
       status: 'pending',
       dueDate: newTask.dueDate
     };
-    setTasks(prev => [...prev, taskToAdd]);
+    setTasks(prev => [taskToAdd, ...prev]);
     setShowNewTaskModal(false);
     setNewTask({ title: '', dueDate: '' });
   }, [tasks.length, newTask]);
 
-  // Authentication and data fetching
+  // Initial data fetch
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setAuthenticated(!!user);
       if (user && clientId) {
-        fetchClientData();
+        fetchInitialData();
       } else if (!user) {
         navigate('/login');
       }
@@ -195,37 +244,55 @@ export default function ClientDashboard() {
     return () => unsubscribe();
   }, [clientId, navigate]);
 
-  const fetchClientData = async () => {
-    if (!auth.currentUser) {
-      navigate('/login');
-      return;
-    }
+  const fetchInitialData = async () => {
+    if (!auth.currentUser || !clientId) return;
 
     try {
       setLoading(true);
       setError('');
       
-      const clientDoc = doc(db, 'clients', clientId!);
-      const docSnap = await getDoc(clientDoc);
+      // Fetch client data
+      const clientDoc = doc(db, 'clients', clientId);
+      const clientSnap = await getDoc(clientDoc);
       
-      if (docSnap.exists()) {
-        const clientData = {
-          id: docSnap.id,
-          ...docSnap.data()
-        } as Client;
-
-        if (clientData.userId !== auth.currentUser.uid) {
-          setError('You do not have permission to view this client');
-          return;
-        }
-
-        setClient(clientData);
-      } else {
+      if (!clientSnap.exists()) {
         setError('Client not found');
+        return;
       }
-    } catch (err: any) {
-      console.error('Error fetching client:', err);
-      setError('Failed to load client details. Please try again.');
+
+      const clientData = {
+        id: clientSnap.id,
+        ...clientSnap.data()
+      } as Client;
+
+      if (clientData.userId !== auth.currentUser.uid) {
+        setError('You do not have permission to view this client');
+        return;
+      }
+
+      setClient(clientData);
+
+      // Fetch initial projects
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('clientId', '==', clientId),
+        orderBy('createdAt', 'desc'),
+        limit(ITEMS_PER_PAGE)
+      );
+
+      const projectsSnap = await getDocs(projectsQuery);
+      const projectsData = projectsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Project[];
+
+      setProjects(projectsData);
+      setLastVisible(projectsSnap.docs[projectsSnap.docs.length - 1]);
+      setHasMore(projectsSnap.docs.length === ITEMS_PER_PAGE);
+
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -242,11 +309,7 @@ export default function ClientDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error || !client) {
@@ -326,70 +389,89 @@ export default function ClientDashboard() {
 
       {/* Content Area */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        {activeTab === 'overview' && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Client Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="text-sm font-medium text-blue-600 mb-2">Active Projects</h3>
-                <p className="text-2xl font-bold text-blue-900">{projects.length}</p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="text-sm font-medium text-green-600 mb-2">Completed Tasks</h3>
-                <p className="text-2xl font-bold text-green-900">{completedTasksCount}</p>
-              </div>
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <h3 className="text-sm font-medium text-yellow-600 mb-2">Pending Tasks</h3>
-                <p className="text-2xl font-bold text-yellow-900">{pendingTasksCount}</p>
+        <Suspense fallback={<LoadingSkeleton />}>
+          {activeTab === 'overview' && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Client Overview</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-blue-600 mb-2">Active Projects</h3>
+                  <p className="text-2xl font-bold text-blue-900">{projects.length}</p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-green-600 mb-2">Completed Tasks</h3>
+                  <p className="text-2xl font-bold text-green-900">{completedTasksCount}</p>
+                </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-yellow-600 mb-2">Pending Tasks</h3>
+                  <p className="text-2xl font-bold text-yellow-900">{pendingTasksCount}</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'projects' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Projects</h2>
-              <button 
-                onClick={() => setShowNewProjectModal(true)}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                Add Project
-              </button>
+          {activeTab === 'projects' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Projects</h2>
+                <button 
+                  onClick={() => setShowNewProjectModal(true)}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Add Project
+                </button>
+              </div>
+              <div className="space-y-4">
+                {projects.map(project => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+                
+                {hasMore && (
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="w-full py-3 text-gray-600 hover:text-gray-900 flex items-center justify-center"
+                  >
+                    {loadingMore ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-5 h-5 mr-2" />
+                        Load More
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="space-y-4">
-              {projects.map(project => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'tasks' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Tasks</h2>
-              <button 
-                onClick={() => setShowNewTaskModal(true)}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-              >
-                Add Task
-              </button>
+          {activeTab === 'tasks' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Tasks</h2>
+                <button 
+                  onClick={() => setShowNewTaskModal(true)}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Add Task
+                </button>
+              </div>
+              <div className="space-y-2">
+                {tasks.map(task => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onToggle={toggleTaskStatus}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="space-y-2">
-              {tasks.map(task => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  onToggle={toggleTaskStatus}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          )}
+        </Suspense>
       </div>
 
-      {/* New Project Modal */}
+      {/* Modals */}
       {showNewProjectModal && (
         <Modal
           title="Add New Project"
@@ -453,7 +535,6 @@ export default function ClientDashboard() {
         </Modal>
       )}
 
-      {/* New Task Modal */}
       {showNewTaskModal && (
         <Modal
           title="Add New Task"
