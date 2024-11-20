@@ -32,19 +32,19 @@ service cloud.firestore {
       allow create: if isAuthenticated() && hasTeamAccess();
       allow read: if isAuthenticated() && hasTeamAccess();
       allow update, delete: if isAuthenticated() && hasTeamAccess();
-    }
 
-    // Project rules - nested under clients
-    match /projects/{projectId} {
-      allow create: if isAuthenticated() && hasTeamAccess();
-      allow read: if isAuthenticated() && hasTeamAccess();
-      allow update, delete: if isAuthenticated() && hasTeamAccess();
-    }
+      // Projects nested under clients
+      match /projects/{projectId} {
+        allow create: if isAuthenticated() && hasTeamAccess();
+        allow read: if isAuthenticated() && hasTeamAccess();
+        allow update, delete: if isAuthenticated() && hasTeamAccess();
 
-    // Task rules - nested under projects
-    match /tasks/{taskId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && hasTeamAccess();
+        // Tasks nested under projects
+        match /tasks/{taskId} {
+          allow read: if isAuthenticated();
+          allow write: if isAuthenticated() && hasTeamAccess();
+        }
+      }
     }
 
     // User profile rules

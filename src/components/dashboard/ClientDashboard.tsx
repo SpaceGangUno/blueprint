@@ -8,7 +8,7 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, DocumentData } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
@@ -162,10 +162,9 @@ export default function ClientDashboard() {
 
       setClient(clientData);
 
-      // Fetch projects
+      // Update to use nested collection path
       const projectsQuery = query(
-        collection(db, 'projects'),
-        where('clientId', '==', clientId),
+        collection(db, `clients/${clientId}/projects`),
         orderBy('createdAt', 'desc'),
         limit(5)
       );
@@ -179,7 +178,7 @@ export default function ClientDashboard() {
           description: data.description || '',
           status: data.status || 'In Progress',
           deadline: data.deadline || '',
-          clientId: data.clientId || '',
+          clientId: clientId,
           createdAt: data.createdAt || '',
           userId: data.userId || '',
           tasks: data.tasks || []
@@ -220,7 +219,8 @@ export default function ClientDashboard() {
     setSubmitting(true);
     
     try {
-      const projectsCollection = collection(db, 'projects');
+      // Update to use nested collection path
+      const projectsCollection = collection(db, `clients/${clientId}/projects`);
       const projectData = {
         ...newProject,
         clientId,
@@ -232,7 +232,9 @@ export default function ClientDashboard() {
       await addDoc(projectsCollection, projectData);
       
       // Update client's lastActivity
-      await getDoc(doc(db, 'clients', clientId));
+      await setDoc(doc(db, 'clients', clientId), {
+        lastActivity: new Date().toISOString()
+      }, { merge: true });
       
       // Refresh projects
       fetchData();

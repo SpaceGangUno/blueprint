@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { 
   Layout, Grid, MessageSquare, Users, Settings, LogOut,
   Activity
@@ -10,10 +10,21 @@ import ClientDashboard from '../components/dashboard/ClientDashboard';
 import ProjectDetails from '../components/dashboard/ProjectDetails';
 import Messages from '../components/dashboard/Messages';
 import TeamView from '../components/dashboard/TeamView';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const isAdmin = true; // In a real app, this would come from auth context
+  const { user, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,6 +43,13 @@ export default function Dashboard() {
                 <span className="text-white font-bold">BS</span>
               </div>
             </div>
+          </div>
+          <div className="flex items-center">
+            {user && (
+              <span className="text-sm text-gray-600 mr-4">
+                {user.email}
+              </span>
+            )}
           </div>
         </div>
       </header>
@@ -79,7 +97,10 @@ export default function Dashboard() {
             <Settings className="w-5 h-5" />
             <span>Settings</span>
           </Link>
-          <button className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg w-full">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg w-full"
+          >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
           </button>
