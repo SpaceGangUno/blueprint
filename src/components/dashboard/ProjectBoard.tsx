@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle, AlertCircle, Calendar, ArrowRight } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, Calendar, ArrowRight, ListTodo } from 'lucide-react';
 import type { Project } from '../../types';
 
 export default function ProjectBoard() {
@@ -12,7 +12,8 @@ export default function ProjectBoard() {
       status: 'In Progress',
       deadline: '2024-04-01',
       moodboard: [],
-      comments: []
+      comments: [],
+      tasks: []
     },
     {
       id: '2',
@@ -21,7 +22,8 @@ export default function ProjectBoard() {
       status: 'Under Review',
       deadline: '2024-05-15',
       moodboard: [],
-      comments: []
+      comments: [],
+      tasks: []
     }
   ]);
 
@@ -70,7 +72,7 @@ export default function ProjectBoard() {
                   {statusIcons[project.status]}
                 </div>
                 <p className="text-gray-600 mb-6 line-clamp-2">{project.description}</p>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar className="w-4 h-4 mr-2" />
                     <span>{new Date(project.deadline).toLocaleDateString()}</span>
@@ -79,6 +81,12 @@ export default function ProjectBoard() {
                     statusColors[project.status]
                   }`}>
                     {project.status}
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <ListTodo className="w-4 h-4 mr-2" />
+                  <span>
+                    {project.tasks.filter(t => t.status === 'Completed').length} / {project.tasks.length} tasks completed
                   </span>
                 </div>
               </div>
