@@ -55,11 +55,11 @@ export default function Dashboard() {
             <span>Overview</span>
           </Link>
           <Link
-            to="/dashboard/projects"
+            to="/dashboard/clients"
             className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
           >
             <Grid className="w-5 h-5" />
-            <span>Projects</span>
+            <span>Clients</span>
           </Link>
           <Link
             to="/dashboard/messages"
@@ -97,7 +97,7 @@ export default function Dashboard() {
         <div className="p-6">
           <Routes>
             <Route path="/" element={<Overview />} />
-            <Route path="/projects" element={<ProjectBoard />} />
+            <Route path="/clients" element={<ProjectBoard />} />
             <Route path="/project/:id/*" element={<ProjectDetails />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/team" element={<TeamView />} />
