@@ -6,7 +6,8 @@ import {
   Plus,
   Check,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Calendar
 } from 'lucide-react';
 import type { Project, Task, MiniTask } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
@@ -14,7 +15,6 @@ import { auth, db } from '../../config/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 
-// Extend UserProfile to include id as it's added by subscribeToTeamMembers
 type TeamMemberWithId = UserProfile & { id: string };
 
 export default function ProjectDetails() {
@@ -28,7 +28,10 @@ export default function ProjectDetails() {
   const [showAssigneeModal, setShowAssigneeModal] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [expandedTasks, setExpandedTasks] = useState<string[]>([]);
-  const [newSubTaskTitle, setNewSubTaskTitle] = useState<string>('');
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
   const [addingSubTaskToId, setAddingSubTaskToId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,7 +45,6 @@ export default function ProjectDetails() {
       return;
     }
 
-    // Subscribe to project updates
     const unsubscribe = onSnapshot(
       doc(db, `clients/${clientId}/projects/${projectId}`),
       (doc) => {
@@ -64,7 +66,6 @@ export default function ProjectDetails() {
       }
     );
 
-    // Subscribe to team members
     const teamUnsubscribe = subscribeToTeamMembers(
       (members) => {
         setTeamMembers(members as TeamMemberWithId[]);
@@ -92,33 +93,23 @@ export default function ProjectDetails() {
     }
   };
 
-  const assignTask = async (taskId: string, member: TeamMemberWithId) => {
-    if (!project) return;
+  const addTask = async () => {
+    if (!project || !newTaskTitle.trim()) return;
 
-    const updatedTasks = project.tasks.map(task =>
-      task.id === taskId
-        ? {
-            ...task,
-            assignee: {
-              id: member.id,
-              name: member.email.split('@')[0],
-              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`
-            }
-          }
-        : task
-    );
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: newTaskTitle.trim(),
+      description: newTaskDescription.trim(),
+      status: 'Todo',
+      miniTasks: [],
+      documents: []
+    };
 
+    const updatedTasks = [...project.tasks, newTask];
     await updateProject({ tasks: updatedTasks });
-    setShowAssigneeModal(false);
-    setSelectedTaskId(null);
-  };
-
-  const toggleTaskExpansion = (taskId: string) => {
-    setExpandedTasks(prev => 
-      prev.includes(taskId)
-        ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setShowNewTaskModal(false);
   };
 
   const addSubTask = async (taskId: string) => {
@@ -163,6 +154,27 @@ export default function ProjectDetails() {
     await updateProject({ tasks: updatedTasks });
   };
 
+  const assignTask = async (taskId: string, member: TeamMemberWithId) => {
+    if (!project) return;
+
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            assignee: {
+              id: member.id,
+              name: member.email.split('@')[0],
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`
+            }
+          }
+        : task
+    );
+
+    await updateProject({ tasks: updatedTasks });
+    setShowAssigneeModal(false);
+    setSelectedTaskId(null);
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -188,13 +200,22 @@ export default function ProjectDetails() {
             <h1 className="text-2xl font-bold">{project.title}</h1>
             <p className="text-gray-600 mt-1">{project.description}</p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-            project.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-green-100 text-green-800'
-          }`}>
-            {project.status}
-          </span>
+          <div className="flex items-center space-x-4">
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+              project.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-green-100 text-green-800'
+            }`}>
+              {project.status}
+            </span>
+            <button
+              onClick={() => setShowNewTaskModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Task
+            </button>
+          </div>
         </div>
       </div>
 
@@ -208,7 +229,11 @@ export default function ProjectDetails() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <button
-                      onClick={() => toggleTaskExpansion(task.id)}
+                      onClick={() => setExpandedTasks(prev => 
+                        prev.includes(task.id)
+                          ? prev.filter(id => id !== task.id)
+                          : [...prev, task.id]
+                      )}
                       className="text-gray-500 hover:text-gray-700"
                     >
                       {expandedTasks.includes(task.id) ? (
@@ -217,7 +242,12 @@ export default function ProjectDetails() {
                         <ChevronRight className="w-5 h-5" />
                       )}
                     </button>
-                    <h3 className="font-medium">{task.title}</h3>
+                    <div>
+                      <h3 className="font-medium">{task.title}</h3>
+                      {task.description && (
+                        <p className="text-sm text-gray-600">{task.description}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <span className={`px-2 py-1 rounded text-sm ${
@@ -315,9 +345,80 @@ export default function ProjectDetails() {
                 )}
               </div>
             ))}
+            {project.tasks.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No tasks yet. Create your first task to get started.
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* New Task Modal */}
+      {showNewTaskModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Task</h2>
+              <button
+                onClick={() => {
+                  setShowNewTaskModal(false);
+                  setNewTaskTitle('');
+                  setNewTaskDescription('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Task Title
+                </label>
+                <input
+                  type="text"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Enter task title"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  rows={3}
+                  placeholder="Enter task description"
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowNewTaskModal(false);
+                    setNewTaskTitle('');
+                    setNewTaskDescription('');
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addTask}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  disabled={!newTaskTitle.trim()}
+                >
+                  Add Task
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Assignee Modal */}
       {showAssigneeModal && (
