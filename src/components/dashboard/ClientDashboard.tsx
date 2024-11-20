@@ -19,6 +19,7 @@ interface Project {
   deadline: string;
   clientId: string;
   createdAt: string;
+  userId: string;
 }
 
 interface Client {
@@ -103,7 +104,7 @@ export default function ClientDashboard() {
       setLoading(true);
       setError('');
       
-      // Fetch client data
+      // Fetch client data with ownership check
       const clientDoc = doc(db, 'clients', clientId);
       const clientSnap = await getDoc(clientDoc);
       
@@ -116,16 +117,18 @@ export default function ClientDashboard() {
         ...clientSnap.data()
       } as Client;
 
+      // Verify ownership (matching Firestore rules)
       if (clientData.userId !== auth.currentUser.uid) {
         throw new Error('You do not have permission to view this client');
       }
 
       setClient(clientData);
 
-      // Fetch projects
+      // Fetch projects with proper security rules
       const projectsQuery = query(
         collection(db, 'projects'),
         where('clientId', '==', clientId),
+        where('userId', '==', auth.currentUser.uid), // Ensure ownership
         orderBy('createdAt', 'desc'),
         limit(5)
       );
@@ -139,7 +142,11 @@ export default function ClientDashboard() {
       setProjects(projectsData);
     } catch (err: any) {
       console.error('Error fetching data:', err);
-      setError(err.message || 'Failed to load data');
+      if (err.code === 'permission-denied') {
+        setError('You do not have permission to access this data');
+      } else {
+        setError(err.message || 'Failed to load data');
+      }
     } finally {
       setLoading(false);
     }
