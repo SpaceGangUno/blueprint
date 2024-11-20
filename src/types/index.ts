@@ -9,6 +9,7 @@ export interface Project {
   userId?: string;
   tasks: Task[];
   moodboard: MoodboardItem[];
+  documents: DocumentItem[];
   comments: Comment[];
 }
 
@@ -36,11 +37,25 @@ export interface MoodboardItem {
   };
 }
 
+export interface DocumentItem {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
 export interface Comment {
   id: string;
   userId: string;
   content: string;
   timestamp: string;
+  attachments?: {
+    type: 'image' | 'document';
+    url: string;
+    name: string;
+  }[];
 }
 
 export interface User {

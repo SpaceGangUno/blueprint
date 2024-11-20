@@ -13,7 +13,8 @@ export default function ProjectBoard() {
       deadline: '2024-04-01',
       moodboard: [],
       comments: [],
-      tasks: []
+      tasks: [],
+      documents: []
     },
     {
       id: '2',
@@ -23,7 +24,8 @@ export default function ProjectBoard() {
       deadline: '2024-05-15',
       moodboard: [],
       comments: [],
-      tasks: []
+      tasks: [],
+      documents: []
     }
   ]);
 
