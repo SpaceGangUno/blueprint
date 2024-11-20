@@ -36,6 +36,19 @@ export interface MiniTask {
   completed: boolean;
   createdAt?: string;
   updatedAt?: string;
+  notes?: string;
+  files?: SubTaskFile[];
+  isExpanded?: boolean;
+}
+
+export interface SubTaskFile {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  size?: number;
 }
 
 export interface MoodboardItem {
