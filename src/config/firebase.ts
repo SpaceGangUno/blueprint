@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   updatePassword,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  signInWithEmailAndPassword
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -21,7 +22,8 @@ import {
   enableIndexedDbPersistence,
   QuerySnapshot,
   DocumentSnapshot,
-  DocumentData
+  DocumentData,
+  getDoc
 } from 'firebase/firestore';
 
 // Types for better type safety
@@ -101,6 +103,40 @@ const enablePersistence = async (retries = 3) => {
 };
 
 enablePersistence();
+
+// Function to ensure admin user exists
+export const ensureAdminUser = async (email: string, password: string): Promise<void> => {
+  try {
+    // Try to sign in first
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
+      
+      // If user exists but not admin, update to admin
+      if (userDoc.exists() && userDoc.data().role !== 'admin') {
+        await setDoc(doc(db, 'users', auth.currentUser!.uid), {
+          email,
+          role: 'admin',
+          updatedAt: new Date().toISOString(),
+          passwordUpdated: true
+        } as UserProfile, { merge: true });
+      }
+    } catch (signInError) {
+      // If sign in fails, create new admin user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        email,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        passwordUpdated: true
+      } as UserProfile);
+    }
+  } catch (error) {
+    console.error('Error ensuring admin user:', error);
+    throw error;
+  }
+};
 
 // Team invite function with improved error handling
 export const sendTeamInvite = async (email: string): Promise<{ success: boolean; message: string }> => {
@@ -324,5 +360,8 @@ export const subscribeToClient = (
 export const clearClientCache = () => {
   clientCache.clear();
 };
+
+// Call ensureAdminUser on app initialization
+ensureAdminUser('isaacmazile@gmail.com', 'Im934456').catch(console.error);
 
 export default app;

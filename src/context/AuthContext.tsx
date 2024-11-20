@@ -5,7 +5,7 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface User {
   id: string;
@@ -49,18 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               passwordUpdated: userData.passwordUpdated
             });
           } else {
-            // If no user document exists, create one with default role and metadata
-            const newUser: User = {
-              id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              role: 'team_member',
-              createdAt: new Date().toISOString(),
-              passwordUpdated: false
-            };
-            
-            // Create the user document
-            await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-            setUser(newUser);
+            setUser(null);
+            console.error('No user document found');
           }
         } else {
           setUser(null);
@@ -95,21 +85,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           passwordUpdated: userData.passwordUpdated
         });
       } else {
-        // If no user document exists, create one with default role and metadata
-        const newUser: User = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email || '',
-          role: 'team_member',
-          createdAt: new Date().toISOString(),
-          passwordUpdated: false
-        };
-        
-        // Create the user document
-        await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-        setUser(newUser);
+        throw new Error('User document not found');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      if (error.code === 'auth/invalid-credential') {
+        throw new Error('Invalid email or password');
+      }
       throw error;
     }
   };
