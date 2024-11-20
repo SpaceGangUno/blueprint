@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { MessageSquare, Image, FileText, CheckSquare, Plus, X, Edit2, Save, Trash2 } from 'lucide-react';
-import type { Project, Task, MiniTask } from '../../types';
+import { MessageSquare, Image, FileText, CheckSquare, Plus, X, Edit2, Save, Trash2, Upload } from 'lucide-react';
+import type { Project, Task, MiniTask, MoodboardItem } from '../../types';
 
-export default function ProjectDetails() {
+function ProjectDetails() {
   const { clientId, projectId } = useParams();
   const location = useLocation();
   const [project, setProject] = useState<Project>({
@@ -60,7 +60,7 @@ export default function ProjectDetails() {
       <Routes>
         <Route path="/" element={<ProjectOverview project={project} />} />
         <Route path="/tasks" element={<ProjectTasks project={project} setProject={setProject} />} />
-        <Route path="/moodboard" element={<ProjectMoodboard project={project} />} />
+        <Route path="/moodboard" element={<ProjectMoodboard project={project} setProject={setProject} />} />
         <Route path="/comments" element={<ProjectComments project={project} />} />
       </Routes>
     </div>
@@ -308,6 +308,221 @@ function ProjectTasks({ project, setProject }: { project: Project; setProject: (
   );
 }
 
+function ProjectMoodboard({ project, setProject }: { project: Project; setProject: (project: Project) => void }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<MoodboardItem | null>(null);
+  const [note, setNote] = useState('');
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    await handleFiles(files);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      await handleFiles(files);
+    }
+  };
+
+  const handleFiles = async (files: File[]) => {
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    for (const file of imageFiles) {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const newItem: MoodboardItem = {
+          id: Date.now().toString(),
+          imageUrl: e.target?.result as string,
+          note: '',
+          position: {
+            x: Math.random() * 500, // Random initial position
+            y: Math.random() * 500
+          }
+        };
+
+        setProject({
+          ...project,
+          moodboard: [...project.moodboard, newItem]
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageClick = (item: MoodboardItem) => {
+    setSelectedImage(item);
+    setNote(item.note);
+  };
+
+  const updateNote = () => {
+    if (!selectedImage) return;
+
+    setProject({
+      ...project,
+      moodboard: project.moodboard.map(item =>
+        item.id === selectedImage.id
+          ? { ...item, note }
+          : item
+      )
+    });
+
+    setSelectedImage(null);
+    setNote('');
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggedItem(id);
+  };
+
+  const handleImageDrag = (e: React.DragEvent, id: string) => {
+    if (!draggedItem) return;
+
+    const board = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - board.left;
+    const y = e.clientY - board.top;
+
+    setProject({
+      ...project,
+      moodboard: project.moodboard.map(item =>
+        item.id === id
+          ? { ...item, position: { x, y } }
+          : item
+      )
+    });
+  };
+
+  const deleteImage = (id: string) => {
+    setProject({
+      ...project,
+      moodboard: project.moodboard.filter(item => item.id !== id)
+    });
+    setSelectedImage(null);
+    setNote('');
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Upload Controls */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Images
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <p className="text-sm text-gray-500">
+            or drag and drop images onto the board
+          </p>
+        </div>
+      </div>
+
+      {/* Moodboard Canvas */}
+      <div
+        className={`bg-white rounded-lg shadow h-[600px] relative overflow-hidden ${
+          isDragging ? 'border-2 border-dashed border-blue-400' : ''
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {project.moodboard.map(item => (
+          <div
+            key={item.id}
+            className="absolute cursor-move"
+            style={{
+              left: item.position.x,
+              top: item.position.y
+            }}
+            draggable
+            onDragStart={() => handleDragStart(item.id)}
+            onDrag={(e) => handleImageDrag(e, item.id)}
+          >
+            <div className="relative group">
+              <img
+                src={item.imageUrl}
+                alt={item.note}
+                className="w-48 h-48 object-cover rounded-lg shadow-lg"
+                onClick={() => handleImageClick(item)}
+              />
+              {item.note && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm rounded-b-lg">
+                  {item.note}
+                </div>
+              )}
+              <button
+                onClick={() => deleteImage(item.id)}
+                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Image Note Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-semibold mb-4">Add Note</h3>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg mb-4"
+              rows={3}
+              placeholder="Add a note to this image..."
+            />
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setSelectedImage(null);
+                  setNote('');
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={updateNote}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Save Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProjectOverview({ project }: { project: Project }) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -330,29 +545,6 @@ function ProjectOverview({ project }: { project: Project }) {
           </dd>
         </div>
       </dl>
-    </div>
-  );
-}
-
-function ProjectMoodboard({ project }: { project: Project }) {
-  return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold mb-4">Mood Board</h2>
-      {project.moodboard.length === 0 ? (
-        <p className="text-gray-500">No mood board items yet.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {project.moodboard.map(item => (
-            <div key={item.id} className="relative aspect-square">
-              <img
-                src={item.imageUrl}
-                alt={item.note}
-                className="w-full h-full object-cover rounded-lg"
-              />
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -381,3 +573,5 @@ function ProjectComments({ project }: { project: Project }) {
     </div>
   );
 }
+
+export default ProjectDetails;

@@ -4,9 +4,12 @@ export interface Project {
   description: string;
   status: 'In Progress' | 'Under Review' | 'Completed';
   deadline: string;
+  clientId?: string;
+  createdAt?: string;
+  userId?: string;
+  tasks: Task[];
   moodboard: MoodboardItem[];
   comments: Comment[];
-  tasks: Task[];
 }
 
 export interface Task {
@@ -27,6 +30,10 @@ export interface MoodboardItem {
   id: string;
   imageUrl: string;
   note: string;
+  position: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface Comment {
