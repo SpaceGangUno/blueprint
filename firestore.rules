@@ -17,55 +17,54 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isTeamMember() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'team_member';
+    }
+
+    function hasTeamAccess() {
+      return isAdmin() || isTeamMember();
+    }
+
     // Client rules
     match /clients/{clientId} {
-      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
-      allow write: if isAuthenticated() && (isOwner(request.resource.data.userId) || isAdmin());
+      allow create: if isAuthenticated() && hasTeamAccess();
+      allow read: if isAuthenticated() && hasTeamAccess();
+      allow update, delete: if isAuthenticated() && hasTeamAccess();
     }
 
     // Project rules - nested under clients
     match /projects/{projectId} {
-      allow read: if isAuthenticated() && (
-        exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) && (
-          get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid ||
-          isAdmin()
-        )
-      );
-      allow write: if isAuthenticated() && (
-        exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) && (
-          get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid ||
-          isAdmin()
-        )
-      );
+      allow create: if isAuthenticated() && hasTeamAccess();
+      allow read: if isAuthenticated() && hasTeamAccess();
+      allow update, delete: if isAuthenticated() && hasTeamAccess();
     }
 
     // Task rules - nested under projects
     match /tasks/{taskId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow write: if isAuthenticated() && hasTeamAccess();
     }
 
     // User profile rules
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      // Allow team members to update their own profile
-      allow update: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isAdmin();
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAuthenticated() && isAdmin();
     }
 
     // Team invite rules
     match /teamInvites/{inviteId} {
-      // Only admins can create invites
       allow create: if isAuthenticated() && isAdmin();
-      // Admins can read all invites, team members can read their own
       allow read: if isAuthenticated() && (
         isAdmin() || 
-        resource.data.userId == request.auth.uid
+        (request.auth.uid in get(/databases/$(database)/documents/teamInvites/$(inviteId)).data.userId)
       );
-      // Allow updates for status changes
       allow update: if isAuthenticated() && (
         isAdmin() || 
-        resource.data.userId == request.auth.uid
+        (request.auth.uid in get(/databases/$(database)/documents/teamInvites/$(inviteId)).data.userId)
       );
     }
   }

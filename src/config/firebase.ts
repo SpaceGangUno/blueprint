@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, updatePassword } from 'firebase/auth';
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  updatePassword,
+  setPersistence,
+  browserLocalPersistence
+} from 'firebase/auth';
 import { 
   getFirestore, 
   collection, 
@@ -61,6 +67,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Enable auth persistence
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.error('Error setting auth persistence:', error);
+  });
 
 // Cache for client data
 const clientCache = new Map<string, Client>();

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { auth, db } from '../../config/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { useAuth } from '../../context/AuthContext';
 
 // Interfaces
 interface Project {
@@ -91,20 +91,20 @@ const ProjectCard = ({ project }: { project: Project }) => (
 export default function ClientDashboard() {
   const { clientId } = useParams();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [authenticated, setAuthenticated] = useState(false);
 
   const fetchData = useCallback(async () => {
-    if (!auth.currentUser || !clientId) return;
+    if (!user || !clientId) return;
 
     try {
       setLoading(true);
       setError('');
       
-      // Fetch client data with ownership check
+      // Fetch client data
       const clientDoc = doc(db, 'clients', clientId);
       const clientSnap = await getDoc(clientDoc);
       
@@ -117,18 +117,12 @@ export default function ClientDashboard() {
         ...clientSnap.data()
       } as Client;
 
-      // Verify ownership (matching Firestore rules)
-      if (clientData.userId !== auth.currentUser.uid) {
-        throw new Error('You do not have permission to view this client');
-      }
-
       setClient(clientData);
 
-      // Fetch projects with proper security rules
+      // Fetch projects
       const projectsQuery = query(
         collection(db, 'projects'),
         where('clientId', '==', clientId),
-        where('userId', '==', auth.currentUser.uid), // Ensure ownership
         orderBy('createdAt', 'desc'),
         limit(5)
       );
@@ -150,22 +144,23 @@ export default function ClientDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [clientId]);
+  }, [clientId, user]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthenticated(!!user);
-      if (user) {
-        fetchData();
-      } else {
+    if (!authLoading) {
+      if (!user) {
         navigate('/login');
+      } else {
+        fetchData();
       }
-    });
+    }
+  }, [user, authLoading, navigate, fetchData]);
 
-    return () => unsubscribe();
-  }, [navigate, fetchData]);
+  if (authLoading || loading) {
+    return <LoadingSkeleton />;
+  }
 
-  if (!authenticated) {
+  if (!user) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8 text-center">
         <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -173,10 +168,6 @@ export default function ClientDashboard() {
         <p className="text-gray-600">Please sign in to view client details.</p>
       </div>
     );
-  }
-
-  if (loading) {
-    return <LoadingSkeleton />;
   }
 
   if (error) {
