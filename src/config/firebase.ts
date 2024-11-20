@@ -16,10 +16,16 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Configure auth settings for email links
+const actionCodeSettings = {
+  url: `${window.location.origin}/team-invite`,
+  handleCodeInApp: true,
+};
+
 // Team invite function
 export const sendTeamInvite = async (email: string) => {
   try {
-    // Generate a unique invite token
+    // First create the invite record
     const inviteRef = await addDoc(collection(db, 'teamInvites'), {
       email,
       status: 'pending',
@@ -27,22 +33,29 @@ export const sendTeamInvite = async (email: string) => {
       role: 'team_member'
     });
 
-    // Create the invite link
-    const actionCodeSettings = {
+    // Update the action code settings with the invite token
+    const inviteSettings = {
+      ...actionCodeSettings,
       url: `${window.location.origin}/team-invite?token=${inviteRef.id}`,
-      handleCodeInApp: true,
     };
 
-    // Send the email
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    // Send the email invitation
+    await sendSignInLinkToEmail(auth, email, inviteSettings);
 
-    // Store the email for verification
+    // Store the email locally for verification
     window.localStorage.setItem('emailForSignIn', email);
 
     return inviteRef.id;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending team invite:', error);
-    throw error;
+    // Rethrow with more specific error message
+    if (error.code === 'auth/invalid-email') {
+      throw new Error('Invalid email address');
+    } else if (error.code === 'auth/email-already-in-use') {
+      throw new Error('This email is already registered');
+    } else {
+      throw new Error('Failed to send invitation. Please try again.');
+    }
   }
 };
 
@@ -67,9 +80,15 @@ export const createTeamMemberAccount = async (email: string, password: string, i
     }, { merge: true });
 
     return userCredential.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating team member account:', error);
-    throw error;
+    if (error.code === 'auth/email-already-in-use') {
+      throw new Error('This email is already registered');
+    } else if (error.code === 'auth/weak-password') {
+      throw new Error('Password should be at least 6 characters');
+    } else {
+      throw new Error('Failed to create account. Please try again.');
+    }
   }
 };
 
