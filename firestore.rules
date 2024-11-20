@@ -49,8 +49,13 @@ service cloud.firestore {
 
     // User profile rules
     match /users/{userId} {
+      // Allow creation of first admin user or if user is creating their own document
+      allow create: if isAuthenticated() && (
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        request.auth.uid == userId && 
+        request.resource.data.role == 'admin'
+      );
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow create: if isAuthenticated() && isAdmin();
       allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow delete: if isAuthenticated() && isAdmin();
     }
