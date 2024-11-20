@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useParams, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   MessageSquare, 
   Image, 
@@ -19,7 +19,6 @@ import type { Project, Task, MiniTask, MoodboardItem, DocumentItem, Comment } fr
 
 export default function ProjectDetails() {
   const { clientId, projectId } = useParams();
-  const location = useLocation();
   const [project, setProject] = useState<Project>({
     id: projectId || '1',
     title: 'Website Redesign',
@@ -37,6 +36,7 @@ export default function ProjectDetails() {
   const commentFileInputRef = useRef<HTMLInputElement>(null);
   const documentFileInputRef = useRef<HTMLInputElement>(null);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', description: '' });
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -47,7 +47,7 @@ export default function ProjectDetails() {
         name: file.name,
         url: URL.createObjectURL(file),
         type: file.type,
-        uploadedBy: 'Current User', // Replace with actual user info
+        uploadedBy: 'Current User',
         uploadedAt: new Date().toISOString()
       }));
 
@@ -70,7 +70,7 @@ export default function ProjectDetails() {
 
     const comment: Comment = {
       id: Date.now().toString(),
-      userId: 'Current User', // Replace with actual user info
+      userId: 'Current User',
       content: newComment,
       timestamp: new Date().toISOString(),
       attachments
@@ -89,6 +89,25 @@ export default function ProjectDetails() {
     if (e.target.files) {
       setCommentAttachments(prev => [...prev, ...Array.from(e.target.files!)]);
     }
+  };
+
+  const addTask = () => {
+    if (!newTask.title.trim()) return;
+    
+    const task: Task = {
+      id: Date.now().toString(),
+      title: newTask.title,
+      description: newTask.description,
+      status: 'Todo',
+      miniTasks: []
+    };
+
+    setProject({
+      ...project,
+      tasks: [...project.tasks, task]
+    });
+    setNewTask({ title: '', description: '' });
+    setShowAddTask(false);
   };
 
   return (
@@ -137,7 +156,36 @@ export default function ProjectDetails() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <ProjectTasks project={project} setProject={setProject} onComplete={() => setShowAddTask(false)} />
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Task Title"
+                    value={newTask.title}
+                    onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                  <textarea
+                    placeholder="Task Description"
+                    value={newTask.description}
+                    onChange={e => setNewTask({ ...newTask, description: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    rows={3}
+                  />
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowAddTask(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={addTask}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add Task
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -316,69 +364,6 @@ export default function ProjectDetails() {
               </div>
             </form>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProjectTasks({ project, setProject, onComplete }: { 
-  project: Project; 
-  setProject: (project: Project) => void;
-  onComplete?: () => void;
-}) {
-  const [newTask, setNewTask] = useState({ title: '', description: '' });
-
-  const addTask = () => {
-    if (!newTask.title.trim()) return;
-    
-    const task: Task = {
-      id: Date.now().toString(),
-      title: newTask.title,
-      description: newTask.description,
-      status: 'Todo',
-      miniTasks: []
-    };
-
-    setProject({
-      ...project,
-      tasks: [...project.tasks, task]
-    });
-    setNewTask({ title: '', description: '' });
-    onComplete?.();
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <input
-          type="text"
-          placeholder="Task Title"
-          value={newTask.title}
-          onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-          className="w-full px-3 py-2 border rounded-lg mb-2"
-        />
-        <textarea
-          placeholder="Task Description"
-          value={newTask.description}
-          onChange={e => setNewTask({ ...newTask, description: e.target.value })}
-          className="w-full px-3 py-2 border rounded-lg mb-4"
-          rows={3}
-        />
-        <div className="flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onComplete}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={addTask}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Add Task
-          </button>
         </div>
       </div>
     </div>
