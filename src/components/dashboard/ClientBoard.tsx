@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
 import { collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { auth, db } from '../../config/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface Client {
   id: string;
@@ -26,6 +27,7 @@ export default function ClientBoard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [initialLoad, setInitialLoad] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [newClient, setNewClient] = useState<NewClientForm>({
@@ -37,10 +39,26 @@ export default function ClientBoard() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchClients();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setAuthenticated(!!user);
+      if (user) {
+        fetchClients();
+      } else {
+        setClients([]);
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const fetchClients = async () => {
+    if (!auth.currentUser) {
+      setError('Please sign in to view clients');
+      setLoading(false);
+      return;
+    }
+
     try {
       setError('');
       
@@ -88,6 +106,12 @@ export default function ClientBoard() {
 
   const handleNewClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!auth.currentUser) {
+      setError('Please sign in to add clients');
+      return;
+    }
+
     setError('');
     setSubmitting(true);
     
@@ -97,7 +121,8 @@ export default function ClientBoard() {
         ...newClient,
         lastActivity: new Date().toISOString(),
         projectCount: 0,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        userId: auth.currentUser.uid
       };
       
       const docRef = await addDoc(clientsCollection, newClientData);
@@ -121,6 +146,16 @@ export default function ClientBoard() {
   const filteredClients = filterStatus === 'all' 
     ? clients 
     : clients.filter(client => client.status === filterStatus);
+
+  if (!authenticated) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+        <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Authentication Required</h3>
+        <p className="text-gray-600">Please sign in to view and manage clients.</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Building2, 
   Calendar, 
@@ -10,7 +10,8 @@ import {
   X
 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { auth, db } from '../../config/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface Project {
   id: string;
@@ -44,13 +45,16 @@ interface Client {
   description: string;
   status: string;
   lastActivity: string;
+  userId: string;
 }
 
 export default function ClientDashboard() {
   const { clientId } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
   
   const [client, setClient] = useState<Client | null>(null);
 
@@ -80,12 +84,24 @@ export default function ClientDashboard() {
   ]);
 
   useEffect(() => {
-    if (clientId) {
-      fetchClientData();
-    }
-  }, [clientId]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setAuthenticated(!!user);
+      if (user && clientId) {
+        fetchClientData();
+      } else if (!user) {
+        navigate('/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [clientId, navigate]);
 
   const fetchClientData = async () => {
+    if (!auth.currentUser) {
+      navigate('/login');
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -94,10 +110,18 @@ export default function ClientDashboard() {
       const docSnap = await getDoc(clientDoc);
       
       if (docSnap.exists()) {
-        setClient({
+        const clientData = {
           id: docSnap.id,
           ...docSnap.data()
-        } as Client);
+        } as Client;
+
+        // Verify the client belongs to the current user
+        if (clientData.userId !== auth.currentUser.uid) {
+          setError('You do not have permission to view this client');
+          return;
+        }
+
+        setClient(clientData);
       } else {
         setError('Client not found');
       }
@@ -156,6 +180,16 @@ export default function ClientDashboard() {
         : task
     ));
   };
+
+  if (!authenticated) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+        <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Authentication Required</h3>
+        <p className="text-gray-600">Please sign in to view client details.</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
