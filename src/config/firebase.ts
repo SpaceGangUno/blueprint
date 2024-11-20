@@ -1,6 +1,18 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  doc, 
+  setDoc, 
+  query, 
+  where,
+  onSnapshot,
+  orderBy,
+  limit,
+  enableIndexedDbPersistence
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOxHT5jCIRCic38yDulk5VXGC_LaAnpKo",
@@ -15,6 +27,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Enable offline persistence
+enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('The current browser does not support persistence.');
+    }
+  });
 
 // Team invite function
 export const sendTeamInvite = async (email: string) => {
@@ -76,6 +98,37 @@ export const updateTeamMemberAccount = async (userId: string, newPassword: strin
     console.error('Error updating team member account:', error);
     throw new Error('Failed to update account. Please try again.');
   }
+};
+
+// Client data subscriptions
+export const subscribeToUserClients = (userId: string, callback: (clients: any[]) => void) => {
+  const clientsQuery = query(
+    collection(db, 'clients'),
+    where('userId', '==', userId),
+    orderBy('lastActivity', 'desc'),
+    limit(20)
+  );
+
+  return onSnapshot(clientsQuery, (snapshot) => {
+    const clients = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(clients);
+  });
+};
+
+export const subscribeToClient = (clientId: string, callback: (client: any | null) => void) => {
+  return onSnapshot(doc(db, 'clients', clientId), (doc) => {
+    if (doc.exists()) {
+      callback({
+        id: doc.id,
+        ...doc.data()
+      });
+    } else {
+      callback(null);
+    }
+  });
 };
 
 export default app;

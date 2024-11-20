@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Calendar, ArrowRight, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
-import { collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
-import { auth, db } from '../../config/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { auth, db, subscribeToUserClients } from '../../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 interface Client {
@@ -22,75 +22,105 @@ interface NewClientForm {
   status: ClientStatus;
 }
 
-export default function ClientBoard() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+// Memoized client card component
+const ClientCard = memo(({ client, statusIcons, statusColors }: {
+  client: Client;
+  statusIcons: Record<string, JSX.Element>;
+  statusColors: Record<string, string>;
+}) => (
+  <Link
+    to={`/dashboard/client/${client.id}`}
+    className="group"
+  >
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 group-hover:border-blue-100">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <Building2 className="w-6 h-6 text-gray-400" />
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {client.name}
+            </h3>
+          </div>
+          {statusIcons[client.status]}
+        </div>
+        <p className="text-gray-600 mb-6 line-clamp-2">{client.description}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-500">
+            <Calendar className="w-4 h-4 mr-2" />
+            <span>Last active: {new Date(client.lastActivity).toLocaleDateString()}</span>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+            statusColors[client.status]
+          }`}>
+            {client.status}
+          </span>
+        </div>
+      </div>
+      <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center">
+        <span className="text-sm text-gray-500">
+          {client.projectCount} {client.projectCount === 1 ? 'Project' : 'Projects'}
+        </span>
+        <span className="text-sm text-blue-600 font-medium flex items-center group-hover:translate-x-1 transition-transform">
+          View Dashboard
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </span>
+      </div>
+    </div>
+  </Link>
+));
 
-  const [showNewClientModal, setShowNewClientModal] = useState(false);
+ClientCard.displayName = 'ClientCard';
+
+// Main component
+export default function ClientBoard() {
+  const [state, setState] = useState({
+    clients: [] as Client[],
+    loading: true,
+    error: '',
+    filterStatus: 'all' as 'all' | ClientStatus,
+    showNewClientModal: false,
+    submitting: false
+  });
+
   const [newClient, setNewClient] = useState<NewClientForm>({
     name: '',
     description: '',
     status: 'Active'
   });
-  const [filterStatus, setFilterStatus] = useState<'all' | ClientStatus>('all');
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthenticated(!!user);
-      if (user) {
-        fetchClients();
-      } else {
-        setClients([]);
-        setLoading(false);
-      }
-    });
+    let unsubscribeAuth: (() => void) | undefined;
+    let unsubscribeClients: (() => void) | undefined;
 
-    return () => unsubscribe();
+    const setupSubscriptions = async () => {
+      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Subscribe to clients when user is authenticated
+          unsubscribeClients = subscribeToUserClients(user.uid, (clients) => {
+            setState(prev => ({
+              ...prev,
+              clients,
+              loading: false
+            }));
+          });
+        } else {
+          setState(prev => ({
+            ...prev,
+            clients: [],
+            loading: false
+          }));
+        }
+      });
+    };
+
+    setupSubscriptions();
+
+    // Cleanup subscriptions
+    return () => {
+      unsubscribeAuth?.();
+      unsubscribeClients?.();
+    };
   }, []);
-
-  const fetchClients = async () => {
-    if (!auth.currentUser) {
-      setError('Please sign in to view clients');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setError('');
-      
-      // Only show loading indicator on initial load
-      if (initialLoad) {
-        setLoading(true);
-      }
-      
-      const clientsCollection = collection(db, 'clients');
-      // Create a query to order by lastActivity and limit to 20 most recent clients
-      const clientsQuery = query(
-        clientsCollection,
-        orderBy('lastActivity', 'desc'),
-        limit(20)
-      );
-      
-      const querySnapshot = await getDocs(clientsQuery);
-      
-      const fetchedClients = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Client[];
-      
-      setClients(fetchedClients);
-    } catch (err: any) {
-      console.error('Error fetching clients:', err);
-      setError('Failed to load clients. Please try again.');
-    } finally {
-      setLoading(false);
-      setInitialLoad(false);
-    }
-  };
 
   const statusIcons = {
     'Active': <Clock className="w-5 h-5 text-blue-500" />,
@@ -108,12 +138,18 @@ export default function ClientBoard() {
     e.preventDefault();
     
     if (!auth.currentUser) {
-      setError('Please sign in to add clients');
+      setState(prev => ({
+        ...prev,
+        error: 'Please sign in to add clients'
+      }));
       return;
     }
 
-    setError('');
-    setSubmitting(true);
+    setState(prev => ({
+      ...prev,
+      error: '',
+      submitting: true
+    }));
     
     try {
       const clientsCollection = collection(db, 'clients');
@@ -125,29 +161,53 @@ export default function ClientBoard() {
         userId: auth.currentUser.uid
       };
       
-      const docRef = await addDoc(clientsCollection, newClientData);
+      // Optimistic update
+      const tempId = Date.now().toString();
+      setState(prev => ({
+        ...prev,
+        clients: [{
+          id: tempId,
+          ...newClientData
+        } as Client, ...prev.clients]
+      }));
       
-      // Add the new client to the local state
-      setClients(prevClients => [{
-        id: docRef.id,
-        ...newClientData
-      } as Client, ...prevClients]);
+      await addDoc(clientsCollection, newClientData);
       
-      setShowNewClientModal(false);
+      setState(prev => ({
+        ...prev,
+        showNewClientModal: false,
+        submitting: false
+      }));
       setNewClient({ name: '', description: '', status: 'Active' });
     } catch (err: any) {
       console.error('Error adding client:', err);
-      setError('Failed to add client. Please try again.');
-    } finally {
-      setSubmitting(false);
+      setState(prev => ({
+        ...prev,
+        error: 'Failed to add client. Please try again.',
+        submitting: false
+      }));
     }
   };
 
-  const filteredClients = filterStatus === 'all' 
-    ? clients 
-    : clients.filter(client => client.status === filterStatus);
+  const handleFilterChange = useCallback((status: 'all' | ClientStatus) => {
+    setState(prev => ({
+      ...prev,
+      filterStatus: status
+    }));
+  }, []);
 
-  if (!authenticated) {
+  const toggleNewClientModal = useCallback((show: boolean) => {
+    setState(prev => ({
+      ...prev,
+      showNewClientModal: show
+    }));
+  }, []);
+
+  const filteredClients = state.filterStatus === 'all' 
+    ? state.clients 
+    : state.clients.filter(client => client.status === state.filterStatus);
+
+  if (!auth.currentUser) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8 text-center">
         <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -157,7 +217,7 @@ export default function ClientBoard() {
     );
   }
 
-  if (loading) {
+  if (state.loading) {
     return (
       <div className="space-y-4">
         <div className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
@@ -187,8 +247,8 @@ export default function ClientBoard() {
         </div>
         <div className="flex space-x-4">
           <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as 'all' | ClientStatus)}
+            value={state.filterStatus}
+            onChange={(e) => handleFilterChange(e.target.value as 'all' | ClientStatus)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
           >
             <option value="all">All Clients</option>
@@ -197,7 +257,7 @@ export default function ClientBoard() {
             <option value="Completed">Completed</option>
           </select>
           <button 
-            onClick={() => setShowNewClientModal(true)}
+            onClick={() => toggleNewClientModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
           >
             New Client
@@ -205,9 +265,9 @@ export default function ClientBoard() {
         </div>
       </div>
 
-      {error && (
+      {state.error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-          {error}
+          {state.error}
         </div>
       )}
       
@@ -216,68 +276,34 @@ export default function ClientBoard() {
           <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
           <p className="text-gray-600">
-            {filterStatus === 'all' 
+            {state.filterStatus === 'all' 
               ? 'Get started by adding your first client'
-              : `No ${filterStatus.toLowerCase()} clients found`}
+              : `No ${state.filterStatus.toLowerCase()} clients found`}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClients.map(client => (
-            <Link
+            <ClientCard
               key={client.id}
-              to={`/dashboard/client/${client.id}`}
-              className="group"
-            >
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 group-hover:border-blue-100">
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <Building2 className="w-6 h-6 text-gray-400" />
-                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {client.name}
-                      </h3>
-                    </div>
-                    {statusIcons[client.status]}
-                  </div>
-                  <p className="text-gray-600 mb-6 line-clamp-2">{client.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      <span>Last active: {new Date(client.lastActivity).toLocaleDateString()}</span>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                      statusColors[client.status]
-                    }`}>
-                      {client.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
-                    {client.projectCount} {client.projectCount === 1 ? 'Project' : 'Projects'}
-                  </span>
-                  <span className="text-sm text-blue-600 font-medium flex items-center group-hover:translate-x-1 transition-transform">
-                    View Dashboard
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </span>
-                </div>
-              </div>
-            </Link>
+              client={client}
+              statusIcons={statusIcons}
+              statusColors={statusColors}
+            />
           ))}
         </div>
       )}
 
       {/* New Client Modal */}
-      {showNewClientModal && (
+      {state.showNewClientModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Add New Client</h2>
               <button
-                onClick={() => setShowNewClientModal(false)}
+                onClick={() => toggleNewClientModal(false)}
                 className="text-gray-500 hover:text-gray-700"
-                disabled={submitting}
+                disabled={state.submitting}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -294,7 +320,7 @@ export default function ClientBoard() {
                     onChange={(e) => setNewClient({...newClient, name: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     required
-                    disabled={submitting}
+                    disabled={state.submitting}
                   />
                 </div>
                 <div>
@@ -307,7 +333,7 @@ export default function ClientBoard() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     rows={3}
                     required
-                    disabled={submitting}
+                    disabled={state.submitting}
                   />
                 </div>
                 <div>
@@ -318,7 +344,7 @@ export default function ClientBoard() {
                     value={newClient.status}
                     onChange={(e) => setNewClient({...newClient, status: e.target.value as ClientStatus})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    disabled={submitting}
+                    disabled={state.submitting}
                   >
                     <option value="Active">Active</option>
                     <option value="On Hold">On Hold</option>
@@ -329,18 +355,18 @@ export default function ClientBoard() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => setShowNewClientModal(false)}
+                  onClick={() => toggleNewClientModal(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                  disabled={submitting}
+                  disabled={state.submitting}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
-                  disabled={submitting}
+                  disabled={state.submitting}
                 >
-                  {submitting ? (
+                  {state.submitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
                       Adding...
