@@ -4,9 +4,10 @@ import {
   Building2, 
   Calendar, 
   Plus, 
-  RefreshCcw
+  RefreshCcw,
+  X
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
@@ -29,6 +30,13 @@ interface Client {
   status: string;
   lastActivity: string;
   userId: string;
+}
+
+interface NewProjectForm {
+  title: string;
+  description: string;
+  status: string;
+  deadline: string;
 }
 
 // Loading Skeleton Components
@@ -96,6 +104,14 @@ export default function ClientDashboard() {
   const [error, setError] = useState('');
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [newProject, setNewProject] = useState<NewProjectForm>({
+    title: '',
+    description: '',
+    status: 'In Progress',
+    deadline: new Date().toISOString().split('T')[0]
+  });
 
   const fetchData = useCallback(async () => {
     if (!user || !clientId) return;
@@ -156,6 +172,48 @@ export default function ClientDashboard() {
     }
   }, [user, authLoading, navigate, fetchData]);
 
+  const handleNewProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user || !clientId) {
+      setError('Authentication required');
+      return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+      const projectsCollection = collection(db, 'projects');
+      const projectData = {
+        ...newProject,
+        clientId,
+        userId: user.id,
+        createdAt: new Date().toISOString()
+      };
+      
+      await addDoc(projectsCollection, projectData);
+      
+      // Update client's lastActivity
+      await getDoc(doc(db, 'clients', clientId));
+      
+      // Refresh projects
+      fetchData();
+      
+      setShowNewProjectModal(false);
+      setNewProject({
+        title: '',
+        description: '',
+        status: 'In Progress',
+        deadline: new Date().toISOString().split('T')[0]
+      });
+    } catch (err: any) {
+      console.error('Error adding project:', err);
+      setError('Failed to add project. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (authLoading || loading) {
     return <LoadingSkeleton />;
   }
@@ -197,7 +255,7 @@ export default function ClientDashboard() {
             </div>
           </div>
           <button 
-            onClick={() => {}} // Add new project handler
+            onClick={() => setShowNewProjectModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -220,6 +278,104 @@ export default function ClientDashboard() {
           )}
         </div>
       </div>
+
+      {/* New Project Modal */}
+      {showNewProjectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Project</h2>
+              <button
+                onClick={() => setShowNewProjectModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+                disabled={submitting}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleNewProject}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Project Title
+                  </label>
+                  <input
+                    type="text"
+                    value={newProject.title}
+                    onChange={(e) => setNewProject({...newProject, title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    rows={3}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={newProject.status}
+                    onChange={(e) => setNewProject({...newProject, status: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    disabled={submitting}
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Deadline
+                  </label>
+                  <input
+                    type="date"
+                    value={newProject.deadline}
+                    onChange={(e) => setNewProject({...newProject, deadline: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowNewProjectModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      Adding...
+                    </>
+                  ) : 'Add Project'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
