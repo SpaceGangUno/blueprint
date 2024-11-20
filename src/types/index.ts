@@ -11,6 +11,7 @@ export interface Project {
   moodboard: MoodboardItem[];
   documents: DocumentItem[];
   comments: Comment[];
+  lastUpdated?: string;
 }
 
 export interface Task {
@@ -18,6 +19,8 @@ export interface Task {
   title: string;
   description: string;
   status: 'Todo' | 'In Progress' | 'Completed';
+  createdAt?: string;
+  updatedAt?: string;
   miniTasks: MiniTask[];
   assignee?: {
     id: string;
@@ -31,6 +34,8 @@ export interface MiniTask {
   id: string;
   title: string;
   completed: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MoodboardItem {
@@ -62,16 +67,4 @@ export interface Comment {
     url: string;
     name: string;
   }[];
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'client' | 'admin' | 'team_member';
-  avatar?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  inviteId?: string;
-  passwordUpdated?: boolean;
 }

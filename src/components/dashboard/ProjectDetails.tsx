@@ -12,7 +12,7 @@ import {
 import type { Project, Task, MiniTask } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
 import { auth, db } from '../../config/firebase';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 
 type TeamMemberWithId = UserProfile & { id: string };
@@ -86,7 +86,10 @@ export default function ProjectDetails() {
 
     try {
       const projectRef = doc(db, `clients/${clientId}/projects/${projectId}`);
-      await updateDoc(projectRef, updates);
+      await updateDoc(projectRef, {
+        ...updates,
+        lastUpdated: serverTimestamp()
+      });
     } catch (err) {
       console.error('Error updating project:', err);
       setError('Failed to update project');
@@ -96,17 +99,23 @@ export default function ProjectDetails() {
   const addTask = async () => {
     if (!project || !newTaskTitle.trim()) return;
 
+    const now = new Date().toISOString();
     const newTask: Task = {
       id: Date.now().toString(),
       title: newTaskTitle.trim(),
       description: newTaskDescription.trim(),
       status: 'Todo',
+      createdAt: now,
+      updatedAt: now,
       miniTasks: [],
       documents: []
     };
 
     const updatedTasks = [...project.tasks, newTask];
-    await updateProject({ tasks: updatedTasks });
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
     setNewTaskTitle('');
     setNewTaskDescription('');
     setShowNewTaskModal(false);
@@ -115,22 +124,29 @@ export default function ProjectDetails() {
   const addSubTask = async (taskId: string) => {
     if (!project || !newSubTaskTitle.trim()) return;
 
+    const now = new Date().toISOString();
     const newSubTask: MiniTask = {
       id: Date.now().toString(),
       title: newSubTaskTitle.trim(),
-      completed: false
+      completed: false,
+      createdAt: now,
+      updatedAt: now
     };
 
     const updatedTasks = project.tasks.map(task =>
       task.id === taskId
         ? {
             ...task,
-            miniTasks: [...task.miniTasks, newSubTask]
+            miniTasks: [...task.miniTasks, newSubTask],
+            updatedAt: now
           }
         : task
     );
 
-    await updateProject({ tasks: updatedTasks });
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
     setNewSubTaskTitle('');
     setAddingSubTaskToId(null);
   };
@@ -138,29 +154,40 @@ export default function ProjectDetails() {
   const toggleSubTaskCompletion = async (taskId: string, subTaskId: string) => {
     if (!project) return;
 
+    const now = new Date().toISOString();
     const updatedTasks = project.tasks.map(task =>
       task.id === taskId
         ? {
             ...task,
+            updatedAt: now,
             miniTasks: task.miniTasks.map(subTask =>
               subTask.id === subTaskId
-                ? { ...subTask, completed: !subTask.completed }
+                ? { 
+                    ...subTask, 
+                    completed: !subTask.completed,
+                    updatedAt: now
+                  }
                 : subTask
             )
           }
         : task
     );
 
-    await updateProject({ tasks: updatedTasks });
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
   };
 
   const assignTask = async (taskId: string, member: TeamMemberWithId) => {
     if (!project) return;
 
+    const now = new Date().toISOString();
     const updatedTasks = project.tasks.map(task =>
       task.id === taskId
         ? {
             ...task,
+            updatedAt: now,
             assignee: {
               id: member.id,
               name: member.email.split('@')[0],
@@ -170,7 +197,10 @@ export default function ProjectDetails() {
         : task
     );
 
-    await updateProject({ tasks: updatedTasks });
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
     setShowAssigneeModal(false);
     setSelectedTaskId(null);
   };
@@ -199,6 +229,11 @@ export default function ProjectDetails() {
           <div>
             <h1 className="text-2xl font-bold">{project.title}</h1>
             <p className="text-gray-600 mt-1">{project.description}</p>
+            {project.lastUpdated && (
+              <p className="text-sm text-gray-500 mt-2">
+                Last updated: {new Date(project.lastUpdated).toLocaleString()}
+              </p>
+            )}
           </div>
           <div className="flex items-center space-x-4">
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -246,6 +281,11 @@ export default function ProjectDetails() {
                       <h3 className="font-medium">{task.title}</h3>
                       {task.description && (
                         <p className="text-sm text-gray-600">{task.description}</p>
+                      )}
+                      {task.updatedAt && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Updated: {new Date(task.updatedAt).toLocaleString()}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -295,9 +335,16 @@ export default function ProjectDetails() {
                           >
                             {subTask.completed && <Check className="w-3 h-3" />}
                           </button>
-                          <span className={subTask.completed ? 'line-through text-gray-500' : ''}>
-                            {subTask.title}
-                          </span>
+                          <div>
+                            <span className={subTask.completed ? 'line-through text-gray-500' : ''}>
+                              {subTask.title}
+                            </span>
+                            {subTask.updatedAt && (
+                              <p className="text-xs text-gray-500">
+                                Updated: {new Date(subTask.updatedAt).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
