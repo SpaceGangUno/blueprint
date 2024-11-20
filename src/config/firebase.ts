@@ -1,11 +1,12 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updatePassword } from 'firebase/auth';
 import { 
   getFirestore, 
   collection, 
   addDoc, 
   doc, 
-  setDoc, 
+  setDoc,
+  getDocs,
   query, 
   where,
   onSnapshot,
@@ -108,7 +109,8 @@ export const sendTeamInvite = async (email: string): Promise<{ success: boolean;
       email,
       role: 'team_member',
       createdAt: new Date().toISOString(),
-      inviteId: inviteRef.id
+      inviteId: inviteRef.id,
+      passwordUpdated: false
     } as UserProfile);
 
     return {
@@ -127,16 +129,39 @@ export const sendTeamInvite = async (email: string): Promise<{ success: boolean;
   }
 };
 
-// Update team member account with improved type safety
+// Update team member account with improved type safety and password update
 export const updateTeamMemberAccount = async (
   userId: string,
   newPassword: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
+    // Get current user
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('No authenticated user found');
+    }
+
+    // Update password in Firebase Auth
+    await updatePassword(currentUser, newPassword);
+
+    // Update user document in Firestore
     await setDoc(doc(db, 'users', userId), {
       passwordUpdated: true,
       updatedAt: new Date().toISOString()
     } as Partial<UserProfile>, { merge: true });
+
+    // Update invite status
+    const userDoc = await getDocs(
+      query(collection(db, 'teamInvites'), where('userId', '==', userId))
+    );
+    
+    if (!userDoc.empty) {
+      const inviteDoc = userDoc.docs[0];
+      await setDoc(doc(db, 'teamInvites', inviteDoc.id), {
+        status: 'accepted',
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
 
     return {
       success: true,
@@ -146,6 +171,33 @@ export const updateTeamMemberAccount = async (
     console.error('Error updating team member account:', error);
     throw new Error('Failed to update account. Please try again.');
   }
+};
+
+// Subscribe to team members
+export const subscribeToTeamMembers = (
+  callback: (members: UserProfile[]) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  const usersQuery = query(
+    collection(db, 'users'),
+    where('role', '==', 'team_member'),
+    orderBy('createdAt', 'desc')
+  );
+
+  return onSnapshot(
+    usersQuery,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const members = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as UserProfile & { id: string }));
+      callback(members);
+    },
+    error => {
+      console.error('Error fetching team members:', error);
+      errorCallback?.(error);
+    }
+  );
 };
 
 // Optimized client data subscriptions with caching

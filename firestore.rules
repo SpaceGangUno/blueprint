@@ -11,18 +11,36 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isTeamMember() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'team_member';
+    }
+
     // Client rules
     match /clients/{clientId} {
-      allow read: if isAuthenticated() && isOwner(resource.data.userId);
-      allow write: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow write: if isAuthenticated() && (isOwner(request.resource.data.userId) || isAdmin());
     }
 
     // Project rules - nested under clients
     match /projects/{projectId} {
-      allow read: if isAuthenticated() && exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) 
-        && get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid;
-      allow write: if isAuthenticated() && exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) 
-        && get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) && (
+          get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid ||
+          isAdmin()
+        )
+      );
+      allow write: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/clients/$(request.resource.data.clientId)) && (
+          get(/databases/$(database)/documents/clients/$(request.resource.data.clientId)).data.userId == request.auth.uid ||
+          isAdmin()
+        )
+      );
     }
 
     // Task rules - nested under projects
@@ -33,14 +51,26 @@ service cloud.firestore {
 
     // User profile rules
     match /users/{userId} {
-      allow read: if isAuthenticated() && isOwner(userId);
-      allow write: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      // Allow team members to update their own profile
+      allow update: if isAuthenticated() && isOwner(userId);
     }
 
     // Team invite rules
     match /teamInvites/{inviteId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      // Only admins can create invites
+      allow create: if isAuthenticated() && isAdmin();
+      // Admins can read all invites, team members can read their own
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        resource.data.userId == request.auth.uid
+      );
+      // Allow updates for status changes
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        resource.data.userId == request.auth.uid
+      );
     }
   }
 }

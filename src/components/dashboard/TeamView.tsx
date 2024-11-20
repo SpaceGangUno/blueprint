@@ -1,47 +1,34 @@
-import { useState } from 'react';
-import { Mail, Phone, MapPin, X } from 'lucide-react';
-import { sendTeamInvite } from '../../config/firebase';
+import { useState, useEffect } from 'react';
+import { Mail, X } from 'lucide-react';
+import { sendTeamInvite, subscribeToTeamMembers, UserProfile } from '../../config/firebase';
 
-interface TeamMember {
+interface TeamMemberWithId extends UserProfile {
   id: string;
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  location: string;
-  avatar: string;
-  projects: string[];
 }
 
 export default function TeamView() {
-  const [team] = useState<TeamMember[]>([
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      role: 'Project Manager',
-      email: 'sarah@blueprintstudios.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      avatar: 'https://ui-avatars.com/api/?name=Sarah+Johnson',
-      projects: ['Website Redesign', 'Mobile App']
-    },
-    {
-      id: '2',
-      name: 'Michael Chen',
-      role: 'Lead Developer',
-      email: 'michael@blueprintstudios.com',
-      phone: '+1 (555) 234-5678',
-      location: 'New York, NY',
-      avatar: 'https://ui-avatars.com/api/?name=Michael+Chen',
-      projects: ['E-commerce Platform', 'Website Redesign']
-    }
-  ]);
-
+  const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    // Subscribe to team members
+    const unsubscribe = subscribeToTeamMembers(
+      (members) => {
+        setTeamMembers(members as TeamMemberWithId[]);
+      },
+      (error) => {
+        console.error('Error fetching team members:', error);
+        setError('Failed to load team members');
+      }
+    );
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,17 +85,17 @@ export default function TeamView() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {team.map(member => (
+        {teamMembers.map(member => (
           <div key={member.id} className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-start space-x-4">
               <img
-                src={member.avatar}
-                alt={member.name}
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.email.split('@')[0])}`}
+                alt={member.email}
                 className="w-16 h-16 rounded-full"
               />
               <div className="flex-1">
-                <h3 className="text-xl font-semibold">{member.name}</h3>
-                <p className="text-gray-600">{member.role}</p>
+                <h3 className="text-xl font-semibold">{member.email.split('@')[0]}</h3>
+                <p className="text-gray-600 capitalize">{member.role.replace('_', ' ')}</p>
                 
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center text-gray-600">
@@ -116,27 +103,25 @@ export default function TeamView() {
                     {member.email}
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {member.phone}
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {member.location}
+                    <span className={`px-2 py-1 rounded-full text-sm ${
+                      member.passwordUpdated 
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {member.passwordUpdated ? 'Account Active' : 'Pending Setup'}
+                    </span>
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <h4 className="font-medium mb-2">Active Projects:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {member.projects.map(project => (
-                      <span
-                        key={project}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        {project}
-                      </span>
-                    ))}
-                  </div>
+                  <p className="text-sm text-gray-500">
+                    Joined: {new Date(member.createdAt).toLocaleDateString()}
+                  </p>
+                  {member.updatedAt && (
+                    <p className="text-sm text-gray-500">
+                      Last Updated: {new Date(member.updatedAt).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
