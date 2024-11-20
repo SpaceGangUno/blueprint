@@ -56,22 +56,15 @@ export default function TeamView() {
 
     try {
       await sendTeamInvite(inviteEmail);
-      setSuccess('Invitation sent successfully!');
+      setSuccess('Invitation sent successfully! The team member will receive an email to complete their account setup.');
       setInviteEmail('');
       // Close modal after short delay
       setTimeout(() => {
         setShowInviteModal(false);
         setSuccess('');
-      }, 2000);
+      }, 3000);
     } catch (err: any) {
-      // Handle specific Firebase errors
-      if (err.code === 'auth/invalid-email') {
-        setError('Invalid email address');
-      } else if (err.code === 'auth/email-already-in-use') {
-        setError('This email is already registered');
-      } else {
-        setError(err.message || 'Failed to send invitation. Please try again.');
-      }
+      setError(err.message || 'Failed to send invitation. Please try again.');
       console.error('Invite error:', err);
     } finally {
       setLoading(false);
@@ -79,11 +72,12 @@ export default function TeamView() {
   };
 
   const closeModal = () => {
-    setShowInviteModal(false);
-    setInviteEmail('');
-    setError('');
-    setSuccess('');
-    setLoading(false);
+    if (!loading) {
+      setShowInviteModal(false);
+      setInviteEmail('');
+      setError('');
+      setSuccess('');
+    }
   };
 
   return (
@@ -173,17 +167,18 @@ export default function TeamView() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   required
                   disabled={loading}
+                  placeholder="Enter team member's email"
                 />
               </div>
 
               {error && (
-                <div className="mb-4 text-red-600 text-sm">
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="mb-4 text-green-600 text-sm">
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-600 text-sm">
                   {success}
                 </div>
               )}
@@ -200,9 +195,17 @@ export default function TeamView() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
-                  {loading ? 'Sending Invite...' : 'Send Invite'}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending Invite...
+                    </>
+                  ) : 'Send Invite'}
                 </button>
               </div>
             </form>

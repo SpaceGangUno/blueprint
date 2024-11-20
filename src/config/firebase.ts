@@ -20,6 +20,15 @@ export const db = getFirestore(app);
 const actionCodeSettings = {
   url: `${window.location.origin}/team-invite`,
   handleCodeInApp: true,
+  iOS: {
+    bundleId: 'com.blueprint.app'
+  },
+  android: {
+    packageName: 'com.blueprint.app',
+    installApp: true,
+    minimumVersion: '12'
+  },
+  dynamicLinkDomain: 'blueprint.page.link'
 };
 
 // Team invite function
@@ -33,14 +42,11 @@ export const sendTeamInvite = async (email: string) => {
       role: 'team_member'
     });
 
-    // Update the action code settings with the invite token
-    const inviteSettings = {
+    // Send the email invitation using Firebase Auth email link
+    await sendSignInLinkToEmail(auth, email, {
       ...actionCodeSettings,
-      url: `${window.location.origin}/team-invite?token=${inviteRef.id}`,
-    };
-
-    // Send the email invitation
-    await sendSignInLinkToEmail(auth, email, inviteSettings);
+      url: `${actionCodeSettings.url}?inviteId=${inviteRef.id}`
+    });
 
     // Store the email locally for verification
     window.localStorage.setItem('emailForSignIn', email);
@@ -48,11 +54,20 @@ export const sendTeamInvite = async (email: string) => {
     return inviteRef.id;
   } catch (error: any) {
     console.error('Error sending team invite:', error);
-    // Rethrow with more specific error message
+    
+    // Check if it's a Firebase Auth error
     if (error.code === 'auth/invalid-email') {
       throw new Error('Invalid email address');
     } else if (error.code === 'auth/email-already-in-use') {
       throw new Error('This email is already registered');
+    } else if (error.code === 'auth/operation-not-allowed') {
+      throw new Error('Email/password sign-in needs to be enabled in the Firebase Console');
+    } else if (error.code === 'auth/missing-android-pkg-name') {
+      throw new Error('Android package name must be provided for Android apps');
+    } else if (error.code === 'auth/missing-continue-uri') {
+      throw new Error('A continue URL must be provided in the request');
+    } else if (error.code === 'auth/missing-ios-bundle-id') {
+      throw new Error('iOS bundle ID must be provided for iOS apps');
     } else {
       throw new Error('Failed to send invitation. Please try again.');
     }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createTeamMemberAccount } from '../config/firebase';
+import { auth } from '../config/firebase';
+import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
 
 export default function TeamInvite() {
   const [searchParams] = useSearchParams();
@@ -11,7 +13,36 @@ export default function TeamInvite() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const token = searchParams.get('token');
+  const inviteId = searchParams.get('inviteId');
+
+  useEffect(() => {
+    // Check if the link is a sign-in with email link
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      // Get the email from localStorage
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        // If email is not in storage, ask user to provide it
+        email = window.prompt('Please provide your email for confirmation');
+      }
+
+      if (email) {
+        setLoading(true);
+        // Complete the sign-in process
+        signInWithEmailLink(auth, email, window.location.href)
+          .then(() => {
+            // Clear the email from storage
+            window.localStorage.removeItem('emailForSignIn');
+            setEmail(email!);
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error('Error completing sign-in:', error);
+            setError('Failed to verify email link. Please try again.');
+            setLoading(false);
+          });
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Get the email from localStorage (stored during invite send)
@@ -24,7 +55,7 @@ export default function TeamInvite() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!token) {
+    if (!inviteId) {
       setError('Invalid invitation link');
       return;
     }
@@ -43,18 +74,34 @@ export default function TeamInvite() {
     setError('');
 
     try {
-      await createTeamMemberAccount(email, password, token);
+      await createTeamMemberAccount(email, password, inviteId);
       // Clear the stored email
       window.localStorage.removeItem('emailForSignIn');
       // Redirect to dashboard
       navigate('/dashboard');
-    } catch (err) {
-      setError('Failed to create account. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account. Please try again.');
       console.error(err);
     }
 
     setLoading(false);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600 rounded-lg mx-auto flex items-center justify-center mb-4">
+            <span className="text-white text-2xl font-bold">BS</span>
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Verifying your invitation...
+          </h2>
+          <p className="mt-2 text-gray-600">Please wait while we verify your email link.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
