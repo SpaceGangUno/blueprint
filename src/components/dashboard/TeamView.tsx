@@ -55,9 +55,14 @@ export default function TeamView() {
     setSuccess('');
 
     try {
-      await sendTeamInvite(inviteEmail);
-      setSuccess('Invitation sent successfully! The team member will receive an email to complete their account setup.');
+      const result = await sendTeamInvite(inviteEmail);
+      
+      // Store the email for verification
+      window.localStorage.setItem('emailForSignIn', inviteEmail);
+      
+      setSuccess(result.message);
       setInviteEmail('');
+      
       // Close modal after short delay
       setTimeout(() => {
         setShowInviteModal(false);
@@ -144,7 +149,7 @@ export default function TeamView() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Invite Team Member</h2>
+              <h2 className="text-xl font-semibold">Add Team Member</h2>
               <button
                 onClick={closeModal}
                 className="text-gray-500 hover:text-gray-700"
@@ -169,6 +174,9 @@ export default function TeamView() {
                   disabled={loading}
                   placeholder="Enter team member's email"
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  An account will be created and the team member will be notified to set their password.
+                </p>
               </div>
 
               {error && (
@@ -203,9 +211,9 @@ export default function TeamView() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Sending Invite...
+                      Creating Account...
                     </>
-                  ) : 'Send Invite'}
+                  ) : 'Add Team Member'}
                 </button>
               </div>
             </form>
