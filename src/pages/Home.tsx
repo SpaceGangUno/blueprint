@@ -10,51 +10,51 @@ export default function Home() {
   const services = [
     {
       title: 'Project Consulting',
-      description: 'Strategic guidance and expert consultation to transform your ideas into actionable plans.',
+      description: 'Strategic guidance to transform your ideas into actionable plans.',
       icon: <Briefcase className="w-6 h-6" />
     },
     {
       title: 'Creative Design',
-      description: 'Innovative design solutions that capture your brand\'s essence and engage your audience.',
+      description: 'Innovative solutions that capture your brand\'s essence.',
       icon: <Palette className="w-6 h-6" />
     },
     {
       title: 'Tech Integration',
-      description: 'Seamless integration of cutting-edge technology to power your digital presence.',
+      description: 'Seamless integration of cutting-edge technology.',
       icon: <Code className="w-6 h-6" />
     },
     {
       title: 'Digital Innovation',
-      description: 'Forward-thinking solutions that keep you ahead in the digital landscape.',
+      description: 'Forward-thinking solutions for the digital landscape.',
       icon: <Lightbulb className="w-6 h-6" />
     }
   ];
 
   const metrics = [
     { number: '98%', label: 'Client Satisfaction', icon: <Users className="w-6 h-6" /> },
-    { number: '45%', label: 'Average ROI Increase', icon: <BarChart className="w-6 h-6" /> },
-    { number: '2x', label: 'Faster Time to Market', icon: <Clock className="w-6 h-6" /> }
+    { number: '45%', label: 'ROI Increase', icon: <BarChart className="w-6 h-6" /> },
+    { number: '2x', label: 'Faster Delivery', icon: <Clock className="w-6 h-6" /> }
   ];
 
   const process = [
     {
       title: 'Discovery',
-      description: 'We dive deep into your business goals and challenges to understand your unique needs.',
+      description: 'Understanding your unique needs and goals.',
       icon: <Target className="w-6 h-6" />
     },
     {
       title: 'Strategy',
-      description: 'Our team develops a comprehensive plan tailored to your objectives and timeline.',
+      description: 'Developing a tailored plan for success.',
       icon: <Lightbulb className="w-6 h-6" />
     },
     {
       title: 'Execution',
-      description: 'We bring your vision to life with precision, expertise, and attention to detail.',
+      description: 'Bringing your vision to life with precision.',
       icon: <Code className="w-6 h-6" />
     },
     {
-      title: 'Launch & Growth',
-      description: 'We ensure successful deployment and provide ongoing support for continuous improvement.',
+      title: 'Launch',
+      description: 'Ensuring successful deployment and growth.',
       icon: <Zap className="w-6 h-6" />
     }
   ];
@@ -105,45 +105,31 @@ export default function Home() {
       {/* Client Banner */}
       <ClientBanner />
 
-      {/* Why Choose Us Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50">
+      {/* Services & Metrics Combined Section */}
+      <section className="py-16 bg-gradient-to-b from-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Blueprint Studios
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We deliver measurable results that drive your business forward
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             {metrics.map((metric, index) => (
-              <div key={index} className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
+              <div key={index} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
                   {metric.icon}
                 </div>
-                <div className="text-4xl font-bold text-blue-600 mb-2">{metric.number}</div>
-                <div className="text-gray-600">{metric.label}</div>
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">{metric.number}</div>
+                  <div className="text-gray-600 text-sm">{metric.label}</div>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Services Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What We Do
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We combine creativity, technology, and strategy to deliver exceptional results for our clients
-            </p>
+          {/* Services */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Do</h2>
+            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full mb-8"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((service) => (
               <ServiceCard
                 key={service.title}
@@ -156,31 +142,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How We Work Section */}
-      <section className="py-24 bg-gray-50">
+      {/* Process Section */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How We Work
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our proven process ensures consistent, high-quality results
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">How We Work</h2>
+            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {process.map((step, index) => (
               <div key={index} className="relative group">
-                <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="bg-gray-50 p-6 rounded-xl hover:bg-blue-50 transition-all duration-300">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
                     {step.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
+                  <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                  <p className="text-gray-600 text-sm">{step.description}</p>
                 </div>
                 {index < process.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 left-full w-8 transform -translate-y-1/2 -translate-x-4">
-                    <ArrowRight className="w-8 h-8 text-blue-300" />
+                  <div className="hidden lg:block absolute top-1/2 left-full w-6 transform -translate-y-1/2 -translate-x-3">
+                    <ArrowRight className="w-6 h-6 text-blue-300" />
                   </div>
                 )}
               </div>
@@ -190,35 +172,36 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
-            What Our Clients Say
-          </h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Client Success Stories</h2>
+            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                quote: "Blueprint Studios modernized our entire digital infrastructure in just 3 months. The new system reduced our operational costs by 32% and improved customer response times significantly.",
+                quote: "Blueprint Studios modernized our infrastructure, reducing costs by 32% and improving response times.",
                 author: "Sarah Johnson",
                 role: "Director of Digital Operations, TechStart"
               },
               {
-                quote: "Their team's deep understanding of both design and development helped us launch our e-commerce platform 2 weeks ahead of schedule. Our online sales increased by 45% in the first quarter.",
+                quote: "Launched our e-commerce platform 2 weeks early, increasing online sales by 45% in Q1.",
                 author: "Michael Chen",
                 role: "Head of E-commerce, Innovate Inc"
               },
               {
-                quote: "The UI/UX redesign of our mobile app resulted in a 28% increase in user engagement and a 4.8-star rating on both app stores. Their attention to user feedback was exceptional.",
+                quote: "UI/UX redesign boosted user engagement by 28% with a 4.8-star app rating.",
                 author: "Emily Rodriguez",
                 role: "Product Manager, Design Co"
               }
             ].map((testimonial, index) => (
-              <div key={index} className="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                <p className="text-gray-600 mb-6 italic">{testimonial.quote}</p>
+              <div key={index} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                <p className="text-gray-600 mb-4 text-sm italic">{testimonial.quote}</p>
                 <div>
                   <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                  <p className="text-gray-500">{testimonial.role}</p>
+                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
                 </div>
               </div>
             ))}
@@ -227,9 +210,9 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-blue-600">
+      <section className="py-16 bg-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Start Your Project?
           </h2>
           <button
