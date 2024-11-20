@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { 
-  Layout, Grid, Plus, MessageSquare, Users, Settings, LogOut,
+  Layout, Grid, MessageSquare, Users, Settings, LogOut,
   Activity
 } from 'lucide-react';
 import Overview from '../components/dashboard/Overview';
-import ProjectBoard from '../components/dashboard/ProjectBoard';
-import ProjectDetails from '../components/dashboard/ProjectDetails';
+import ClientBoard from '../components/dashboard/ClientBoard';
+import ClientDashboard from '../components/dashboard/ClientDashboard';
 import Messages from '../components/dashboard/Messages';
 import TeamView from '../components/dashboard/TeamView';
 
@@ -31,13 +31,6 @@ export default function Dashboard() {
                 <span className="text-white font-bold">BS</span>
               </div>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              New Project
-            </button>
           </div>
         </div>
       </header>
@@ -97,8 +90,8 @@ export default function Dashboard() {
         <div className="p-6">
           <Routes>
             <Route path="/" element={<Overview />} />
-            <Route path="/clients" element={<ProjectBoard />} />
-            <Route path="/project/:id/*" element={<ProjectDetails />} />
+            <Route path="/clients" element={<ClientBoard />} />
+            <Route path="/client/:clientId/*" element={<ClientDashboard />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/team" element={<TeamView />} />
           </Routes>
