@@ -11,7 +11,7 @@ import {
   Save, 
   Trash2, 
   Upload,
-  File,
+  File as FileIcon,
   Send,
   Paperclip
 } from 'lucide-react';
@@ -36,6 +36,7 @@ export default function ProjectDetails() {
   const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
   const commentFileInputRef = useRef<HTMLInputElement>(null);
   const documentFileInputRef = useRef<HTMLInputElement>(null);
+  const [showAddTask, setShowAddTask] = useState(false);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -116,14 +117,55 @@ export default function ProjectDetails() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Tasks</h2>
               <button
-                onClick={() => documentFileInputRef.current?.click()}
+                onClick={() => setShowAddTask(true)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </button>
             </div>
-            <ProjectTasks project={project} setProject={setProject} />
+
+            {/* Add Task Form */}
+            {showAddTask && (
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">New Task</h3>
+                  <button
+                    onClick={() => setShowAddTask(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <ProjectTasks project={project} setProject={setProject} onComplete={() => setShowAddTask(false)} />
+              </div>
+            )}
+
+            {/* Tasks List */}
+            <div className="space-y-4">
+              {project.tasks.map(task => (
+                <div key={task.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-semibold">{task.title}</h3>
+                      <p className="text-gray-600 text-sm">{task.description}</p>
+                    </div>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
+                      task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {task.status}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-sm text-gray-500">
+                      {task.miniTasks.filter(mt => mt.completed).length} of {task.miniTasks.length} subtasks completed
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -154,7 +196,7 @@ export default function ProjectDetails() {
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
                 >
                   <div className="flex items-center space-x-3">
-                    <File className="w-5 h-5 text-gray-500" />
+                    <FileIcon className="w-5 h-5 text-gray-500" />
                     <div>
                       <p className="font-medium">{doc.name}</p>
                       <p className="text-sm text-gray-500">
@@ -211,7 +253,7 @@ export default function ProjectDetails() {
                             download={attachment.name}
                             className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
                           >
-                            <File className="w-4 h-4" />
+                            <FileIcon className="w-4 h-4" />
                             <span>{attachment.name}</span>
                           </a>
                         )
@@ -280,10 +322,12 @@ export default function ProjectDetails() {
   );
 }
 
-function ProjectTasks({ project, setProject }: { project: Project; setProject: (project: Project) => void }) {
+function ProjectTasks({ project, setProject, onComplete }: { 
+  project: Project; 
+  setProject: (project: Project) => void;
+  onComplete?: () => void;
+}) {
   const [newTask, setNewTask] = useState({ title: '', description: '' });
-  const [editingTask, setEditingTask] = useState<string | null>(null);
-  const [editedTask, setEditedTask] = useState<Task | null>(null);
 
   const addTask = () => {
     if (!newTask.title.trim()) return;
@@ -301,193 +345,42 @@ function ProjectTasks({ project, setProject }: { project: Project; setProject: (
       tasks: [...project.tasks, task]
     });
     setNewTask({ title: '', description: '' });
-  };
-
-  const deleteTask = (taskId: string) => {
-    setProject({
-      ...project,
-      tasks: project.tasks.filter(t => t.id !== taskId)
-    });
-  };
-
-  const updateTask = (taskId: string) => {
-    if (!editedTask) return;
-    
-    setProject({
-      ...project,
-      tasks: project.tasks.map(t => 
-        t.id === taskId ? editedTask : t
-      )
-    });
-    setEditingTask(null);
-    setEditedTask(null);
-  };
-
-  const addMiniTask = (taskId: string, title: string) => {
-    if (!title.trim()) return;
-    
-    const miniTask: MiniTask = {
-      id: Date.now().toString(),
-      title,
-      completed: false
-    };
-
-    setProject({
-      ...project,
-      tasks: project.tasks.map(task => 
-        task.id === taskId
-          ? { ...task, miniTasks: [...task.miniTasks, miniTask] }
-          : task
-      )
-    });
-  };
-
-  const toggleMiniTask = (taskId: string, miniTaskId: string) => {
-    setProject({
-      ...project,
-      tasks: project.tasks.map(task => 
-        task.id === taskId
-          ? {
-              ...task,
-              miniTasks: task.miniTasks.map(mt =>
-                mt.id === miniTaskId
-                  ? { ...mt, completed: !mt.completed }
-                  : mt
-              )
-            }
-          : task
-      )
-    });
-  };
-
-  const deleteMiniTask = (taskId: string, miniTaskId: string) => {
-    setProject({
-      ...project,
-      tasks: project.tasks.map(task => 
-        task.id === taskId
-          ? {
-              ...task,
-              miniTasks: task.miniTasks.filter(mt => mt.id !== miniTaskId)
-            }
-          : task
-      )
-    });
+    onComplete?.();
   };
 
   return (
     <div className="space-y-4">
-      {project.tasks.map(task => (
-        <div key={task.id} className="bg-white rounded-lg shadow-sm border p-4">
-          {editingTask === task.id ? (
-            // Edit Task Form
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={editedTask?.title || ''}
-                onChange={e => setEditedTask({ ...editedTask!, title: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
-              <textarea
-                value={editedTask?.description || ''}
-                onChange={e => setEditedTask({ ...editedTask!, description: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => updateTask(task.id)}
-                  className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  <Save className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    setEditingTask(null);
-                    setEditedTask(null);
-                  }}
-                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            // Task View
-            <>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold">{task.title}</h3>
-                  <p className="text-gray-600">{task.description}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => {
-                      setEditingTask(task.id);
-                      setEditedTask(task);
-                    }}
-                    className="p-1 text-gray-600 hover:text-blue-600"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="p-1 text-gray-600 hover:text-red-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Mini Tasks */}
-              <div className="space-y-2">
-                <h4 className="font-medium">Mini Tasks</h4>
-                {task.miniTasks.map(miniTask => (
-                  <div key={miniTask.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={miniTask.completed}
-                        onChange={() => toggleMiniTask(task.id, miniTask.id)}
-                        className="rounded"
-                      />
-                      <span className={miniTask.completed ? 'line-through text-gray-500' : ''}>
-                        {miniTask.title}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => deleteMiniTask(task.id, miniTask.id)}
-                      className="text-gray-600 hover:text-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const input = e.currentTarget.elements.namedItem('miniTask') as HTMLInputElement;
-                    addMiniTask(task.id, input.value);
-                    input.value = '';
-                  }}
-                  className="flex items-center space-x-2"
-                >
-                  <input
-                    name="miniTask"
-                    type="text"
-                    placeholder="Add mini task"
-                    className="flex-1 px-3 py-1 border rounded-lg"
-                  />
-                  <button
-                    type="submit"
-                    className="p-1 text-gray-600 hover:text-blue-600"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </form>
-              </div>
-            </>
-          )}
+      <div>
+        <input
+          type="text"
+          placeholder="Task Title"
+          value={newTask.title}
+          onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+          className="w-full px-3 py-2 border rounded-lg mb-2"
+        />
+        <textarea
+          placeholder="Task Description"
+          value={newTask.description}
+          onChange={e => setNewTask({ ...newTask, description: e.target.value })}
+          className="w-full px-3 py-2 border rounded-lg mb-4"
+          rows={3}
+        />
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onComplete}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={addTask}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add Task
+          </button>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
