@@ -11,8 +11,41 @@ import {
   onSnapshot,
   orderBy,
   limit,
-  enableIndexedDbPersistence
+  enableIndexedDbPersistence,
+  QuerySnapshot,
+  DocumentSnapshot,
+  DocumentData
 } from 'firebase/firestore';
+
+// Types for better type safety
+export type ClientStatus = 'Active' | 'On Hold' | 'Completed';
+
+export interface Client {
+  id: string;
+  name: string;
+  description: string;
+  status: ClientStatus;
+  lastActivity: string;
+  userId: string;
+  projectCount: number;
+}
+
+export interface TeamInvite {
+  email: string;
+  userId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  role: 'team_member' | 'admin';
+}
+
+export interface UserProfile {
+  email: string;
+  role: 'team_member' | 'admin';
+  createdAt: string;
+  inviteId?: string;
+  passwordUpdated?: boolean;
+  updatedAt?: string;
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOxHT5jCIRCic38yDulk5VXGC_LaAnpKo",
@@ -28,41 +61,55 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Enable offline persistence
-enableIndexedDbPersistence(db)
-  .catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-    } else if (err.code === 'unimplemented') {
-      console.warn('The current browser does not support persistence.');
-    }
-  });
+// Cache for client data
+const clientCache = new Map<string, Client>();
 
-// Team invite function
-export const sendTeamInvite = async (email: string) => {
+// Enable offline persistence with retry logic
+const enablePersistence = async (retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await enableIndexedDbPersistence(db);
+      console.log('Offline persistence enabled successfully');
+      break;
+    } catch (err: any) {
+      if (err.code === 'failed-precondition') {
+        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+        break;
+      } else if (err.code === 'unimplemented') {
+        console.warn('The current browser does not support persistence.');
+        break;
+      } else if (i === retries - 1) {
+        console.error('Failed to enable persistence after multiple attempts:', err);
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+  }
+};
+
+enablePersistence();
+
+// Team invite function with improved error handling
+export const sendTeamInvite = async (email: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Generate a temporary password
     const tempPassword = Math.random().toString(36).slice(-8);
     
-    // Create the user account
     const userCredential = await createUserWithEmailAndPassword(auth, email, tempPassword);
     
-    // Create invite record in Firestore
     const inviteRef = await addDoc(collection(db, 'teamInvites'), {
       email,
       userId: userCredential.user.uid,
       status: 'pending',
       createdAt: new Date().toISOString(),
       role: 'team_member'
-    });
+    } as TeamInvite);
 
-    // Set up initial user profile
     await setDoc(doc(db, 'users', userCredential.user.uid), {
       email,
       role: 'team_member',
       createdAt: new Date().toISOString(),
       inviteId: inviteRef.id
-    });
+    } as UserProfile);
 
     return {
       success: true,
@@ -75,20 +122,21 @@ export const sendTeamInvite = async (email: string) => {
       throw new Error('Invalid email address');
     } else if (error.code === 'auth/email-already-in-use') {
       throw new Error('This email is already registered');
-    } else {
-      throw new Error('Failed to create team member account. Please try again.');
     }
+    throw new Error('Failed to create team member account. Please try again.');
   }
 };
 
-// Update team member account
-export const updateTeamMemberAccount = async (userId: string, newPassword: string) => {
+// Update team member account with improved type safety
+export const updateTeamMemberAccount = async (
+  userId: string,
+  newPassword: string
+): Promise<{ success: boolean; message: string }> => {
   try {
-    // Update user profile
     await setDoc(doc(db, 'users', userId), {
       passwordUpdated: true,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    } as Partial<UserProfile>, { merge: true });
 
     return {
       success: true,
@@ -100,8 +148,12 @@ export const updateTeamMemberAccount = async (userId: string, newPassword: strin
   }
 };
 
-// Client data subscriptions
-export const subscribeToUserClients = (userId: string, callback: (clients: any[]) => void) => {
+// Optimized client data subscriptions with caching
+export const subscribeToUserClients = (
+  userId: string,
+  callback: (clients: Client[]) => void,
+  errorCallback?: (error: Error) => void
+) => {
   const clientsQuery = query(
     collection(db, 'clients'),
     where('userId', '==', userId),
@@ -109,26 +161,70 @@ export const subscribeToUserClients = (userId: string, callback: (clients: any[]
     limit(20)
   );
 
-  return onSnapshot(clientsQuery, (snapshot) => {
-    const clients = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    callback(clients);
-  });
+  return onSnapshot(
+    clientsQuery,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const clients = snapshot.docs.map(doc => {
+        const client = {
+          id: doc.id,
+          ...doc.data()
+        } as Client;
+        
+        // Update cache
+        clientCache.set(client.id, client);
+        
+        return client;
+      });
+      callback(clients);
+    },
+    error => {
+      console.error('Error fetching clients:', error);
+      errorCallback?.(error);
+    }
+  );
 };
 
-export const subscribeToClient = (clientId: string, callback: (client: any | null) => void) => {
-  return onSnapshot(doc(db, 'clients', clientId), (doc) => {
-    if (doc.exists()) {
-      callback({
-        id: doc.id,
-        ...doc.data()
-      });
-    } else {
-      callback(null);
+// Optimized single client subscription with caching
+export const subscribeToClient = (
+  clientId: string,
+  callback: (client: Client | null) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  // Check cache first
+  const cachedClient = clientCache.get(clientId);
+  if (cachedClient) {
+    callback(cachedClient);
+  }
+
+  return onSnapshot(
+    doc(db, 'clients', clientId),
+    (doc: DocumentSnapshot<DocumentData>) => {
+      if (doc.exists()) {
+        const client = {
+          id: doc.id,
+          ...doc.data()
+        } as Client;
+        
+        // Update cache
+        clientCache.set(client.id, client);
+        
+        callback(client);
+      } else {
+        // Remove from cache if document doesn't exist
+        clientCache.delete(clientId);
+        callback(null);
+      }
+    },
+    error => {
+      console.error('Error fetching client:', error);
+      errorCallback?.(error);
     }
-  });
+  );
+};
+
+// Cache cleanup utility
+export const clearClientCache = () => {
+  clientCache.clear();
 };
 
 export default app;
