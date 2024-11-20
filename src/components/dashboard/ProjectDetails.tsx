@@ -15,7 +15,8 @@ import {
   Send,
   Paperclip,
   UserPlus,
-  Move
+  Move,
+  ListPlus
 } from 'lucide-react';
 import type { Project, Task, MiniTask, MoodboardItem, DocumentItem, Comment } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
@@ -42,7 +43,12 @@ export default function ProjectDetails() {
   const [newComment, setNewComment] = useState('');
   const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
   const [showAddTask, setShowAddTask] = useState(false);
-  const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [newTask, setNewTask] = useState({ 
+    title: '', 
+    description: '',
+    miniTasks: [] as { title: string }[]
+  });
+  const [newSubtask, setNewSubtask] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showAssigneeModal, setShowAssigneeModal] = useState(false);
   const [isDraggingMoodboard, setIsDraggingMoodboard] = useState(false);
@@ -51,6 +57,7 @@ export default function ProjectDetails() {
   const commentFileInputRef = useRef<HTMLInputElement>(null);
   const documentFileInputRef = useRef<HTMLInputElement>(null);
   const moodboardFileInputRef = useRef<HTMLInputElement>(null);
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -66,6 +73,25 @@ export default function ProjectDetails() {
 
     return () => unsubscribe();
   }, [auth.currentUser]);
+
+  const handleAddSubtask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubtask.trim()) return;
+
+    setNewTask(prev => ({
+      ...prev,
+      miniTasks: [...prev.miniTasks, { title: newSubtask }]
+    }));
+    setNewSubtask('');
+    subtaskInputRef.current?.focus();
+  };
+
+  const removeSubtask = (index: number) => {
+    setNewTask(prev => ({
+      ...prev,
+      miniTasks: prev.miniTasks.filter((_, i) => i !== index)
+    }));
+  };
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -96,7 +122,7 @@ export default function ProjectDetails() {
         imageUrl: URL.createObjectURL(file),
         note: '',
         position: {
-          x: Math.random() * 400, // Random initial position
+          x: Math.random() * 400,
           y: Math.random() * 400
         }
       }));
@@ -175,14 +201,18 @@ export default function ProjectDetails() {
       title: newTask.title,
       description: newTask.description,
       status: 'Todo',
-      miniTasks: []
+      miniTasks: newTask.miniTasks.map(st => ({
+        id: Date.now().toString() + Math.random(),
+        title: st.title,
+        completed: false
+      }))
     };
 
     setProject({
       ...project,
       tasks: [...project.tasks, task]
     });
-    setNewTask({ title: '', description: '' });
+    setNewTask({ title: '', description: '', miniTasks: [] });
     setShowAddTask(false);
   };
 
@@ -267,6 +297,43 @@ export default function ProjectDetails() {
                     className="w-full px-3 py-2 border rounded-lg"
                     rows={3}
                   />
+                  
+                  {/* Subtasks Section */}
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-700">Subtasks</h4>
+                    <form onSubmit={handleAddSubtask} className="flex space-x-2">
+                      <input
+                        ref={subtaskInputRef}
+                        type="text"
+                        placeholder="Add a subtask"
+                        value={newSubtask}
+                        onChange={e => setNewSubtask(e.target.value)}
+                        className="flex-grow px-3 py-2 border rounded-lg"
+                      />
+                      <button
+                        type="submit"
+                        className="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200"
+                      >
+                        <ListPlus className="w-5 h-5" />
+                      </button>
+                    </form>
+                    
+                    {/* Subtasks List */}
+                    <div className="space-y-2">
+                      {newTask.miniTasks.map((subtask, index) => (
+                        <div key={index} className="flex items-center justify-between bg-white p-2 rounded-lg">
+                          <span>{subtask.title}</span>
+                          <button
+                            onClick={() => removeSubtask(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex justify-end space-x-3">
                     <button
                       onClick={() => setShowAddTask(false)}
@@ -324,11 +391,42 @@ export default function ProjectDetails() {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-2">
-                    <div className="text-sm text-gray-500">
-                      {task.miniTasks.filter(mt => mt.completed).length} of {task.miniTasks.length} subtasks completed
+                  {task.miniTasks.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <div className="text-sm text-gray-500 mb-2">
+                        {task.miniTasks.filter(mt => mt.completed).length} of {task.miniTasks.length} subtasks completed
+                      </div>
+                      {task.miniTasks.map(miniTask => (
+                        <div key={miniTask.id} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={miniTask.completed}
+                            onChange={() => {
+                              setProject({
+                                ...project,
+                                tasks: project.tasks.map(t =>
+                                  t.id === task.id
+                                    ? {
+                                        ...t,
+                                        miniTasks: t.miniTasks.map(mt =>
+                                          mt.id === miniTask.id
+                                            ? { ...mt, completed: !mt.completed }
+                                            : mt
+                                        )
+                                      }
+                                    : t
+                                )
+                              });
+                            }}
+                            className="rounded text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className={`text-sm ${miniTask.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                            {miniTask.title}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
