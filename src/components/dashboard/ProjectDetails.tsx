@@ -1,11 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Loader,
-  X,
-  Plus
+  X
 } from 'lucide-react';
-import type { Project, Task } from '../../types';
+import type { Project } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
 import { auth, db } from '../../config/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
@@ -14,66 +13,16 @@ import { useAuth } from '../../context/AuthContext';
 // Extend UserProfile to include id as it's added by subscribeToTeamMembers
 type TeamMemberWithId = UserProfile & { id: string };
 
-interface DocumentItem {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  uploadedBy: string;
-  uploadedAt: string;
-}
-
-interface MoodboardItem {
-  id: string;
-  imageUrl: string;
-  note: string;
-  position: {
-    x: number;
-    y: number;
-  };
-}
-
-interface Comment {
-  id: string;
-  userId: string;
-  content: string;
-  timestamp: string;
-  attachments: Array<{
-    type: 'image' | 'document';
-    url: string;
-    name: string;
-  }>;
-}
-
 export default function ProjectDetails() {
   const { clientId, projectId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [newTask, setNewTask] = useState({ 
-    title: '', 
-    description: '',
-    miniTasks: [] as { title: string }[],
-    documents: [] as DocumentItem[]
-  });
-  const [newSubtask, setNewSubtask] = useState('');
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showAssigneeModal, setShowAssigneeModal] = useState(false);
-  const [isDraggingMoodboard, setIsDraggingMoodboard] = useState(false);
-  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
-
-  const commentFileInputRef = useRef<HTMLInputElement>(null);
-  const documentFileInputRef = useRef<HTMLInputElement>(null);
-  const moodboardFileInputRef = useRef<HTMLInputElement>(null);
-  const subtaskInputRef = useRef<HTMLInputElement>(null);
-  const taskDocumentInputRef = useRef<HTMLInputElement>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -136,191 +85,6 @@ export default function ProjectDetails() {
     }
   };
 
-  const handleAddSubtask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSubtask.trim()) return;
-
-    setNewTask(prev => ({
-      ...prev,
-      miniTasks: [...prev.miniTasks, { title: newSubtask }]
-    }));
-    setNewSubtask('');
-    subtaskInputRef.current?.focus();
-  };
-
-  const removeSubtask = (index: number) => {
-    setNewTask(prev => ({
-      ...prev,
-      miniTasks: prev.miniTasks.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleTaskDocumentUpload = async (taskId: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!project || !e.target.files) return;
-
-    const files = Array.from(e.target.files);
-    
-    const newDocuments: DocumentItem[] = files.map(file => ({
-      id: Date.now().toString() + Math.random(),
-      name: file.name,
-      url: URL.createObjectURL(file),
-      type: file.type,
-      uploadedBy: user?.email || 'Unknown User',
-      uploadedAt: new Date().toISOString()
-    }));
-
-    if (editingTaskId) {
-      setNewTask(prev => ({
-        ...prev,
-        documents: [...prev.documents, ...newDocuments]
-      }));
-    } else {
-      const updatedTasks = project.tasks.map(task =>
-        task.id === taskId
-          ? { ...task, documents: [...(task.documents || []), ...newDocuments] }
-          : task
-      );
-
-      await updateProject({ tasks: updatedTasks });
-    }
-  };
-
-  const startEditingTask = (task: Task) => {
-    setEditingTaskId(task.id);
-    setNewTask({
-      title: task.title,
-      description: task.description,
-      miniTasks: task.miniTasks.map(mt => ({ title: mt.title })),
-      documents: task.documents || []
-    });
-    setShowAddTask(true);
-  };
-
-  const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!project || !e.target.files) return;
-
-    const files = Array.from(e.target.files);
-    
-    const newDocuments: DocumentItem[] = files.map(file => ({
-      id: Date.now().toString(),
-      name: file.name,
-      url: URL.createObjectURL(file),
-      type: file.type,
-      uploadedBy: user?.email || 'Unknown User',
-      uploadedAt: new Date().toISOString()
-    }));
-
-    await updateProject({
-      documents: [...(project.documents || []), ...newDocuments]
-    });
-  };
-
-  const handleMoodboardUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!project || !e.target.files) return;
-
-    const files = Array.from(e.target.files);
-    
-    const newMoodboardItems: MoodboardItem[] = files.map(file => ({
-      id: Date.now().toString(),
-      imageUrl: URL.createObjectURL(file),
-      note: '',
-      position: {
-        x: Math.random() * 400,
-        y: Math.random() * 400
-      }
-    }));
-
-    await updateProject({
-      moodboard: [...(project.moodboard || []), ...newMoodboardItems]
-    });
-  };
-
-  const handleMoodboardDragStart = (itemId: string) => {
-    setIsDraggingMoodboard(true);
-    setDraggedItemId(itemId);
-  };
-
-  const handleMoodboardDragEnd = async (e: React.DragEvent, itemId: string) => {
-    if (!project) return;
-
-    setIsDraggingMoodboard(false);
-    setDraggedItemId(null);
-
-    const moodboardContainer = document.getElementById('moodboard-container');
-    if (!moodboardContainer) return;
-
-    const rect = moodboardContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const updatedMoodboard = project.moodboard.map(item => 
-      item.id === itemId
-        ? { ...item, position: { x, y } }
-        : item
-    );
-
-    await updateProject({ moodboard: updatedMoodboard });
-  };
-
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!project || (!newComment.trim() && commentAttachments.length === 0)) return;
-
-    const attachments = commentAttachments.map(file => ({
-      type: file.type.startsWith('image/') ? 'image' : 'document' as 'image' | 'document',
-      url: URL.createObjectURL(file),
-      name: file.name
-    }));
-
-    const comment: Comment = {
-      id: Date.now().toString(),
-      userId: user?.email || 'Unknown User',
-      content: newComment,
-      timestamp: new Date().toISOString(),
-      attachments
-    };
-
-    await updateProject({
-      comments: [...(project.comments || []), comment]
-    });
-
-    setNewComment('');
-    setCommentAttachments([]);
-  };
-
-  const handleCommentAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setCommentAttachments(prev => [...prev, ...Array.from(e.target.files!)]);
-    }
-  };
-
-  const addTask = async () => {
-    if (!project || !newTask.title.trim()) return;
-    
-    const task: Task = {
-      id: editingTaskId || Date.now().toString(),
-      title: newTask.title,
-      description: newTask.description,
-      status: 'Todo',
-      miniTasks: newTask.miniTasks.map(st => ({
-        id: Date.now().toString() + Math.random(),
-        title: st.title,
-        completed: false
-      })),
-      documents: newTask.documents
-    };
-
-    const updatedTasks = editingTaskId
-      ? project.tasks.map(t => t.id === editingTaskId ? task : t)
-      : [...project.tasks, task];
-
-    await updateProject({ tasks: updatedTasks });
-
-    setNewTask({ title: '', description: '', miniTasks: [], documents: [] });
-    setShowAddTask(false);
-    setEditingTaskId(null);
-  };
-
   const assignTask = async (taskId: string, member: TeamMemberWithId) => {
     if (!project) return;
 
@@ -342,7 +106,7 @@ export default function ProjectDetails() {
     setSelectedTaskId(null);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader className="w-8 h-8 animate-spin text-blue-600" />

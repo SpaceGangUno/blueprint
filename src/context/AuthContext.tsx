@@ -2,16 +2,19 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { 
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-  User as FirebaseUser 
+  onAuthStateChanged
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface User {
   id: string;
   email: string;
-  role: 'admin' | 'team_member';
+  role: 'admin' | 'team_member' | 'client';
+  createdAt?: string;
+  updatedAt?: string;
+  inviteId?: string;
+  passwordUpdated?: boolean;
 }
 
 interface AuthContextType {
@@ -39,15 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser({
               id: firebaseUser.uid,
               email: firebaseUser.email || '',
-              role: userData.role || 'team_member'
+              role: userData.role as User['role'],
+              createdAt: userData.createdAt,
+              updatedAt: userData.updatedAt,
+              inviteId: userData.inviteId,
+              passwordUpdated: userData.passwordUpdated
             });
           } else {
-            // If no user document exists, create one with default role
-            setUser({
+            // If no user document exists, create one with default role and metadata
+            const newUser: User = {
               id: firebaseUser.uid,
               email: firebaseUser.email || '',
-              role: 'team_member'
-            });
+              role: 'team_member',
+              createdAt: new Date().toISOString(),
+              passwordUpdated: false
+            };
+            
+            // Create the user document
+            await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+            setUser(newUser);
           }
         } else {
           setUser(null);
@@ -75,14 +88,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({
           id: firebaseUser.uid,
           email: firebaseUser.email || '',
-          role: userData.role || 'team_member'
+          role: userData.role as User['role'],
+          createdAt: userData.createdAt,
+          updatedAt: userData.updatedAt,
+          inviteId: userData.inviteId,
+          passwordUpdated: userData.passwordUpdated
         });
       } else {
-        setUser({
+        // If no user document exists, create one with default role and metadata
+        const newUser: User = {
           id: firebaseUser.uid,
           email: firebaseUser.email || '',
-          role: 'team_member'
-        });
+          role: 'team_member',
+          createdAt: new Date().toISOString(),
+          passwordUpdated: false
+        };
+        
+        // Create the user document
+        await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+        setUser(newUser);
       }
     } catch (error) {
       console.error('Login error:', error);

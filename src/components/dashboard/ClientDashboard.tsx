@@ -8,8 +8,8 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
-import { doc, collection, query, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
-import { db, type Client, type ClientStatus, subscribeToClient } from '../../config/firebase';
+import { doc, collection, query, orderBy, limit, getDocs, addDoc, setDoc } from 'firebase/firestore';
+import { db, type Client, subscribeToClient } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
 interface Project {
@@ -21,17 +21,7 @@ interface Project {
   clientId: string;
   createdAt: string;
   userId: string;
-  tasks: {
-    id: string;
-    title: string;
-    description: string;
-    status: 'Todo' | 'In Progress' | 'Completed';
-    miniTasks: {
-      id: string;
-      title: string;
-      completed: boolean;
-    }[];
-  }[];
+  tasks: any[];
 }
 
 interface NewProjectForm {
@@ -40,6 +30,40 @@ interface NewProjectForm {
   status: string;
   deadline: string;
 }
+
+// Project Card Component
+const ProjectCard = ({ project, clientId }: { project: Project; clientId: string }) => {
+  const navigate = useNavigate();
+  const completedTasks = project.tasks?.filter(t => t.status === 'Completed').length || 0;
+  const totalTasks = project.tasks?.length || 0;
+
+  return (
+    <div 
+      onClick={() => navigate(`/dashboard/client/${clientId}/project/${project.id}`)}
+      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors"
+    >
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-medium text-gray-900">{project.title}</h3>
+          <p className="text-gray-600 text-sm mt-1">{project.description}</p>
+        </div>
+        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+          {project.status}
+        </span>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center text-sm text-gray-500">
+          <Calendar className="w-4 h-4 mr-2" />
+          <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-500">
+          <span>{completedTasks} / {totalTasks} tasks completed</span>
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -78,40 +102,6 @@ const ErrorDisplay = ({ error, onRetry }: { error: string; onRetry: () => void }
     </button>
   </div>
 );
-
-// Project Card Component
-const ProjectCard = ({ project, clientId }: { project: Project; clientId: string }) => {
-  const navigate = useNavigate();
-  const completedTasks = project.tasks?.filter(t => t.status === 'Completed').length || 0;
-  const totalTasks = project.tasks?.length || 0;
-
-  return (
-    <div 
-      onClick={() => navigate(`/dashboard/client/${clientId}/project/${project.id}`)}
-      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors"
-    >
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-medium text-gray-900">{project.title}</h3>
-          <p className="text-gray-600 text-sm mt-1">{project.description}</p>
-        </div>
-        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-          {project.status}
-        </span>
-      </div>
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar className="w-4 h-4 mr-2" />
-          <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
-        </div>
-        <div className="flex items-center text-sm text-gray-500">
-          <span>{completedTasks} / {totalTasks} tasks completed</span>
-          <ArrowRight className="w-4 h-4 ml-2" />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function ClientDashboard() {
   const { clientId } = useParams();
