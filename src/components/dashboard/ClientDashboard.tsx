@@ -8,8 +8,8 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
-import { doc, getDoc, collection, query, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
-import { db, type Client, type ClientStatus } from '../../config/firebase';
+import { doc, collection, query, orderBy, limit, getDocs, addDoc, setDoc, DocumentData } from 'firebase/firestore';
+import { db, type Client, type ClientStatus, subscribeToClient } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
 interface Project {
@@ -136,41 +136,50 @@ export default function ClientDashboard() {
     try {
       setLoading(true);
       setError('');
-      
-      // Fetch client data
-      const clientDoc = doc(db, 'clients', clientId);
-      const clientSnap = await getDoc(clientDoc);
-      
-      if (!clientSnap.exists()) {
-        throw new Error('Client not found');
-      }
 
-      const clientData = {
-        id: clientSnap.id,
-        ...clientSnap.data()
-      } as Client;
+      // Subscribe to client data
+      const unsubscribeClient = subscribeToClient(
+        clientId,
+        async (clientData) => {
+          if (!clientData) {
+            setError('Client not found');
+            setLoading(false);
+            return;
+          }
 
-      // Check access permissions
-      if (!isAdmin && user.role !== 'team_member' && clientData.userId !== user.id) {
-        throw new Error('You do not have permission to access this client');
-      }
+          // Check access permissions
+          if (!isAdmin && user.role !== 'team_member' && clientData.userId !== user.id) {
+            setError('You do not have permission to access this client');
+            setLoading(false);
+            return;
+          }
 
-      setClient(clientData);
+          setClient(clientData);
 
-      // Fetch projects using nested collection
-      const projectsQuery = query(
-        collection(db, `clients/${clientId}/projects`),
-        orderBy('createdAt', 'desc'),
-        limit(20)
+          // Fetch projects using nested collection
+          const projectsQuery = query(
+            collection(db, `clients/${clientId}/projects`),
+            orderBy('createdAt', 'desc'),
+            limit(20)
+          );
+
+          const projectsSnap = await getDocs(projectsQuery);
+          const projectsData = projectsSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as Project));
+
+          setProjects(projectsData);
+          setLoading(false);
+        },
+        (error) => {
+          console.error('Error fetching client:', error);
+          setError(error.message || 'Failed to load client data');
+          setLoading(false);
+        }
       );
 
-      const projectsSnap = await getDocs(projectsQuery);
-      const projectsData = projectsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Project));
-
-      setProjects(projectsData);
+      return unsubscribeClient;
     } catch (err: any) {
       console.error('Error fetching data:', err);
       if (err.code === 'permission-denied') {
@@ -178,19 +187,26 @@ export default function ClientDashboard() {
       } else {
         setError(err.message || 'Failed to load data');
       }
-    } finally {
       setLoading(false);
     }
   }, [clientId, user, isAdmin]);
 
   useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
     if (!authLoading) {
       if (!user) {
         navigate('/login');
       } else {
-        fetchData();
+        fetchData().then(unsub => {
+          unsubscribe = unsub;
+        });
       }
     }
+
+    return () => {
+      unsubscribe?.();
+    };
   }, [user, authLoading, navigate, fetchData]);
 
   const handleNewProject = async (e: React.FormEvent) => {
