@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Loader,
-  X
+  X,
+  Plus,
+  Check,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
-import type { Project } from '../../types';
+import type { Project, Task, MiniTask } from '../../types';
 import { subscribeToTeamMembers, UserProfile } from '../../config/firebase';
 import { auth, db } from '../../config/firebase';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
@@ -23,6 +27,9 @@ export default function ProjectDetails() {
   const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
   const [showAssigneeModal, setShowAssigneeModal] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [expandedTasks, setExpandedTasks] = useState<string[]>([]);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState<string>('');
+  const [addingSubTaskToId, setAddingSubTaskToId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -106,6 +113,56 @@ export default function ProjectDetails() {
     setSelectedTaskId(null);
   };
 
+  const toggleTaskExpansion = (taskId: string) => {
+    setExpandedTasks(prev => 
+      prev.includes(taskId)
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+
+  const addSubTask = async (taskId: string) => {
+    if (!project || !newSubTaskTitle.trim()) return;
+
+    const newSubTask: MiniTask = {
+      id: Date.now().toString(),
+      title: newSubTaskTitle.trim(),
+      completed: false
+    };
+
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            miniTasks: [...task.miniTasks, newSubTask]
+          }
+        : task
+    );
+
+    await updateProject({ tasks: updatedTasks });
+    setNewSubTaskTitle('');
+    setAddingSubTaskToId(null);
+  };
+
+  const toggleSubTaskCompletion = async (taskId: string, subTaskId: string) => {
+    if (!project) return;
+
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === subTaskId
+                ? { ...subTask, completed: !subTask.completed }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({ tasks: updatedTasks });
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -138,6 +195,127 @@ export default function ProjectDetails() {
           }`}>
             {project.status}
           </span>
+        </div>
+      </div>
+
+      {/* Tasks List */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Tasks</h2>
+          <div className="space-y-4">
+            {project.tasks.map(task => (
+              <div key={task.id} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => toggleTaskExpansion(task.id)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      {expandedTasks.includes(task.id) ? (
+                        <ChevronDown className="w-5 h-5" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5" />
+                      )}
+                    </button>
+                    <h3 className="font-medium">{task.title}</h3>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
+                      task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {task.status}
+                    </span>
+                    {task.assignee ? (
+                      <img
+                        src={task.assignee.avatar}
+                        alt={task.assignee.name}
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setSelectedTaskId(task.id);
+                          setShowAssigneeModal(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        Assign
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {expandedTasks.includes(task.id) && (
+                  <div className="mt-4 pl-8">
+                    <div className="space-y-2">
+                      {task.miniTasks.map(subTask => (
+                        <div
+                          key={subTask.id}
+                          className="flex items-center space-x-3"
+                        >
+                          <button
+                            onClick={() => toggleSubTaskCompletion(task.id, subTask.id)}
+                            className={`w-5 h-5 rounded border flex items-center justify-center ${
+                              subTask.completed
+                                ? 'bg-green-500 border-green-500 text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {subTask.completed && <Check className="w-3 h-3" />}
+                          </button>
+                          <span className={subTask.completed ? 'line-through text-gray-500' : ''}>
+                            {subTask.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {addingSubTaskToId === task.id ? (
+                      <div className="mt-3 flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={newSubTaskTitle}
+                          onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                          placeholder="Enter subtask title"
+                          className="flex-1 border rounded px-3 py-1 text-sm"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addSubTask(task.id);
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => addSubTask(task.id)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAddingSubTaskToId(null);
+                            setNewSubTaskTitle('');
+                          }}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setAddingSubTaskToId(task.id)}
+                        className="mt-3 flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add subtask</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
