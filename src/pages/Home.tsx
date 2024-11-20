@@ -62,7 +62,7 @@ export default function Home() {
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center overflow-hidden">
+      <section className="relative h-[60vh] min-h-[400px] max-h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
@@ -73,23 +73,30 @@ export default function Home() {
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="space-y-8">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
               Bringing Your Vision
-              <span className="text-blue-400 ml-4">
+              <span className="text-blue-400 ml-2 sm:ml-4">
                 to Life
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
               Full-service consulting and creative studio focused on transforming ideas into exceptional digital experiences
             </p>
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <button
                 onClick={() => setShowQuoteModal(true)}
-                className="inline-block px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Get Started
               </button>
+            </div>
+          </div>
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <div className="w-8 h-8 border-2 border-white rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </div>
           </div>
         </div>
