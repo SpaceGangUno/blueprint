@@ -7,7 +7,7 @@ import {
   RefreshCcw
 } from 'lucide-react';
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-import { auth, db } from '../../config/firebase';
+import { db } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 
 // Interfaces
