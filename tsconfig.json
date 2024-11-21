@@ -18,7 +18,11 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "node", "react", "react-dom"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/custom.d.ts"
+    ],
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
@@ -26,7 +30,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "src/custom.d.ts"
   ],
   "exclude": [
     "node_modules",
