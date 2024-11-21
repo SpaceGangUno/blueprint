@@ -120,7 +120,7 @@ export const getClient = async (clientId: string): Promise<Client | null> => {
 };
 
 // Team Functions
-export const subscribeToTeamUpdates = (onNext: SnapshotCallback<UserProfile>, onError: ErrorCallback) => {
+export const subscribeToTeamMembers = (onNext: SnapshotCallback<UserProfile>, onError: ErrorCallback) => {
   const teamRef = collection(db, 'users');
   return onSnapshot(
     teamRef,
@@ -146,16 +146,32 @@ export const subscribeToTeamUpdates = (onNext: SnapshotCallback<UserProfile>, on
   );
 };
 
-export const sendTeamInvite = async (email: string, role: 'admin' | 'team_member') => {
+export const sendTeamInvite = async (email: string) => {
   const invitesRef = collection(db, 'invites');
   const inviteData = {
     email,
-    role,
+    role: 'team_member' as const,
     status: 'pending',
     createdAt: serverTimestamp()
   };
   
   await addDoc(invitesRef, inviteData);
+  return { message: 'Invitation sent successfully' };
+};
+
+export const updateTeamMemberAccount = async (userId: string, password: string) => {
+  const userRef = doc(db, 'users', userId);
+  
+  // Update the user's password in Firebase Auth
+  if (auth.currentUser) {
+    await updatePassword(auth.currentUser, password);
+  }
+  
+  // Update the user's status in Firestore
+  await updateDoc(userRef, {
+    passwordUpdated: true,
+    updatedAt: serverTimestamp()
+  });
 };
 
 // Auth Functions
