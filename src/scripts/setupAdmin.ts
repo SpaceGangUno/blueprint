@@ -1,83 +1,69 @@
-import { createAdminUser } from './createAdmin.js';
-import { User } from 'firebase/auth';
-import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import path from 'path';
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { UserProfile } from '../types';
 
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables from .env file in the project root
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+const setupAdmin = () => {
+  if (getApps().length === 0) {
+    initializeApp({
+      credential: cert({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+      })
+    });
+  }
+  return {
+    auth: getAuth(),
+    db: getFirestore()
+  };
 };
 
-const validatePassword = (password: string): boolean => {
-  return password.length >= 6;
+export const createAdminUser = async (email: string, password: string) => {
+  const { auth, db } = setupAdmin();
+
+  try {
+    // Create the user in Firebase Auth
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      emailVerified: true
+    });
+
+    // Create the user profile in Firestore
+    const userProfile: UserProfile = {
+      email,
+      role: 'admin',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      passwordUpdated: true
+    };
+
+    await db.collection('users').doc(userRecord.uid).set(userProfile);
+
+    console.log('Successfully created admin user:', userRecord.uid);
+    return userRecord;
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    throw error;
+  }
 };
 
-const run = async () => {
-  console.log('\n🚀 Starting Blueprint Studios Admin Setup...\n');
-
+export const setupAdminAccount = async () => {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
 
-  // Validate environment variables
   if (!email || !password) {
-    console.error('❌ Error: Missing required environment variables');
-    console.log('\nPlease ensure you have set the following in your .env file:');
-    console.log('- ADMIN_EMAIL');
-    console.log('- ADMIN_PASSWORD');
-    process.exit(1);
-  }
-
-  // Validate email format
-  if (!validateEmail(email)) {
-    console.error('❌ Error: Invalid email format');
-    console.log('Please provide a valid email address in ADMIN_EMAIL');
-    process.exit(1);
-  }
-
-  // Validate password
-  if (!validatePassword(password)) {
-    console.error('❌ Error: Invalid password');
-    console.log('Password must be at least 6 characters long');
-    process.exit(1);
+    throw new Error('Admin email and password must be provided in environment variables');
   }
 
   try {
-    console.log('📧 Using email:', email);
-    console.log('🔐 Password length:', password.length, 'characters\n');
-
-    const user: User = await createAdminUser(email, password);
-    
-    console.log('\n✅ Admin setup completed successfully!');
-    console.log('\nYou can now:');
-    console.log('1. Log in to the dashboard using your admin credentials');
-    console.log('2. Create and manage team members');
-    console.log('3. Access all admin features\n');
-    
-    process.exit(0);
-  } catch (error: any) {
-    console.error('\n❌ Admin setup failed');
-    
-    if (error.code === 'auth/email-already-in-use') {
-      console.log('\nℹ️  An account with this email already exists.');
-      console.log('If you need to update its role to admin, you can:');
-      console.log('1. Log in to Firebase Console');
-      console.log('2. Go to Firestore Database');
-      console.log('3. Find the user document in the "users" collection');
-      console.log('4. Update the "role" field to "admin"');
-    }
-    
-    process.exit(1);
+    await createAdminUser(email, password);
+    console.log('Admin account setup completed successfully');
+  } catch (error) {
+    console.error('Failed to setup admin account:', error);
+    throw error;
   }
 };
 
-// Run the setup
-run();
+export default setupAdmin;

@@ -17,8 +17,8 @@ const ClientDashboard: React.FC = () => {
       return;
     }
 
-    const callback = (clientData: Client[]) => {
-      setClients(clientData);
+    const callback = (clientsList: Client[]) => {
+      setClients(clientsList);
       setLoading(false);
     };
 
@@ -35,6 +35,19 @@ const ClientDashboard: React.FC = () => {
 
     return () => unsubscribe();
   }, [user, userProfile, isAdmin, navigate]);
+
+  const getStatusColor = (status: Client['status']) => {
+    switch (status) {
+      case 'Active':
+        return 'bg-green-100 text-green-800';
+      case 'On Hold':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Completed':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   if (loading) {
     return (
@@ -72,11 +85,7 @@ const ClientDashboard: React.FC = () => {
           >
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-semibold">{client.name}</h3>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                client.status === 'Active' ? 'bg-green-100 text-green-800' :
-                client.status === 'On Hold' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(client.status)}`}>
                 {client.status}
               </span>
             </div>

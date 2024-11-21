@@ -1,34 +1,26 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "ES2020",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist/admin",
-    "rootDir": "./src",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
     "types": ["node"],
     "allowJs": true,
     "resolveJsonModule": true,
+    "lib": ["ES2020"],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "*": ["node_modules/*"]
     }
   },
   "include": [
-    "src/scripts/**/*",
-    "src/config/admin-firebase.ts"
+    "src/config/admin-firebase.ts",
+    "src/scripts/setupAdmin.ts",
+    "src/scripts/createAdmin.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "references": [
-    { "path": "./tsconfig.json" }
-  ]
+  "exclude": ["node_modules"]
 }

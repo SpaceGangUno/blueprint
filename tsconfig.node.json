@@ -6,13 +6,16 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["node", "vite/client"]
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "types": ["node"],
+    "esModuleInterop": true,
+    "paths": {
+      "firebase-admin/*": ["./node_modules/firebase-admin/*"]
+    }
   },
   "include": [
-    "vite.config.ts"
-  ],
-  "exclude": [
-    "src/scripts/**/*",
-    "src/config/admin-firebase.ts"
+    "vite.config.ts",
+    "src/scripts/**/*"
   ]
 }

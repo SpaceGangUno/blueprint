@@ -15,23 +15,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
     "paths": {
-      "@/*": ["src/*"]
+      "firebase-admin/*": ["./node_modules/firebase-admin/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js",
-    "src/**/*.jsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "scripts"
-  ],
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

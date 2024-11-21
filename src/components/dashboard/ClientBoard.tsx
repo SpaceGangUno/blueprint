@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { db, subscribeToUserClients, subscribeToAllClients, type Client, type ClientStatus } from '../../config/firebase';
+import { subscribeToUserClients, subscribeToAllClients, type Client } from '../../config/firebase';
 
 const ClientBoard: React.FC = () => {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ const ClientBoard: React.FC = () => {
     return () => unsubscribe();
   }, [user, userProfile, isAdmin, navigate]);
 
-  const getStatusColor = (status: ClientStatus) => {
+  const getStatusColor = (status: Client['status']) => {
     switch (status) {
       case 'Active':
         return 'bg-green-100 text-green-800';
@@ -89,6 +89,9 @@ const ClientBoard: React.FC = () => {
                 {client.status}
               </span>
             </div>
+            {client.description && (
+              <p className="text-gray-600 mb-4">{client.description}</p>
+            )}
             <div className="space-y-2">
               <p className="text-sm text-gray-600">{client.email}</p>
               {client.phone && (
