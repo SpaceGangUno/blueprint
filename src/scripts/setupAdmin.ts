@@ -22,7 +22,7 @@ const setupAdminAccount = async () => {
 };
 
 // Run this if the file is executed directly
-if (require.main === module) {
+if (import.meta.url === new URL(import.meta.url).href) {
   setupAdminAccount()
     .then(() => {
       console.log('Admin setup completed');

@@ -7,10 +7,8 @@ import {
 import { 
   getFirestore, 
   collection, 
-  addDoc, 
   doc, 
   setDoc,
-  getDocs,
   query, 
   where,
   onSnapshot,

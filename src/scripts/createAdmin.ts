@@ -30,7 +30,7 @@ export const createAdminUser = async (email: string, password: string) => {
 };
 
 // Run this if the file is executed directly
-if (require.main === module) {
+if (import.meta.url === new URL(import.meta.url).href) {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
 

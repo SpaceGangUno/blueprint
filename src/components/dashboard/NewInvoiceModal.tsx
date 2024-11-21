@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
-import { Client, Invoice, InvoiceItem } from '../../types';
+import { Client, Invoice } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -25,7 +25,7 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedProjectId] = useState<string>('');
   const [items, setItems] = useState<InvoiceItemInput[]>([
     { description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
