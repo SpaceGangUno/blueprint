@@ -46,6 +46,9 @@ export interface Client {
   name: string;
   email: string;
   phone?: string;
+  status: 'Active' | 'On Hold' | 'Completed';
+  projectCount: number;
+  description?: string;
   address?: {
     street: string;
     city: string;
