@@ -18,11 +18,27 @@
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node"],
+    "types": ["node", "vite/client"],
+    "baseUrl": ".",
     "paths": {
-      "firebase-admin/*": ["./node_modules/firebase-admin/*"]
+      "*": ["node_modules/*"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "scripts"
+  ],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.admin.json" }
+  ]
 }
