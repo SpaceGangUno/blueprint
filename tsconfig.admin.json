@@ -6,8 +6,12 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "dist",
+    "outDir": "dist/admin",
     "rootDir": "src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "types": ["node"],
     "allowJs": true,
     "resolveJsonModule": true,
@@ -20,7 +24,11 @@
   "include": [
     "src/config/admin-firebase.ts",
     "src/scripts/setupAdmin.ts",
-    "src/scripts/createAdmin.ts"
+    "src/scripts/createAdmin.ts",
+    "src/types/index.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "./tsconfig.json" }
+  ]
 }
