@@ -116,6 +116,7 @@ export interface Invoice {
   id: string;
   number: string;
   clientId: string;
+  userId: string; // Added userId field
   projectId?: string;
   status: 'draft' | 'sent' | 'paid' | 'overdue';
   issueDate: string;

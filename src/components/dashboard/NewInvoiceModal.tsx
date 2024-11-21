@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { Client, Invoice, InvoiceItem, Project } from '../../types';
 import { db } from '../../config/firebase';
+import { useAuth } from '../../context/AuthContext';
 import { 
   collection, 
   addDoc, 
@@ -18,6 +19,7 @@ interface NewInvoiceModalProps {
 }
 
 export default function NewInvoiceModal({ onClose, onInvoiceCreated, clients }: NewInvoiceModalProps) {
+  const { user } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -92,6 +94,11 @@ export default function NewInvoiceModal({ onClose, onInvoiceCreated, clients }: 
   };
 
   const handleSubmit = async () => {
+    if (!user) {
+      setError('You must be logged in to create invoices');
+      return;
+    }
+
     if (!selectedClientId) {
       setError('Please select a client');
       return;
@@ -106,7 +113,7 @@ export default function NewInvoiceModal({ onClose, onInvoiceCreated, clients }: 
     setError(null);
 
     try {
-      // Generate invoice number (you might want to implement a more sophisticated system)
+      // Generate invoice number (YYYY-MM-DD-XXXXX format)
       const now = new Date();
       const invoiceNumber = `INV-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
 
@@ -127,7 +134,8 @@ export default function NewInvoiceModal({ onClose, onInvoiceCreated, clients }: 
         notes: notes || undefined,
         terms: terms || undefined,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        userId: user.uid // Add the userId to the invoice
       };
 
       await addDoc(collection(db, 'invoices'), newInvoice);
