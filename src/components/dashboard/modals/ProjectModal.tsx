@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { Plus, X, Trash2 } from 'lucide-react';
 import { type Project, type Task, type MiniTask } from '../../../types';
+import { addClientEvent } from '../../../config/firebase';
 
 interface ProjectModalProps {
   project?: Project;
+  clientId: string;
   onClose: () => void;
   onSave: (project: Omit<Project, 'id'>) => void;
 }
 
-const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, onSave }) => {
+const ProjectModal: React.FC<ProjectModalProps> = ({ project, clientId, onClose, onSave }) => {
   const [form, setForm] = useState({
     title: project?.title || '',
     description: project?.description || '',
     status: project?.status || 'Sourcing',
-    tasks: project?.tasks || []
+    tasks: project?.tasks || [],
+    deadline: project?.deadline || new Date().toISOString().split('T')[0]
   });
 
   const [newTask, setNewTask] = useState('');
@@ -79,12 +82,35 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, onSave })
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      ...form,
+
+    // Create deadline event
+    if (form.deadline) {
+      try {
+        await addClientEvent(clientId, {
+          title: `${form.title} Deadline`,
+          description: `Project deadline for: ${form.title}\n${form.description}`,
+          start: form.deadline,
+          end: form.deadline,
+          type: 'deadline',
+          allDay: true
+        });
+      } catch (error) {
+        console.error('Error creating deadline event:', error);
+      }
+    }
+
+    const projectData: Omit<Project, 'id'> = {
+      title: form.title,
+      description: form.description,
+      status: form.status,
+      tasks: form.tasks,
+      deadline: form.deadline,
       lastUpdated: new Date().toISOString()
-    });
+    };
+
+    onSave(projectData);
     onClose();
   };
 
@@ -117,6 +143,17 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, onSave })
               onChange={e => setForm({ ...form, description: e.target.value })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Deadline</label>
+            <input
+              type="date"
+              value={form.deadline}
+              onChange={e => setForm({ ...form, deadline: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
             />
           </div>
 

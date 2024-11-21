@@ -4,7 +4,8 @@ export interface Project {
   title: string;
   description: string;
   status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed' | 'On Hold';
-  lastUpdated: string;  // Making this required since we always want to track when projects are updated
+  lastUpdated: string;
+  deadline: string;  // Add deadline field
   tasks: Task[];
 }
 

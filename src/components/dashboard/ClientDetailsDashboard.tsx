@@ -19,7 +19,7 @@ import ProjectModal from './modals/ProjectModal';
 import MonthCalendar from './calendar/MonthCalendar';
 
 const ClientDetailsDashboard: React.FC = () => {
-  const { clientId } = useParams();
+  const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -311,9 +311,10 @@ const ClientDetailsDashboard: React.FC = () => {
         />
       )}
 
-      {showProjectModal && (
+      {showProjectModal && clientId && (
         <ProjectModal
           project={selectedProject}
+          clientId={clientId}
           onClose={() => {
             setShowProjectModal(false);
             setSelectedProject(undefined);
