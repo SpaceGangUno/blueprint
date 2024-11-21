@@ -11,9 +11,11 @@ import {
   addClientEvent,
   updateClientEvent,
   deleteClientEvent,
+  getUserPermissions,
   type CalendarEvent
 } from '../../config/firebase';
-import { type Client, type Project, type Task } from '../../types';
+import { type Client, type Project, type Task, type ProjectPermission } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import EventModal from './modals/EventModal';
 import ProjectModal from './modals/ProjectModal';
 import MonthCalendar from './calendar/MonthCalendar';
@@ -21,9 +23,11 @@ import MonthCalendar from './calendar/MonthCalendar';
 const ClientDetailsDashboard: React.FC = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [permissions, setPermissions] = useState<Record<string, ProjectPermission>>({});
   const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +38,16 @@ const ClientDetailsDashboard: React.FC = () => {
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!clientId) return;
+    if (!clientId || !user) return;
+
+    // Fetch user permissions
+    if (!isAdmin) {
+      getUserPermissions(user.uid).then(perms => {
+        setPermissions(perms);
+      }).catch(error => {
+        console.error('Error fetching permissions:', error);
+      });
+    }
 
     const unsubscribeClient = subscribeToClient(
       clientId,
@@ -51,7 +64,19 @@ const ClientDetailsDashboard: React.FC = () => {
 
     const unsubscribeProjects = subscribeToClientProjects(
       clientId,
-      (updatedProjects) => setProjects(updatedProjects),
+      (updatedProjects) => {
+        // Filter projects based on permissions if not admin
+        if (isAdmin) {
+          setProjects(updatedProjects);
+        } else {
+          const accessibleProjects = updatedProjects.filter(project => 
+            permissions[project.id]?.access === 'read' || 
+            permissions[project.id]?.access === 'write' || 
+            permissions[project.id]?.access === 'admin'
+          );
+          setProjects(accessibleProjects);
+        }
+      },
       (error) => console.error('Error fetching projects:', error)
     );
 
@@ -66,7 +91,17 @@ const ClientDetailsDashboard: React.FC = () => {
       unsubscribeProjects();
       unsubscribeEvents();
     };
-  }, [clientId]);
+  }, [clientId, user, isAdmin, permissions]);
+
+  const hasWriteAccess = (projectId: string) => {
+    if (isAdmin) return true;
+    return permissions[projectId]?.access === 'write' || permissions[projectId]?.access === 'admin';
+  };
+
+  const hasAdminAccess = (projectId: string) => {
+    if (isAdmin) return true;
+    return permissions[projectId]?.access === 'admin';
+  };
 
   const handleAddEvent = async (eventData: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!clientId) return;
@@ -114,7 +149,7 @@ const ClientDetailsDashboard: React.FC = () => {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!clientId) return;
+    if (!clientId || !hasAdminAccess(projectId)) return;
     try {
       await deleteClientProject(clientId, projectId);
     } catch (error) {
@@ -170,44 +205,48 @@ const ClientDetailsDashboard: React.FC = () => {
       </div>
 
       {/* Calendar Section */}
-      <div className="relative">
-        <button
-          onClick={() => {
-            setSelectedEvent(undefined);
-            setShowEventModal(true);
-          }}
-          className="absolute top-4 right-4 z-10 flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Event
-        </button>
-        <MonthCalendar
-          date={date}
-          events={events}
-          onDateChange={setDate}
-          onSelectEvent={setSelectedEvent}
-          onDeleteEvent={handleDeleteEvent}
-        />
-      </div>
+      {isAdmin && (
+        <div className="relative">
+          <button
+            onClick={() => {
+              setSelectedEvent(undefined);
+              setShowEventModal(true);
+            }}
+            className="absolute top-4 right-4 z-10 flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Event
+          </button>
+          <MonthCalendar
+            date={date}
+            events={events}
+            onDateChange={setDate}
+            onSelectEvent={setSelectedEvent}
+            onDeleteEvent={handleDeleteEvent}
+          />
+        </div>
+      )}
 
       {/* Projects Section */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-medium text-gray-900">Projects</h2>
-          <button
-            onClick={() => {
-              setSelectedProject(undefined);
-              setShowProjectModal(true);
-            }}
-            className="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Project
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setSelectedProject(undefined);
+                setShowProjectModal(true);
+              }}
+              className="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Project
+            </button>
+          )}
         </div>
         <div className="p-6">
           {projects.length === 0 ? (
-            <p className="text-gray-500">No projects yet</p>
+            <p className="text-gray-500">No projects available</p>
           ) : (
             <div className="space-y-4">
               {projects.map((project) => (
@@ -238,21 +277,25 @@ const ClientDetailsDashboard: React.FC = () => {
                           'bg-gray-100 text-gray-800'}`}>
                         {project.status}
                       </span>
-                      <button
-                        onClick={() => {
-                          setSelectedProject(project);
-                          setShowProjectModal(true);
-                        }}
-                        className="p-1 text-gray-500 hover:text-gray-700"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="p-1 text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {hasWriteAccess(project.id) && (
+                        <button
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setShowProjectModal(true);
+                          }}
+                          className="p-1 text-gray-500 hover:text-gray-700"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {hasAdminAccess(project.id) && (
+                        <button
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="p-1 text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { subscribeToAllClients, subscribeToUserClients } from '../../config/firebase';
+import { subscribeToAllClients, subscribeToAccessibleClients } from '../../config/firebase';
 import { type Client } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import NewClientModal from './NewClientModal';
@@ -31,7 +31,7 @@ const ClientDashboard: React.FC = () => {
             setLoading(false);
           }
         )
-      : subscribeToUserClients(
+      : subscribeToAccessibleClients(
           user.uid,
           (updatedClients) => {
             setClients(updatedClients);
@@ -78,20 +78,27 @@ const ClientDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Clients</h2>
-        <button
-          onClick={() => setShowNewClientModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Client
-        </button>
+        <h2 className="text-2xl font-bold text-gray-900">
+          {isAdmin ? 'All Clients' : 'Your Accessible Clients'}
+        </h2>
+        {isAdmin && (
+          <button
+            onClick={() => setShowNewClientModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Client
+          </button>
+        )}
       </div>
 
       {clients.length === 0 ? (
         <div className="text-center py-8">
-          <h3 className="text-lg font-medium text-gray-900">No clients found</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by adding your first client.</p>
+          <h3 className="text-lg font-medium text-gray-900">
+            {isAdmin 
+              ? 'No clients found. Get started by adding your first client.'
+              : 'No accessible clients found. Contact an admin to get access to projects.'}
+          </h3>
         </div>
       ) : (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -125,16 +132,18 @@ const ClientDashboard: React.FC = () => {
                           'bg-gray-100 text-gray-800'}`}>
                         {client.status}
                       </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedClient(client);
-                        }}
-                        className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
-                        title="Edit client"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedClient(client);
+                          }}
+                          className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+                          title="Edit client"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

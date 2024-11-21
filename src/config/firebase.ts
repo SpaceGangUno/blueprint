@@ -14,7 +14,8 @@ import {
   updateDoc,
   serverTimestamp,
   deleteDoc,
-  setDoc
+  setDoc,
+  getDocs
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -25,7 +26,7 @@ import {
   updatePassword,
   type User
 } from 'firebase/auth';
-import { type Client, type UserProfile, type Project } from '../types';
+import { type Client, type UserProfile, type Project, type ProjectPermission } from '../types';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -45,6 +46,98 @@ export const db = getFirestore(app);
 type SnapshotCallback<T> = (data: T[]) => void;
 type SingleDocCallback<T> = (data: T | null) => void;
 type ErrorCallback = (error: Error) => void;
+
+// Calendar Event Types
+export type EventType = 'meeting' | 'deadline' | 'milestone' | 'other';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  start: string;
+  end: string;
+  allDay?: boolean;
+  type: EventType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Get user's project permissions
+export const getUserPermissions = async (userId: string): Promise<Record<string, ProjectPermission>> => {
+  const userDoc = await getDoc(doc(db, 'users', userId));
+  if (!userDoc.exists()) return {};
+  return userDoc.data().projectPermissions || {};
+};
+
+// Get all projects a user has access to
+export const getAccessibleProjects = async (userId: string): Promise<{clientId: string, project: Project}[]> => {
+  const permissions = await getUserPermissions(userId);
+  const projectIds = Object.keys(permissions);
+  
+  // Get all clients
+  const clientsSnapshot = await getDocs(collection(db, 'clients'));
+  const accessibleProjects: {clientId: string, project: Project}[] = [];
+
+  // For each client, get their projects and filter for accessible ones
+  for (const clientDoc of clientsSnapshot.docs) {
+    const projectsSnapshot = await getDocs(collection(db, 'clients', clientDoc.id, 'projects'));
+    
+    for (const projectDoc of projectsSnapshot.docs) {
+      if (projectIds.includes(projectDoc.id)) {
+        accessibleProjects.push({
+          clientId: clientDoc.id,
+          project: {
+            id: projectDoc.id,
+            ...projectDoc.data()
+          } as Project
+        });
+      }
+    }
+  }
+
+  return accessibleProjects;
+};
+
+// Subscribe to accessible clients (clients with projects user has access to)
+export const subscribeToAccessibleClients = (
+  userId: string,
+  onNext: SnapshotCallback<Client>,
+  onError: ErrorCallback
+) => {
+  const clientsRef = collection(db, 'clients');
+  
+  // First get user's permissions
+  getUserPermissions(userId).then(permissions => {
+    const projectIds = Object.keys(permissions);
+    
+    // Then subscribe to clients collection
+    return onSnapshot(
+      clientsRef,
+      async (snapshot: QuerySnapshot<DocumentData>) => {
+        const accessibleClients: Client[] = [];
+        
+        // For each client, check if they have any accessible projects
+        for (const clientDoc of snapshot.docs) {
+          const projectsSnapshot = await getDocs(collection(db, 'clients', clientDoc.id, 'projects'));
+          const hasAccessibleProject = projectsSnapshot.docs.some(doc => projectIds.includes(doc.id));
+          
+          if (hasAccessibleProject) {
+            accessibleClients.push({
+              id: clientDoc.id,
+              ...clientDoc.data()
+            } as Client);
+          }
+        }
+        
+        onNext(accessibleClients);
+      },
+      onError
+    );
+  }).catch(onError);
+  
+  // Return an unsubscribe function
+  return () => {};
+};
 
 // Client Functions
 export const subscribeToAllClients = (onNext: SnapshotCallback<Client>, onError: ErrorCallback) => {
@@ -105,20 +198,6 @@ export const subscribeToClient = (
   );
 };
 
-export const getClient = async (clientId: string): Promise<Client | null> => {
-  const clientRef = doc(db, 'clients', clientId);
-  const clientDoc = await getDoc(clientRef);
-  
-  if (clientDoc.exists()) {
-    return {
-      id: clientDoc.id,
-      ...clientDoc.data()
-    } as Client;
-  }
-  
-  return null;
-};
-
 // Project Functions
 export const subscribeToClientProjects = (
   clientId: string,
@@ -161,21 +240,7 @@ export const deleteClientProject = async (clientId: string, projectId: string) =
   await deleteDoc(projectRef);
 };
 
-// Calendar Event Types and Functions
-export type EventType = 'meeting' | 'deadline' | 'milestone' | 'other';
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  description?: string;
-  start: string;
-  end: string;
-  allDay?: boolean;
-  type: EventType;
-  createdAt: string;
-  updatedAt: string;
-}
-
+// Event Functions
 export const subscribeToClientEvents = (
   clientId: string,
   onNext: SnapshotCallback<CalendarEvent>,
@@ -237,7 +302,8 @@ export const subscribeToTeamMembers = (onNext: SnapshotCallback<UserProfile>, on
           passwordUpdated: data.passwordUpdated,
           displayName: data.displayName,
           photoURL: data.photoURL,
-          lastLogin: data.lastLogin
+          lastLogin: data.lastLogin,
+          projectPermissions: data.projectPermissions || {}
         } as UserProfile;
       });
       onNext(team);
@@ -246,7 +312,7 @@ export const subscribeToTeamMembers = (onNext: SnapshotCallback<UserProfile>, on
   );
 };
 
-// New function to create team member
+// Create team member
 export const createTeamMember = async (email: string) => {
   try {
     // Generate a random password for initial account creation
@@ -278,21 +344,6 @@ export const createTeamMember = async (email: string) => {
     console.error('Error creating team member:', error);
     throw new Error(error.message || 'Failed to create team member');
   }
-};
-
-export const updateTeamMemberAccount = async (userId: string, password: string) => {
-  const userRef = doc(db, 'users', userId);
-  
-  // Update the user's password in Firebase Auth
-  if (auth.currentUser) {
-    await updatePassword(auth.currentUser, password);
-  }
-  
-  // Update the user's status in Firestore
-  await updateDoc(userRef, {
-    passwordUpdated: true,
-    updatedAt: serverTimestamp()
-  });
 };
 
 // Auth Functions
