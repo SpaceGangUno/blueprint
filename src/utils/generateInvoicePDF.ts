@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Invoice, Client } from '../types';
+import { Invoice } from '../types';
 
 export const generateInvoicePDF = (invoice: Invoice): jsPDF => {
   const doc = new jsPDF();
@@ -80,14 +80,14 @@ export const generateInvoicePDF = (invoice: Invoice): jsPDF => {
   doc.text(`$${invoice.tax.toFixed(2)}`, pageWidth - margin - 20, finalY + 30, { align: 'right' });
   
   doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text('Total:', pageWidth - margin - 80, finalY + 40);
   doc.text(`$${invoice.total.toFixed(2)}`, pageWidth - margin - 20, finalY + 40, { align: 'right' });
 
   // Notes
   if (invoice.notes) {
     doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text('Notes:', margin, finalY + 60);
     doc.text(invoice.notes, margin, finalY + 70);
   }
