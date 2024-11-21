@@ -1,55 +1,10 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { UserProfile } from '../types';
+import { createAdminUser } from './createAdmin';
+import dotenv from 'dotenv';
 
-const setupAdmin = () => {
-  if (getApps().length === 0) {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-      })
-    });
-  }
-  return {
-    auth: getAuth(),
-    db: getFirestore()
-  };
-};
+// Load environment variables
+dotenv.config();
 
-export const createAdminUser = async (email: string, password: string) => {
-  const { auth, db } = setupAdmin();
-
-  try {
-    // Create the user in Firebase Auth
-    const userRecord = await auth.createUser({
-      email,
-      password,
-      emailVerified: true
-    });
-
-    // Create the user profile in Firestore
-    const userProfile: UserProfile = {
-      email,
-      role: 'admin',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      passwordUpdated: true
-    };
-
-    await db.collection('users').doc(userRecord.uid).set(userProfile);
-
-    console.log('Successfully created admin user:', userRecord.uid);
-    return userRecord;
-  } catch (error) {
-    console.error('Error creating admin user:', error);
-    throw error;
-  }
-};
-
-export const setupAdminAccount = async () => {
+const setupAdminAccount = async () => {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
 
@@ -66,4 +21,17 @@ export const setupAdminAccount = async () => {
   }
 };
 
-export default setupAdmin;
+// Run this if the file is executed directly
+if (require.main === module) {
+  setupAdminAccount()
+    .then(() => {
+      console.log('Admin setup completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('Admin setup failed:', error);
+      process.exit(1);
+    });
+}
+
+export default setupAdminAccount;
