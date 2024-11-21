@@ -27,6 +27,9 @@ import {
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+// Import Project type
+import type { Project } from '../types';
+
 // Types for better type safety
 export type ClientStatus = 'Active' | 'On Hold' | 'Completed';
 
@@ -355,6 +358,41 @@ export const subscribeToClient = (
     },
     error => {
       console.error('Error fetching client:', error);
+      errorCallback?.(error);
+    }
+  );
+};
+
+// Subscribe to project with detailed logging
+export const subscribeToProject = (
+  clientId: string,
+  projectId: string,
+  callback: (project: Project | null) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  console.log('Setting up project subscription:', { clientId, projectId });
+  
+  return onSnapshot(
+    doc(db, `clients/${clientId}/projects/${projectId}`),
+    (docSnapshot: DocumentSnapshot<DocumentData>) => {
+      if (docSnapshot.exists()) {
+        const projectData = docSnapshot.data();
+        console.log('Project data received:', projectData);
+        
+        const project = {
+          id: docSnapshot.id,
+          ...projectData,
+          tasks: projectData.tasks || []
+        } as Project;
+        
+        callback(project);
+      } else {
+        console.log('Project document does not exist');
+        callback(null);
+      }
+    },
+    error => {
+      console.error('Error in project subscription:', error);
       errorCallback?.(error);
     }
   );

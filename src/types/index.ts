@@ -2,15 +2,15 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed';
+  status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed' | 'On Hold';
   deadline: string;
-  clientId?: string;
-  createdAt?: string;
-  userId?: string;
+  clientId: string;
+  createdAt: string;
+  userId: string;
   tasks: Task[];
-  moodboard: MoodboardItem[];
-  documents: DocumentItem[];
-  comments: Comment[];
+  moodboard?: MoodboardItem[];
+  documents?: DocumentItem[];
+  comments?: Comment[];
   lastUpdated?: string;
 }
 
@@ -80,4 +80,14 @@ export interface Comment {
     url: string;
     name: string;
   }[];
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  description: string;
+  status: 'Active' | 'On Hold' | 'Completed';
+  lastActivity: string;
+  userId: string;
+  projectCount: number;
 }
