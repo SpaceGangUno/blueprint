@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar as CalendarIcon, ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
 import Calendar from 'react-calendar';
 import type { Value } from 'react-calendar/dist/cjs/shared/types';
 import 'react-calendar/dist/Calendar.css';
@@ -9,8 +9,6 @@ import {
   subscribeToClientProjects,
   subscribeToClientEvents,
   addClientProject,
-  updateClientProject,
-  deleteClientProject,
   addClientEvent,
   updateClientEvent,
   deleteClientEvent,
