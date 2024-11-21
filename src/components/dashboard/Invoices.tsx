@@ -11,9 +11,9 @@ import {
   Trash2,
   Search
 } from 'lucide-react';
-import { Invoice } from '../../types';
+import { Invoice, Client } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { db } from '../../config/firebase';
+import { db, subscribeToAllClients } from '../../config/firebase';
 import {
   collection,
   query,
@@ -31,6 +31,7 @@ const Invoices: React.FC = () => {
   const navigate = useNavigate();
   const { user, userProfile, isAdmin } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [clients, setClients] = useState<{ [key: string]: Client }>({});
   const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -42,14 +43,15 @@ const Invoices: React.FC = () => {
       return;
     }
 
-    const q = query(
+    // Subscribe to invoices
+    const invoicesQuery = query(
       collection(db, 'invoices'),
       isAdmin ? orderBy('createdAt', 'desc') : where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(
-      q,
+    const unsubscribeInvoices = onSnapshot(
+      invoicesQuery,
       (snapshot) => {
         const invoiceData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -65,7 +67,25 @@ const Invoices: React.FC = () => {
       }
     );
 
-    return () => unsubscribe();
+    // Subscribe to clients
+    const unsubscribeClients = subscribeToAllClients(
+      (clientsList) => {
+        const clientsMap = clientsList.reduce<{ [key: string]: Client }>((acc, client) => {
+          acc[client.id] = client;
+          return acc;
+        }, {});
+        setClients(clientsMap);
+      },
+      (err) => {
+        console.error('Error fetching clients:', err);
+        setError('Failed to load clients');
+      }
+    );
+
+    return () => {
+      unsubscribeInvoices();
+      unsubscribeClients();
+    };
   }, [user, userProfile, isAdmin, navigate]);
 
   const getStatusColor = (status: Invoice['status']) => {
@@ -197,7 +217,7 @@ const Invoices: React.FC = () => {
                   {invoice.invoiceNumber}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {invoice.client?.name}
+                  {clients[invoice.clientId]?.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${invoice.total.toFixed(2)}
@@ -283,6 +303,7 @@ const Invoices: React.FC = () => {
 
       {showNewInvoiceModal && (
         <NewInvoiceModal
+          clients={clients}
           onClose={() => setShowNewInvoiceModal(false)}
           onInvoiceCreated={() => setShowNewInvoiceModal(false)}
         />

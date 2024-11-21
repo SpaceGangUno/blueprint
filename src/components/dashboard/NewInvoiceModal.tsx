@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Minus } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { Client, Invoice, InvoiceItem } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
@@ -11,8 +11,12 @@ interface NewInvoiceModalProps {
   onInvoiceCreated: () => void;
 }
 
-type InvoiceItemInput = Omit<InvoiceItem, 'id'>;
-type InvoiceItemField = keyof InvoiceItemInput;
+interface InvoiceItemInput {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
 
 const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   clients,
@@ -21,12 +25,14 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [items, setItems] = useState<InvoiceItemInput[]>([
     { description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
+  const [taxRate, setTaxRate] = useState<number>(0);
   const [dueDate, setDueDate] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
-  const [terms, setTerms] = useState<string>('');
+  const [terms, setTerms] = useState<string>('Payment is due within 30 days of invoice date.');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,23 +40,25 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     return quantity * rate;
   };
 
-  const updateItem = (index: number, field: InvoiceItemField, value: string | number) => {
-    const newItems = [...items];
-    const item = { ...newItems[index] };
+  const handleItemUpdate = (index: number, field: keyof InvoiceItemInput, value: string | number) => {
+    setItems(prevItems => {
+      const newItems = [...prevItems];
+      const item = { ...newItems[index] };
 
-    if (field === 'quantity' || field === 'rate') {
-      const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-      item[field] = numValue;
-      item.amount = calculateAmount(
-        field === 'quantity' ? numValue : item.quantity,
-        field === 'rate' ? numValue : item.rate
-      );
-    } else if (field === 'description') {
-      item[field] = value as string;
-    }
+      if (field === 'quantity' || field === 'rate') {
+        const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+        item[field] = numValue;
+        item.amount = calculateAmount(
+          field === 'quantity' ? numValue : item.quantity,
+          field === 'rate' ? numValue : item.rate
+        );
+      } else if (field === 'description') {
+        item.description = value as string;
+      }
 
-    newItems[index] = item;
-    setItems(newItems);
+      newItems[index] = item;
+      return newItems;
+    });
   };
 
   const addItem = () => {
@@ -67,8 +75,18 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     }
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = (): number => {
     return items.reduce((sum, item) => sum + item.amount, 0);
+  };
+
+  const calculateTax = (subtotal: number): number => {
+    return subtotal * (taxRate / 100);
+  };
+
+  const calculateTotal = (): number => {
+    const subtotal = calculateSubtotal();
+    const tax = calculateTax(subtotal);
+    return subtotal + tax;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,28 +112,35 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     setError(null);
 
     try {
-      const total = calculateTotal();
       const now = new Date().toISOString();
       const invoiceNumber = `INV-${Date.now()}`;
+      const subtotal = calculateSubtotal();
+      const tax = calculateTax(subtotal);
+      const total = calculateTotal();
 
       const newInvoice: Omit<Invoice, 'id'> = {
         invoiceNumber,
         clientId: selectedClientId,
+        projectId: selectedProjectId || undefined,
+        userId: user.uid,
         status: 'draft',
         issueDate: now,
         dueDate,
         items: items.map((item, index) => ({
-          ...item,
-          id: `item-${index + 1}`
+          id: `item-${index + 1}`,
+          description: item.description,
+          quantity: item.quantity,
+          rate: item.rate,
+          amount: item.amount
         })),
-        subtotal: total,
-        tax: 0, // You might want to add tax calculation
+        subtotal,
+        tax,
         total,
         notes: notes.trim(),
         terms: terms.trim(),
         createdAt: now,
         updatedAt: now,
-        userId: user.uid
+        client: clients[selectedClientId]
       };
 
       await addDoc(collection(db, 'invoices'), newInvoice);
@@ -199,7 +224,7 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
                     <input
                       type="text"
                       value={item.description}
-                      onChange={(e) => updateItem(index, 'description', e.target.value)}
+                      onChange={(e) => handleItemUpdate(index, 'description', e.target.value)}
                       placeholder="Description"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
@@ -208,7 +233,7 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
                     <input
                       type="number"
                       value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                      onChange={(e) => handleItemUpdate(index, 'quantity', e.target.value)}
                       placeholder="Qty"
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -218,7 +243,7 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
                     <input
                       type="number"
                       value={item.rate}
-                      onChange={(e) => updateItem(index, 'rate', e.target.value)}
+                      onChange={(e) => handleItemUpdate(index, 'rate', e.target.value)}
                       placeholder="Rate"
                       min="0"
                       step="0.01"
@@ -239,7 +264,7 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
                       onClick={() => removeItem(index)}
                       className="text-red-600 hover:text-red-700"
                     >
-                      <Minus className="w-5 h-5" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   )}
                 </div>
@@ -247,11 +272,34 @@ const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tax Rate (%)
+            </label>
+            <input
+              type="number"
+              value={taxRate}
+              onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
+              min="0"
+              max="100"
+              step="0.01"
+              className="w-32 px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+
           <div className="flex justify-end">
             <div className="w-64">
               <div className="flex justify-between py-2">
-                <span className="font-medium">Total:</span>
-                <span className="font-medium">${calculateTotal().toFixed(2)}</span>
+                <span>Subtotal:</span>
+                <span>${calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Tax ({taxRate}%):</span>
+                <span>${calculateTax(calculateSubtotal()).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-2 font-bold">
+                <span>Total:</span>
+                <span>${calculateTotal().toFixed(2)}</span>
               </div>
             </div>
           </div>
