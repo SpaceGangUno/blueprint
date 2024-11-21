@@ -8,10 +8,11 @@ import {
   MoreHorizontal,
   DollarSign,
   Calendar,
-  Building2
+  Building2,
+  Loader
 } from 'lucide-react';
 import { Invoice, Client } from '../../types';
-import { db, auth } from '../../config/firebase';
+import { db } from '../../config/firebase';
 import { 
   collection, 
   query, 
@@ -20,7 +21,9 @@ import {
   doc,
   getDoc,
   updateDoc,
-  DocumentData
+  DocumentData,
+  where,
+  Query
 } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import NewInvoiceModal from './NewInvoiceModal';
@@ -28,7 +31,7 @@ import { downloadInvoicePDF } from '../../utils/generateInvoicePDF';
 
 export default function Invoices() {
   const navigate = useNavigate();
-  const { loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -37,82 +40,86 @@ export default function Invoices() {
   const [processingAction, setProcessingAction] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!auth.currentUser) {
+    if (authLoading) return;
+
+    if (!user) {
+      console.log('No authenticated user, redirecting to login');
       navigate('/login');
       return;
     }
 
+    console.log('Setting up invoice subscription for user:', user.email);
+
+    // Create query based on user role
+    let invoicesQuery: Query;
+    if (isAdmin) {
+      // Admins can see all invoices
+      invoicesQuery = query(
+        collection(db, 'invoices'),
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      // Team members can only see their own invoices
+      invoicesQuery = query(
+        collection(db, 'invoices'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+    }
+
     // Subscribe to invoices
     const unsubscribe = onSnapshot(
-      query(collection(db, 'invoices'), orderBy('createdAt', 'desc')),
-      async (snapshot) => {
-        const invoicesData: Invoice[] = [];
-        const clientIds = new Set<string>();
+      invoicesQuery,
+      {
+        next: async (snapshot) => {
+          console.log('Received invoice snapshot');
+          const invoicesData: Invoice[] = [];
+          const clientIds = new Set<string>();
 
-        snapshot.forEach((doc) => {
-          const invoice = { id: doc.id, ...doc.data() } as Invoice;
-          invoicesData.push(invoice);
-          if (invoice.clientId) {
-            clientIds.add(invoice.clientId);
-          }
-        });
-
-        // Fetch client details for all invoices
-        const clientsData: { [key: string]: Client } = {};
-        for (const clientId of clientIds) {
-          try {
-            const clientDoc = await getDoc(doc(db, 'clients', clientId));
-            if (clientDoc.exists()) {
-              clientsData[clientId] = { 
-                id: clientDoc.id, 
-                ...clientDoc.data() 
-              } as Client;
+          snapshot.forEach((doc) => {
+            const invoice = { id: doc.id, ...doc.data() } as Invoice;
+            invoicesData.push(invoice);
+            if (invoice.clientId) {
+              clientIds.add(invoice.clientId);
             }
-          } catch (err) {
-            console.error('Error fetching client:', err);
-          }
-        }
+          });
 
-        setInvoices(invoicesData);
-        setClients(clientsData);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error fetching invoices:', error);
-        setError('Failed to load invoices');
-        setLoading(false);
+          console.log('Fetched invoices:', invoicesData.length);
+
+          // Fetch client details for all invoices
+          const clientsData: { [key: string]: Client } = {};
+          for (const clientId of clientIds) {
+            try {
+              const clientDoc = await getDoc(doc(db, 'clients', clientId));
+              if (clientDoc.exists()) {
+                clientsData[clientId] = { 
+                  id: clientDoc.id, 
+                  ...clientDoc.data() 
+                } as Client;
+              }
+            } catch (err) {
+              console.error('Error fetching client:', err);
+            }
+          }
+
+          setInvoices(invoicesData);
+          setClients(clientsData);
+          setLoading(false);
+          setError(null);
+        },
+        error: (err) => {
+          console.error('Error fetching invoices:', err);
+          setError('Failed to load invoices. Please try again.');
+          setLoading(false);
+        }
       }
     );
 
-    return () => unsubscribe();
-  }, [navigate]);
-
-  const getStatusColor = (status: Invoice['status']) => {
-    switch (status) {
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800';
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'overdue':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const handleInvoiceCreated = () => {
-    // The invoice list will automatically update through the onSnapshot listener
-    console.log('Invoice created successfully');
-  };
+    return () => {
+      console.log('Cleaning up invoice subscription');
+      unsubscribe();
+    };
+  }, [user, authLoading, navigate, isAdmin]);
 
   const handleDownload = async (invoice: Invoice) => {
     try {
@@ -149,28 +156,41 @@ export default function Invoices() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading invoices...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        {error}
+      <div className="min-h-[calc(100vh-4rem)] p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-red-800 font-medium mb-2">Error Loading Invoices</h3>
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold">Invoices</h1>
-            <p className="text-gray-600 mt-1">Manage and track your invoices</p>
+            <p className="text-gray-600 mt-1">
+              {isAdmin ? 'Manage all invoices' : 'Manage your invoices'}
+            </p>
           </div>
           <button
             onClick={() => setShowNewInvoiceModal(true)}
@@ -182,7 +202,6 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* Invoice List */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -231,12 +250,20 @@ export default function Invoices() {
                     <div className="flex items-center">
                       <DollarSign className="w-5 h-5 text-gray-400 mr-2" />
                       <span className="text-sm text-gray-900">
-                        {formatCurrency(invoice.total)}
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD'
+                        }).format(invoice.total)}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      invoice.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                      invoice.status === 'sent' ? 'bg-blue-100 text-blue-800' :
+                      invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
                       {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                     </span>
                   </td>
@@ -294,11 +321,10 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* New Invoice Modal */}
       {showNewInvoiceModal && (
         <NewInvoiceModal
           onClose={() => setShowNewInvoiceModal(false)}
-          onInvoiceCreated={handleInvoiceCreated}
+          onInvoiceCreated={() => setShowNewInvoiceModal(false)}
           clients={clients}
         />
       )}

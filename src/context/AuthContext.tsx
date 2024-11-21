@@ -1,82 +1,57 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { 
+  User as FirebaseUser,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-interface User {
-  id: string;
+interface User extends FirebaseUser {
+  role?: 'admin' | 'team_member';
   email: string;
-  role: 'admin' | 'team_member' | 'client';
-  createdAt?: string;
-  updatedAt?: string;
-  inviteId?: string;
-  passwordUpdated?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
+  error: string | null;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_EMAIL = 'isaacmazile@gmail.com';
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser && firebaseUser.email) {
-          // Get user profile from Firestore
+      if (firebaseUser) {
+        try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email,
-              role: userData.role,
-              createdAt: userData.createdAt,
-              updatedAt: userData.updatedAt,
-              inviteId: userData.inviteId,
-              passwordUpdated: userData.passwordUpdated
-            });
-          } else {
-            // If no user document exists but it's the admin email, create admin user
-            if (firebaseUser.email === ADMIN_EMAIL) {
-              const adminData = {
-                id: firebaseUser.uid,
-                email: firebaseUser.email,
-                role: 'admin' as const,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                passwordUpdated: true
-              };
-              await setDoc(doc(db, 'users', firebaseUser.uid), adminData);
-              setUser(adminData);
-            } else {
-              setUser(null);
-              console.error('No user document found');
-            }
-          }
-        } else {
-          setUser(null);
+          const userData = userDoc.data();
+          
+          setUser({
+            ...firebaseUser,
+            role: userData?.role
+          } as User);
+          
+          setIsAdmin(userData?.role === 'admin');
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          setError('Failed to load user data');
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
+        setIsAdmin(false);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -84,47 +59,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      setError(null);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseUser = userCredential.user;
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      const userData = userDoc.data();
       
-      if (!firebaseUser.email) {
-        throw new Error('User email not found');
-      }
-
-      // Get user profile from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        setUser({
-          id: firebaseUser.uid,
-          email: firebaseUser.email,
-          role: userData.role,
-          createdAt: userData.createdAt,
-          updatedAt: userData.updatedAt,
-          inviteId: userData.inviteId,
-          passwordUpdated: userData.passwordUpdated
-        });
-      } else if (email === ADMIN_EMAIL) {
-        // Create admin user if it doesn't exist
-        const adminData = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email,
-          role: 'admin' as const,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          passwordUpdated: true
-        };
-        await setDoc(doc(db, 'users', firebaseUser.uid), adminData);
-        setUser(adminData);
-      } else {
-        throw new Error('User document not found');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/invalid-credential') {
-        throw new Error('Invalid email or password');
-      }
-      throw error;
+      setUser({
+        ...userCredential.user,
+        role: userData?.role
+      } as User);
+      
+      setIsAdmin(userData?.role === 'admin');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message);
+      throw err;
     }
   };
 
@@ -132,16 +81,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth);
       setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
+      setIsAdmin(false);
+    } catch (err: any) {
+      console.error('Logout error:', err);
+      setError(err.message);
+      throw err;
     }
   };
 
-  const isAdmin = user?.role === 'admin';
-
   return (
-    <AuthContext.Provider value={{ user, isAdmin, login, logout, loading }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      error,
+      isAdmin,
+      login,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -149,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
