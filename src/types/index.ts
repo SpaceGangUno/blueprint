@@ -2,7 +2,7 @@ export interface Project {
   id: string;
   title: string;
   description: string;
-  status: 'In Progress' | 'Under Review' | 'Completed';
+  status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed';
   deadline: string;
   clientId?: string;
   createdAt?: string;
