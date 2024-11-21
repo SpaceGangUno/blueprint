@@ -7,17 +7,29 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
+    "outDir": "./dist/admin",
     "rootDir": "./src",
+    "declaration": true,
+    "declarationDir": "./dist/admin/types",
+    "sourceMap": true,
     "types": ["node"],
-    "allowJs": true
+    "allowJs": true,
+    "resolveJsonModule": true
   },
   "include": [
     "src/scripts/**/*",
     "src/config/admin-firebase.ts"
   ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "scripts"
+  ],
   "ts-node": {
     "esm": true,
-    "experimentalSpecifiers": true
+    "experimentalSpecifiers": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
   }
 }

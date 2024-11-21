@@ -27,10 +27,6 @@ service cloud.firestore {
       return isAdmin() || isTeamMember();
     }
 
-    function isInvoiceOwner(invoiceData) {
-      return invoiceData.userId == request.auth.uid;
-    }
-
     // Client rules
     match /clients/{clientId} {
       allow create: if hasTeamAccess();
@@ -54,12 +50,15 @@ service cloud.firestore {
       allow create: if isTeamMember() && 
         request.resource.data.userId == request.auth.uid;
       
-      allow read: if isTeamMember() && 
-        resource.data.userId == request.auth.uid;
+      allow read: if isTeamMember() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.assignedTo == request.auth.uid
+      );
       
-      allow update: if isTeamMember() && 
-        resource.data.userId == request.auth.uid && 
-        request.resource.data.userId == request.auth.uid;
+      allow update: if isTeamMember() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.assignedTo == request.auth.uid
+      ) && request.resource.data.userId == resource.data.userId;
       
       allow delete: if isTeamMember() && 
         resource.data.userId == request.auth.uid;
