@@ -1,41 +1,60 @@
-import { auth, db } from '../config/firebase';
+import { auth, db } from '../config/admin-firebase.js';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import * as dotenv from 'dotenv';
+import { User } from 'firebase/auth';
 
-export const createAdminUser = async (email: string, password: string) => {
+// Load environment variables
+dotenv.config();
+
+export const createAdminUser = async (email: string, password: string): Promise<User> => {
   try {
-    console.log('Starting admin user creation...');
+    console.log('\nStarting admin user creation process...');
+    console.log('Email:', email);
     
     // Create the user in Firebase Auth
+    console.log('\nCreating user in Firebase Auth...');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
-    console.log('User created in Firebase Auth:', user.uid);
+    console.log('User created successfully in Firebase Auth');
+    console.log('User ID:', user.uid);
 
     // Create the user document in Firestore with admin role
+    console.log('\nCreating user document in Firestore...');
     const userData = {
       email: user.email,
       role: 'admin',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      passwordUpdated: true
     };
 
-    console.log('Creating user document in Firestore...');
     await setDoc(doc(db, 'users', user.uid), userData);
+    console.log('User document created successfully in Firestore');
 
-    console.log('Admin user created successfully:', {
-      uid: user.uid,
-      email: user.email,
-      role: 'admin'
-    });
+    console.log('\nAdmin user creation completed successfully!');
+    console.log('Summary:');
+    console.log('- User ID:', user.uid);
+    console.log('- Email:', user.email);
+    console.log('- Role: admin');
 
     return user;
   } catch (error: any) {
-    console.error('Error creating admin user:', error.message);
+    console.error('\nError creating admin user:');
+    
     if (error.code === 'auth/email-already-in-use') {
-      console.log('User already exists. Attempting to update role to admin...');
-      // Here you might want to add logic to update an existing user to admin
+      console.error('Email is already in use.');
+      console.log('\nTip: If you need to update an existing user to admin role,');
+      console.log('you can update the user document directly in Firestore.');
+    } else if (error.code === 'auth/invalid-email') {
+      console.error('Invalid email format.');
+    } else if (error.code === 'auth/weak-password') {
+      console.error('Password is too weak. It should be at least 6 characters.');
+    } else {
+      console.error('Unexpected error:', error.message);
+      console.error('Error code:', error.code);
     }
+
     throw error;
   }
 };
