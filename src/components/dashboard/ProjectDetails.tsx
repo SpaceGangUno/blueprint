@@ -59,6 +59,16 @@ export default function ProjectDetails() {
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [expandedTasks, setExpandedTasks] = useState<string[]>([]);
+  const [expandedSubTasks, setExpandedSubTasks] = useState<string[]>([]);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
+  const [addingSubTaskToId, setAddingSubTaskToId] = useState<string | null>(null);
+  const [editingSubTaskId, setEditingSubTaskId] = useState<string | null>(null);
+  const [editingSubTaskText, setEditingSubTaskText] = useState('');
+  const [editingSubTaskNotes, setEditingSubTaskNotes] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingFiles, setUploadingFiles] = useState<{ [key: string]: boolean }>({});
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -164,6 +174,374 @@ export default function ProjectDetails() {
     setShowNewTaskModal(false);
   };
 
+  const toggleSubTaskExpansion = (subTaskId: string) => {
+    setExpandedSubTasks(prev =>
+      prev.includes(subTaskId)
+        ? prev.filter(id => id !== subTaskId)
+        : [...prev, subTaskId]
+    );
+  };
+
+  const addSubTask = async (taskId: string) => {
+    if (!project || !newSubTaskTitle.trim()) return;
+
+    const now = new Date().toISOString();
+    const newSubTask: MiniTask = {
+      id: Date.now().toString(),
+      title: newSubTaskTitle.trim(),
+      completed: false,
+      createdAt: now,
+      updatedAt: now,
+      notes: '',
+      files: []
+    };
+
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            miniTasks: [...(task.miniTasks || []), newSubTask],
+            updatedAt: now
+          }
+        : task
+    );
+
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+    setNewSubTaskTitle('');
+    setAddingSubTaskToId(null);
+  };
+
+  const toggleSubTaskCompletion = async (taskId: string, subTaskId: string) => {
+    if (!project) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            updatedAt: now,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === subTaskId
+                ? { 
+                    ...subTask, 
+                    completed: !subTask.completed,
+                    updatedAt: now
+                  }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({ 
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+  };
+
+  const handleNotesChange = async (taskId: string, subTaskId: string, notes: string) => {
+    if (!project) return;
+
+    const now = new Date().toISOString();
+    const updatedTasks = project.tasks.map(task =>
+      task.id === taskId
+        ? {
+            ...task,
+            updatedAt: now,
+            miniTasks: task.miniTasks.map(subTask =>
+              subTask.id === subTaskId
+                ? {
+                    ...subTask,
+                    notes,
+                    updatedAt: now
+                  }
+                : subTask
+            )
+          }
+        : task
+    );
+
+    await updateProject({
+      tasks: updatedTasks,
+      lastUpdated: now
+    });
+  };
+
+  const handleFileUpload = async (taskId: string, subTaskId: string, files: FileList) => {
+    if (!project || !user || !projectId) {
+      console.error('Missing required data:', { project: !!project, user: !!user, projectId: !!projectId });
+      setUploadError('Missing required data for upload');
+      return;
+    }
+
+    setUploadingFiles(prev => ({ ...prev, [subTaskId]: true }));
+    setUploadError(null);
+
+    const now = new Date().toISOString();
+    const newFiles: SubTaskFile[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log('Processing file:', {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+
+        const path = `projects/${projectId}/subtasks/${subTaskId}/${file.name}`;
+        console.log('Creating storage reference at path:', path);
+        const fileRef = ref(storage, path);
+        
+        console.log('Starting file upload...');
+        try {
+          const snapshot = await uploadBytes(fileRef, file);
+          console.log('Upload completed:', snapshot.metadata);
+          
+          console.log('Getting download URL...');
+          const downloadUrl = await getDownloadURL(snapshot.ref);
+          console.log('Download URL obtained:', downloadUrl);
+          
+          newFiles.push({
+            id: Date.now().toString() + i,
+            name: file.name,
+            url: downloadUrl,
+            type: file.type,
+            uploadedBy: user.email || 'unknown',
+            uploadedAt: now,
+            size: file.size
+          });
+          console.log('File processed successfully');
+        } catch (uploadError: any) {
+          console.error('Error in upload process:', {
+            code: uploadError.code,
+            message: uploadError.message,
+            serverResponse: uploadError.serverResponse
+          });
+          throw uploadError;
+        }
+      }
+
+      console.log('All files processed, updating project...');
+      const updatedTasks = project.tasks.map(task =>
+        task.id === taskId
+          ? {
+              ...task,
+              updatedAt: now,
+              miniTasks: task.miniTasks.map(subTask =>
+                subTask.id === subTaskId
+                  ? {
+                      ...subTask,
+                      files: [...(subTask.files || []), ...newFiles],
+                      updatedAt: now
+                    }
+                  : subTask
+              )
+            }
+          : task
+      );
+
+      await updateProject({
+        tasks: updatedTasks,
+        lastUpdated: now
+      });
+      console.log('Project updated with new files');
+    } catch (err: any) {
+      console.error('Upload error details:', {
+        name: err.name,
+        message: err.message,
+        code: err.code,
+        stack: err.stack
+      });
+      setUploadError(err.message || 'Failed to upload file. Please try again.');
+    } finally {
+      setUploadingFiles(prev => ({ ...prev, [subTaskId]: false }));
+    }
+  };
+
+  const renderSubTask = (parentTask: Task, subTask: MiniTask) => {
+    const isExpanded = expandedSubTasks.includes(subTask.id);
+    const isEditing = editingSubTaskId === subTask.id;
+    const isUploading = uploadingFiles[subTask.id];
+
+    return (
+      <div key={subTask.id} className="border rounded-lg p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3 flex-grow">
+            <button
+              onClick={() => toggleSubTaskCompletion(parentTask.id, subTask.id)}
+              className={`w-5 h-5 rounded border flex items-center justify-center ${
+                subTask.completed
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-300'
+              }`}
+            >
+              {subTask.completed && <Check className="w-3 h-3" />}
+            </button>
+            
+            {isEditing ? (
+              <input
+                type="text"
+                value={editingSubTaskText}
+                onChange={(e) => setEditingSubTaskText(e.target.value)}
+                className="flex-grow px-2 py-1 border rounded"
+                autoFocus
+              />
+            ) : (
+              <span
+                className={`flex-grow cursor-pointer ${subTask.completed ? 'line-through text-gray-500' : ''}`}
+                onClick={() => {
+                  setEditingSubTaskId(subTask.id);
+                  setEditingSubTaskText(subTask.title);
+                  setEditingSubTaskNotes(subTask.notes || '');
+                }}
+              >
+                {subTask.title}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {isEditing ? (
+              <button
+                onClick={async () => {
+                  if (!project) return;
+                  const now = new Date().toISOString();
+                  const updatedTasks = project.tasks.map(task =>
+                    task.id === parentTask.id
+                      ? {
+                          ...task,
+                          updatedAt: now,
+                          miniTasks: task.miniTasks.map(st =>
+                            st.id === subTask.id
+                              ? {
+                                  ...st,
+                                  title: editingSubTaskText,
+                                  notes: editingSubTaskNotes,
+                                  updatedAt: now
+                                }
+                              : st
+                          )
+                        }
+                      : task
+                  );
+                  await updateProject({
+                    tasks: updatedTasks,
+                    lastUpdated: now
+                  });
+                  setEditingSubTaskId(null);
+                  setEditingSubTaskText('');
+                  setEditingSubTaskNotes('');
+                }}
+                className="text-green-600 hover:text-green-700"
+              >
+                <Save className="w-4 h-4" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setEditingSubTaskId(subTask.id);
+                    setEditingSubTaskText(subTask.title);
+                    setEditingSubTaskNotes(subTask.notes || '');
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => toggleSubTaskExpansion(subTask.id)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {isExpanded && (
+          <div className="mt-3 space-y-3 pl-8">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes
+              </label>
+              <textarea
+                value={subTask.notes || ''}
+                onChange={(e) => handleNotesChange(parentTask.id, subTask.id, e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="Add notes here..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Files
+              </label>
+              <div className="space-y-2">
+                {subTask.files?.map(file => (
+                  <a
+                    key={file.id}
+                    href={file.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>{file.name}</span>
+                  </a>
+                ))}
+              </div>
+              <div className="mt-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      handleFileUpload(parentTask.id, subTask.id, e.target.files);
+                    }
+                  }}
+                />
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700"
+                    disabled={isUploading}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                    <span>{isUploading ? 'Uploading...' : 'Attach files'}</span>
+                  </button>
+                  {isUploading && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                  )}
+                </div>
+                {uploadError && (
+                  <p className="text-sm text-red-600 mt-1">{uploadError}</p>
+                )}
+              </div>
+            </div>
+
+            {subTask.updatedAt && (
+              <p className="text-xs text-gray-500">
+                Updated: {new Date(subTask.updatedAt).toLocaleString()}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
@@ -218,11 +596,27 @@ export default function ProjectDetails() {
               {project.tasks?.map(task => (
                 <div key={task.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{task.title}</h3>
-                      {task.description && (
-                        <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-                      )}
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setExpandedTasks(prev => 
+                          prev.includes(task.id)
+                            ? prev.filter(id => id !== task.id)
+                            : [...prev, task.id]
+                        )}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        {expandedTasks.includes(task.id) ? (
+                          <ChevronDown className="w-5 h-5" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5" />
+                        )}
+                      </button>
+                      <div>
+                        <h3 className="font-medium">{task.title}</h3>
+                        {task.description && (
+                          <p className="text-sm text-gray-600">{task.description}</p>
+                        )}
+                      </div>
                     </div>
                     <span className={`px-2 py-1 rounded text-sm ${
                       task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
@@ -232,6 +626,52 @@ export default function ProjectDetails() {
                       {task.status}
                     </span>
                   </div>
+
+                  {expandedTasks.includes(task.id) && (
+                    <div className="mt-4 pl-8 space-y-3">
+                      {task.miniTasks?.map(subTask => renderSubTask(task, subTask))}
+
+                      {addingSubTaskToId === task.id ? (
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            value={newSubTaskTitle}
+                            onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                            placeholder="Enter subtask title"
+                            className="flex-1 border rounded px-3 py-1 text-sm"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addSubTask(task.id);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => addSubTask(task.id)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                          >
+                            Add
+                          </button>
+                          <button
+                            onClick={() => {
+                              setAddingSubTaskToId(null);
+                              setNewSubTaskTitle('');
+                            }}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setAddingSubTaskToId(task.id)}
+                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add subtask</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
               {(!project.tasks || project.tasks.length === 0) && (
