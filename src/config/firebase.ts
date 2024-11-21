@@ -9,22 +9,45 @@ import {
   where,
   type DocumentData,
   type QuerySnapshot,
-  type DocumentSnapshot
+  type DocumentSnapshot,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp
 } from 'firebase/firestore';
-import { type Client } from '../types';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updatePassword,
+  type User
+} from 'firebase/auth';
+import { type Client, type UserProfile } from '../types';
 
 const firebaseConfig = {
-  // Your firebase config here
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-type SnapshotCallback = (clients: Client[]) => void;
+// Type definitions for callbacks
+type SnapshotCallback<T> = (data: T[]) => void;
+type SingleDocCallback<T> = (data: T | null) => void;
 type ErrorCallback = (error: Error) => void;
-type ClientCallback = (client: Client | null) => void;
 
-export const subscribeToAllClients = (onNext: SnapshotCallback, onError: ErrorCallback) => {
+// Client Functions
+export const subscribeToAllClients = (onNext: SnapshotCallback<Client>, onError: ErrorCallback) => {
   const clientsRef = collection(db, 'clients');
   return onSnapshot(
     clientsRef,
@@ -41,7 +64,7 @@ export const subscribeToAllClients = (onNext: SnapshotCallback, onError: ErrorCa
 
 export const subscribeToUserClients = (
   userId: string,
-  onNext: SnapshotCallback,
+  onNext: SnapshotCallback<Client>,
   onError: ErrorCallback
 ) => {
   const clientsRef = collection(db, 'clients');
@@ -61,7 +84,7 @@ export const subscribeToUserClients = (
 
 export const subscribeToClient = (
   clientId: string,
-  onNext: ClientCallback,
+  onNext: SingleDocCallback<Client>,
   onError: ErrorCallback
 ) => {
   const clientRef = doc(db, 'clients', clientId);
@@ -94,4 +117,64 @@ export const getClient = async (clientId: string): Promise<Client | null> => {
   }
   
   return null;
+};
+
+// Team Functions
+export const subscribeToTeamUpdates = (onNext: SnapshotCallback<UserProfile>, onError: ErrorCallback) => {
+  const teamRef = collection(db, 'users');
+  return onSnapshot(
+    teamRef,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const team = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          email: data.email,
+          role: data.role,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          inviteId: data.inviteId,
+          passwordUpdated: data.passwordUpdated,
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          lastLogin: data.lastLogin
+        } as UserProfile;
+      });
+      onNext(team);
+    },
+    onError
+  );
+};
+
+export const sendTeamInvite = async (email: string, role: 'admin' | 'team_member') => {
+  const invitesRef = collection(db, 'invites');
+  const inviteData = {
+    email,
+    role,
+    status: 'pending',
+    createdAt: serverTimestamp()
+  };
+  
+  await addDoc(invitesRef, inviteData);
+};
+
+// Auth Functions
+export const loginWithEmail = (email: string, password: string) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const registerWithEmail = (email: string, password: string) => {
+  return createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const logout = () => {
+  return signOut(auth);
+};
+
+export const resetPassword = (email: string) => {
+  return sendPasswordResetEmail(auth, email);
+};
+
+export const changePassword = (user: User, newPassword: string) => {
+  return updatePassword(user, newPassword);
 };
