@@ -12,7 +12,8 @@ import {
   type DocumentSnapshot,
   addDoc,
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  deleteDoc
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -23,7 +24,7 @@ import {
   updatePassword,
   type User
 } from 'firebase/auth';
-import { type Client, type UserProfile } from '../types';
+import { type Client, type UserProfile, type Project } from '../types';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -115,6 +116,106 @@ export const getClient = async (clientId: string): Promise<Client | null> => {
   }
   
   return null;
+};
+
+// Project Functions
+export const subscribeToClientProjects = (
+  clientId: string,
+  onNext: SnapshotCallback<Project>,
+  onError: ErrorCallback
+) => {
+  const projectsRef = collection(db, 'clients', clientId, 'projects');
+  return onSnapshot(
+    projectsRef,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const projects = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Project[];
+      onNext(projects);
+    },
+    onError
+  );
+};
+
+export const addClientProject = async (clientId: string, project: Omit<Project, 'id'>) => {
+  const projectsRef = collection(db, 'clients', clientId, 'projects');
+  const docRef = await addDoc(projectsRef, {
+    ...project,
+    lastUpdated: serverTimestamp()
+  });
+  return docRef.id;
+};
+
+export const updateClientProject = async (clientId: string, projectId: string, updates: Partial<Project>) => {
+  const projectRef = doc(db, 'clients', clientId, 'projects', projectId);
+  await updateDoc(projectRef, {
+    ...updates,
+    lastUpdated: serverTimestamp()
+  });
+};
+
+export const deleteClientProject = async (clientId: string, projectId: string) => {
+  const projectRef = doc(db, 'clients', clientId, 'projects', projectId);
+  await deleteDoc(projectRef);
+};
+
+// Calendar Event Types and Functions
+export type EventType = 'meeting' | 'deadline' | 'milestone' | 'other';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  start: string;
+  end: string;
+  allDay?: boolean;
+  type: EventType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const subscribeToClientEvents = (
+  clientId: string,
+  onNext: SnapshotCallback<CalendarEvent>,
+  onError: ErrorCallback
+) => {
+  const eventsRef = collection(db, 'clients', clientId, 'events');
+  return onSnapshot(
+    eventsRef,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const events = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      })) as CalendarEvent[];
+      onNext(events);
+    },
+    onError
+  );
+};
+
+export const addClientEvent = async (clientId: string, event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const eventsRef = collection(db, 'clients', clientId, 'events');
+  const now = new Date().toISOString();
+  const docRef = await addDoc(eventsRef, {
+    ...event,
+    createdAt: now,
+    updatedAt: now
+  });
+  return docRef.id;
+};
+
+export const updateClientEvent = async (clientId: string, eventId: string, updates: Partial<CalendarEvent>) => {
+  const eventRef = doc(db, 'clients', clientId, 'events', eventId);
+  await updateDoc(eventRef, {
+    ...updates,
+    updatedAt: new Date().toISOString()
+  });
+};
+
+export const deleteClientEvent = async (clientId: string, eventId: string) => {
+  const eventRef = doc(db, 'clients', clientId, 'events', eventId);
+  await deleteDoc(eventRef);
 };
 
 // Team Functions
