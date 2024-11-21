@@ -3,8 +3,10 @@ import { Mail, X } from 'lucide-react';
 import { createTeamMember, subscribeToTeamMembers } from '../../config/firebase';
 import { auth } from '../../config/firebase';
 import { type UserProfile } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 const TeamView: React.FC = () => {
+  const { isAdmin } = useAuth();
   const [teamMembers, setTeamMembers] = useState<UserProfile[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -13,22 +15,20 @@ const TeamView: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    // Only subscribe if user is authenticated
     if (!auth.currentUser) return;
 
     const unsubscribe = subscribeToTeamMembers(
-      (members) => {
-        console.log('Received team members:', members); // Debug log
+      (members: UserProfile[]) => {
         setTeamMembers(members);
       },
-      (error) => {
+      (error: Error) => {
         console.error('Error fetching team members:', error);
         setError('Failed to load team members');
       }
     );
 
     return () => unsubscribe();
-  }, [auth.currentUser]); // Add auth.currentUser as dependency
+  }, [auth.currentUser]);
 
   const handleAddTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +72,14 @@ const TeamView: React.FC = () => {
       setSuccess('');
     }
   };
+
+  if (!isAdmin) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+        You don't have permission to access this page.
+      </div>
+    );
+  }
 
   return (
     <div>

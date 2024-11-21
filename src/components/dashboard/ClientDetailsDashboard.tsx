@@ -20,12 +20,16 @@ import EventModal from './modals/EventModal';
 import ProjectModal from './modals/ProjectModal';
 import MonthCalendar from './calendar/MonthCalendar';
 
+interface ProjectWithPermissions extends Project {
+  userPermission?: ProjectPermission;
+}
+
 const ClientDetailsDashboard: React.FC = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [client, setClient] = useState<Client | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithPermissions[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [permissions, setPermissions] = useState<Record<string, ProjectPermission>>({});
   const [date, setDate] = useState<Date>(new Date());
@@ -73,7 +77,10 @@ const ClientDetailsDashboard: React.FC = () => {
             permissions[project.id]?.access === 'read' || 
             permissions[project.id]?.access === 'write' || 
             permissions[project.id]?.access === 'admin'
-          );
+          ).map(project => ({
+            ...project,
+            userPermission: permissions[project.id]
+          }));
           setProjects(accessibleProjects);
         }
       },
@@ -95,7 +102,8 @@ const ClientDetailsDashboard: React.FC = () => {
 
   const hasWriteAccess = (projectId: string) => {
     if (isAdmin) return true;
-    return permissions[projectId]?.access === 'write' || permissions[projectId]?.access === 'admin';
+    const permission = permissions[projectId]?.access;
+    return permission === 'write' || permission === 'admin';
   };
 
   const hasAdminAccess = (projectId: string) => {
