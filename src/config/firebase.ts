@@ -25,6 +25,7 @@ import {
   DocumentData,
   getDoc
 } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Types for better type safety
 export type ClientStatus = 'Active' | 'On Hold' | 'Completed';
@@ -69,6 +70,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Enable auth persistence
 setPersistence(auth, browserLocalPersistence)
