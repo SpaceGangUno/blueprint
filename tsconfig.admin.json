@@ -9,12 +9,16 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist/admin",
     "rootDir": "./src",
+    "composite": true,
     "declaration": true,
-    "declarationDir": "./dist/admin/types",
+    "declarationMap": true,
     "sourceMap": true,
     "types": ["node"],
     "allowJs": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src/scripts/**/*",
@@ -22,14 +26,9 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "scripts"
+    "dist"
   ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifiers": true,
-    "compilerOptions": {
-      "module": "ESNext"
-    }
-  }
+  "references": [
+    { "path": "./tsconfig.json" }
+  ]
 }

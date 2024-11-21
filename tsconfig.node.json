@@ -6,14 +6,13 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "target": "ESNext",
-    "lib": ["ESNext"],
-    "types": ["node"],
-    "esModuleInterop": true
+    "types": ["node", "vite/client"]
   },
   "include": [
-    "src/scripts/**/*",
-    "src/config/admin-firebase.ts",
     "vite.config.ts"
+  ],
+  "exclude": [
+    "src/scripts/**/*",
+    "src/config/admin-firebase.ts"
   ]
 }

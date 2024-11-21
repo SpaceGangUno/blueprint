@@ -1,109 +1,114 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Invoice, Client } from '../types';
 
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
-
-export const generateInvoicePDF = (invoice: Invoice, client: Client) => {
+export const generateInvoicePDF = (invoice: Invoice): jsPDF => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
-  
-  // Add company logo/name
-  doc.setFontSize(24);
-  doc.setTextColor(66, 135, 245); // Blue color
-  doc.text('Blueprint Studios', 20, 20);
+  const margin = 20;
 
-  // Add invoice details
-  doc.setFontSize(12);
-  doc.setTextColor(0);
-  doc.text(`Invoice #: ${invoice.number}`, 20, 40);
-  doc.text(`Date: ${new Date(invoice.issueDate).toLocaleDateString()}`, 20, 47);
-  doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, 20, 54);
+  // Company Info
+  doc.setFontSize(20);
+  doc.text('Blueprint Studios', margin, 20);
+  doc.setFontSize(10);
+  doc.text('123 Design Street', margin, 30);
+  doc.text('San Francisco, CA 94105', margin, 35);
+  doc.text('United States', margin, 40);
+  doc.text('contact@blueprintstudios.tech', margin, 45);
 
-  // Add client details
-  doc.setFontSize(12);
-  doc.text('Bill To:', 20, 70);
-  doc.text(client.name, 20, 77);
-  if (client.billingAddress) {
-    doc.text(client.billingAddress.street, 20, 84);
-    doc.text(`${client.billingAddress.city}, ${client.billingAddress.state} ${client.billingAddress.zip}`, 20, 91);
-    doc.text(client.billingAddress.country, 20, 98);
+  // Invoice Details
+  doc.setFontSize(16);
+  doc.text('INVOICE', pageWidth - margin - 40, 20);
+  doc.setFontSize(10);
+  doc.text(`Invoice #: ${invoice.invoiceNumber}`, pageWidth - margin - 40, 30);
+  doc.text(`Issue Date: ${new Date(invoice.issueDate).toLocaleDateString()}`, pageWidth - margin - 40, 35);
+  doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, pageWidth - margin - 40, 40);
+
+  // Client Info
+  if (invoice.client) {
+    doc.setFontSize(12);
+    doc.text('Bill To:', margin, 60);
+    doc.setFontSize(10);
+    doc.text(invoice.client.name, margin, 70);
+    if (invoice.client.billingAddress) {
+      doc.text(invoice.client.billingAddress.street, margin, 75);
+      doc.text(`${invoice.client.billingAddress.city}, ${invoice.client.billingAddress.state} ${invoice.client.billingAddress.zip}`, margin, 80);
+      doc.text(invoice.client.billingAddress.country, margin, 85);
+    }
+    if (invoice.client.billingEmail) {
+      doc.text(`Email: ${invoice.client.billingEmail}`, margin, 90);
+    }
   }
-  if (client.billingEmail) {
-    doc.text(client.billingEmail, 20, 105);
-  }
 
-  // Add invoice items
-  const tableColumn = ['Description', 'Quantity', 'Rate', 'Amount'];
-  const tableRows = invoice.items.map(item => [
+  // Items Table
+  const tableData = invoice.items.map(item => [
     item.description,
     item.quantity.toString(),
     `$${item.rate.toFixed(2)}`,
     `$${item.amount.toFixed(2)}`
   ]);
 
-  doc.autoTable({
-    startY: 120,
-    head: [tableColumn],
-    body: tableRows,
+  autoTable(doc, {
+    startY: 100,
+    head: [['Description', 'Quantity', 'Rate', 'Amount']],
+    body: tableData,
     theme: 'striped',
     headStyles: {
-      fillColor: [66, 135, 245],
+      fillColor: [66, 133, 244],
       textColor: 255,
-      fontSize: 12
+      fontStyle: 'bold'
     },
     styles: {
       fontSize: 10,
       cellPadding: 5
+    },
+    columnStyles: {
+      0: { cellWidth: 'auto' },
+      1: { cellWidth: 30, halign: 'center' },
+      2: { cellWidth: 40, halign: 'right' },
+      3: { cellWidth: 40, halign: 'right' }
     }
   });
 
-  // Add totals
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  
-  doc.text('Subtotal:', 120, finalY);
-  doc.text(`$${invoice.subtotal.toFixed(2)}`, pageWidth - 30, finalY, { align: 'right' });
-  
-  doc.text('Tax:', 120, finalY + 7);
-  doc.text(`$${invoice.tax.toFixed(2)}`, pageWidth - 30, finalY + 7, { align: 'right' });
-  
-  doc.setFontSize(14);
-  doc.text('Total:', 120, finalY + 17);
-  doc.text(`$${invoice.total.toFixed(2)}`, pageWidth - 30, finalY + 17, { align: 'right' });
-
-  // Add notes and terms
-  if (invoice.notes) {
-    doc.setFontSize(12);
-    doc.text('Notes:', 20, finalY + 35);
-    doc.setFontSize(10);
-    doc.text(invoice.notes, 20, finalY + 42);
-  }
-
-  if (invoice.terms) {
-    doc.setFontSize(12);
-    doc.text('Terms:', 20, finalY + 60);
-    doc.setFontSize(10);
-    doc.text(invoice.terms, 20, finalY + 67);
-  }
-
-  // Add footer
+  // Summary
+  const finalY = (doc as any).lastAutoTable.finalY || 150;
   doc.setFontSize(10);
+  doc.text('Subtotal:', pageWidth - margin - 80, finalY + 20);
+  doc.text(`$${invoice.subtotal.toFixed(2)}`, pageWidth - margin - 20, finalY + 20, { align: 'right' });
+  
+  doc.text('Tax:', pageWidth - margin - 80, finalY + 30);
+  doc.text(`$${invoice.tax.toFixed(2)}`, pageWidth - margin - 20, finalY + 30, { align: 'right' });
+  
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Total:', pageWidth - margin - 80, finalY + 40);
+  doc.text(`$${invoice.total.toFixed(2)}`, pageWidth - margin - 20, finalY + 40, { align: 'right' });
+
+  // Notes
+  if (invoice.notes) {
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text('Notes:', margin, finalY + 60);
+    doc.text(invoice.notes, margin, finalY + 70);
+  }
+
+  // Terms
+  if (invoice.terms) {
+    doc.setFontSize(10);
+    doc.text('Terms & Conditions:', margin, finalY + 90);
+    doc.text(invoice.terms, margin, finalY + 100);
+  }
+
+  // Footer
+  doc.setFontSize(8);
   doc.setTextColor(128);
-  doc.text('Thank you for your business!', pageWidth / 2, doc.internal.pageSize.height - 20, { align: 'center' });
+  doc.text(`Invoice #${invoice.invoiceNumber} - Generated on ${new Date().toLocaleDateString()}`, margin, doc.internal.pageSize.height - 10);
 
   return doc;
 };
 
-export const downloadInvoicePDF = (invoice: Invoice, client: Client) => {
-  const doc = generateInvoicePDF(invoice, client);
-  doc.save(`invoice-${invoice.number}.pdf`);
-};
-
-export const getInvoicePDFBlob = async (invoice: Invoice, client: Client): Promise<Blob> => {
-  const doc = generateInvoicePDF(invoice, client);
-  return doc.output('blob');
+export const downloadInvoicePDF = (invoice: Invoice): void => {
+  const doc = generateInvoicePDF(invoice);
+  const fileName = `invoice-${invoice.invoiceNumber}.pdf`;
+  doc.save(fileName);
 };
