@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus,
-  FileText,
   Download,
   Send,
   Check,
@@ -12,7 +11,7 @@ import {
   Trash2,
   Search
 } from 'lucide-react';
-import { Invoice, Client } from '../../types';
+import { Invoice } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
 import {
@@ -23,45 +22,35 @@ import {
   onSnapshot,
   doc,
   updateDoc,
-  deleteDoc,
-  DocumentData,
-  QuerySnapshot
+  deleteDoc
 } from 'firebase/firestore';
 import NewInvoiceModal from './NewInvoiceModal';
 import { downloadInvoicePDF } from '../../utils/generateInvoicePDF';
 
 const Invoices: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userProfile, isAdmin } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [clientsArray, setClientsArray] = useState<Client[]>([]);
   const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Convert clients array to object with id as key
-  const clients = clientsArray.reduce<{ [key: string]: Client }>((acc, client) => {
-    acc[client.id] = client;
-    return acc;
-  }, {});
-
   useEffect(() => {
-    if (!user) {
+    if (!user || !userProfile) {
       navigate('/login');
       return;
     }
 
-    // Subscribe to invoices
-    const invoicesQuery = query(
+    const q = query(
       collection(db, 'invoices'),
-      where('userId', '==', user.uid),
+      isAdmin ? orderBy('createdAt', 'desc') : where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribeInvoices = onSnapshot(
-      invoicesQuery,
-      (snapshot: QuerySnapshot<DocumentData>) => {
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
         const invoiceData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -69,40 +58,15 @@ const Invoices: React.FC = () => {
         setInvoices(invoiceData);
         setLoading(false);
       },
-      (err: Error) => {
+      (err) => {
         console.error('Error fetching invoices:', err);
         setError('Failed to load invoices');
         setLoading(false);
       }
     );
 
-    // Subscribe to clients
-    const clientsQuery = query(
-      collection(db, 'clients'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribeClients = onSnapshot(
-      clientsQuery,
-      (snapshot: QuerySnapshot<DocumentData>) => {
-        const clientData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Client[];
-        setClientsArray(clientData);
-      },
-      (err: Error) => {
-        console.error('Error fetching clients:', err);
-        setError('Failed to load clients');
-      }
-    );
-
-    return () => {
-      unsubscribeInvoices();
-      unsubscribeClients();
-    };
-  }, [user, navigate]);
+    return () => unsubscribe();
+  }, [user, userProfile, isAdmin, navigate]);
 
   const getStatusColor = (status: Invoice['status']) => {
     switch (status) {
@@ -148,8 +112,13 @@ const Invoices: React.FC = () => {
     }
   };
 
-  const handleDownload = (invoice: Invoice) => {
-    downloadInvoicePDF(invoice);
+  const handleDownload = async (invoice: Invoice) => {
+    try {
+      await downloadInvoicePDF(invoice);
+    } catch (err) {
+      console.error('Error downloading invoice:', err);
+      setError('Failed to download invoice');
+    }
   };
 
   const filteredInvoices = invoices.filter(invoice =>
@@ -314,7 +283,6 @@ const Invoices: React.FC = () => {
 
       {showNewInvoiceModal && (
         <NewInvoiceModal
-          clients={clients}
           onClose={() => setShowNewInvoiceModal(false)}
           onInvoiceCreated={() => setShowNewInvoiceModal(false)}
         />
