@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2 } from 'lucide-react';
 import { type Client, subscribeToAllClients, subscribeToUserClients } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import NewClientModal from './NewClientModal';
+import EditClientModal from './EditClientModal';
 
 const ClientDashboard: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -10,6 +11,7 @@ const ClientDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +46,10 @@ const ClientDashboard: React.FC = () => {
 
   const handleClientCreated = () => {
     setShowNewClientModal(false);
+  };
+
+  const handleClientUpdated = () => {
+    setSelectedClient(null);
   };
 
   if (loading) {
@@ -101,13 +107,20 @@ const ClientDashboard: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="ml-4 flex-shrink-0">
+                    <div className="ml-4 flex items-center space-x-3">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                         ${client.status === 'Active' ? 'bg-green-100 text-green-800' : 
                           client.status === 'On Hold' ? 'bg-yellow-100 text-yellow-800' : 
                           'bg-gray-100 text-gray-800'}`}>
                         {client.status}
                       </span>
+                      <button
+                        onClick={() => setSelectedClient(client)}
+                        className="p-1 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+                        title="Edit client"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
@@ -115,6 +128,12 @@ const ClientDashboard: React.FC = () => {
                       <span className="mr-2">Projects:</span>
                       <span className="font-medium">{client.projectCount}</span>
                     </div>
+                    {client.description && (
+                      <div className="mt-1">
+                        <span className="mr-2">Description:</span>
+                        <span>{client.description}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </li>
@@ -127,6 +146,14 @@ const ClientDashboard: React.FC = () => {
         <NewClientModal
           onClose={() => setShowNewClientModal(false)}
           onClientCreated={handleClientCreated}
+        />
+      )}
+
+      {selectedClient && (
+        <EditClientModal
+          client={selectedClient}
+          onClose={() => setSelectedClient(null)}
+          onClientUpdated={handleClientUpdated}
         />
       )}
     </div>
