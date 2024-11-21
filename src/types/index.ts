@@ -4,9 +4,9 @@ export interface Project {
   description: string;
   status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed' | 'On Hold';
   deadline: string;
-  clientId: string;
-  createdAt: string;
-  userId: string;
+  clientId?: string;
+  createdAt?: string;
+  userId?: string;
   tasks: Task[];
   moodboard?: MoodboardItem[];
   documents?: DocumentItem[];
@@ -90,4 +90,44 @@ export interface Client {
   lastActivity: string;
   userId: string;
   projectCount: number;
+  billingAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  billingEmail?: string;
+  billingPhone?: string;
+  taxId?: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+  projectId?: string;
+  taskId?: string;
+}
+
+export interface Invoice {
+  id: string;
+  number: string;
+  clientId: string;
+  projectId?: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue';
+  issueDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  notes?: string;
+  terms?: string;
+  createdAt: string;
+  updatedAt: string;
+  paidAt?: string;
+  sentAt?: string;
 }

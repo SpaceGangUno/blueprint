@@ -47,6 +47,18 @@ service cloud.firestore {
       }
     }
 
+    // Invoice rules
+    match /invoices/{invoiceId} {
+      allow create: if isAuthenticated() && hasTeamAccess();
+      allow read: if isAuthenticated() && (
+        hasTeamAccess() || 
+        exists(/databases/$(database)/documents/clients/$(resource.data.clientId)) && 
+        resource.data.clientId == request.auth.uid
+      );
+      allow update: if isAuthenticated() && hasTeamAccess();
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+
     // User profile rules
     match /users/{userId} {
       // Allow creation of first admin user or if user is creating their own document

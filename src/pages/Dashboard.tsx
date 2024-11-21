@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { 
-  Layout, Grid, MessageSquare, Users, Settings, LogOut,
-  Activity
+  Layout, 
+  Grid, 
+  MessageSquare, 
+  Users, 
+  Settings, 
+  LogOut,
+  Activity,
+  FileText
 } from 'lucide-react';
 import Overview from '../components/dashboard/Overview';
 import ClientBoard from '../components/dashboard/ClientBoard';
@@ -10,6 +16,7 @@ import ClientDashboard from '../components/dashboard/ClientDashboard';
 import ProjectDetails from '../components/dashboard/ProjectDetails';
 import Messages from '../components/dashboard/Messages';
 import TeamView from '../components/dashboard/TeamView';
+import Invoices from '../components/dashboard/Invoices';
 import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
@@ -74,6 +81,13 @@ export default function Dashboard() {
             <span>Clients</span>
           </Link>
           <Link
+            to="/dashboard/invoices"
+            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+          >
+            <FileText className="w-5 h-5" />
+            <span>Invoices</span>
+          </Link>
+          <Link
             to="/dashboard/messages"
             className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
           >
@@ -117,6 +131,7 @@ export default function Dashboard() {
             <Route path="/client/:clientId/project/:projectId/*" element={<ProjectDetails />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/team" element={<TeamView />} />
+            <Route path="/invoices" element={<Invoices />} />
           </Routes>
         </div>
       </main>
