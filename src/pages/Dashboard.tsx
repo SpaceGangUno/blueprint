@@ -6,10 +6,11 @@ import ClientDetailsDashboard from '../components/dashboard/ClientDetailsDashboa
 import TeamView from '../components/dashboard/TeamView';
 import Overview from '../components/dashboard/Overview';
 import Invoices from '../components/dashboard/Invoices';
+import PermissionsManager from '../components/dashboard/PermissionsManager';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
 
   // Determine active tab based on current path
@@ -18,6 +19,7 @@ const Dashboard: React.FC = () => {
     if (path.includes('/clients/')) return 'clients';
     if (path.includes('/team')) return 'team';
     if (path.includes('/invoices')) return 'invoices';
+    if (path.includes('/permissions')) return 'permissions';
     if (path === '/dashboard') return 'overview';
     return '';
   };
@@ -87,6 +89,18 @@ const Dashboard: React.FC = () => {
                 >
                   Invoices
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/dashboard/permissions"
+                    className={`${
+                      activeTab === 'permissions'
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                  >
+                    Permissions
+                  </Link>
+                )}
               </div>
             </div>
             <div className="flex items-center">
@@ -112,6 +126,7 @@ const Dashboard: React.FC = () => {
             <Route path="/clients/:clientId" element={<ClientDetailsDashboard />} />
             <Route path="/team" element={<TeamView />} />
             <Route path="/invoices" element={<Invoices />} />
+            <Route path="/permissions" element={<PermissionsManager />} />
           </Routes>
         </div>
       </main>

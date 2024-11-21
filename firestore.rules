@@ -27,6 +27,39 @@ service cloud.firestore {
       return isAdmin() || isTeamMember();
     }
 
+    // Project permission helper functions
+    function getUserProjectPermission(projectId) {
+      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return user.projectPermissions[projectId].access;
+    }
+
+    function hasProjectReadAccess(projectId) {
+      return isAdmin() || (
+        isTeamMember() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)).data.projectPermissions[projectId] &&
+        (getUserProjectPermission(projectId) in ['read', 'write', 'admin'])
+      );
+    }
+
+    function hasProjectWriteAccess(projectId) {
+      return isAdmin() || (
+        isTeamMember() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)).data.projectPermissions[projectId] &&
+        (getUserProjectPermission(projectId) in ['write', 'admin'])
+      );
+    }
+
+    function hasProjectAdminAccess(projectId) {
+      return isAdmin() || (
+        isTeamMember() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)).data.projectPermissions[projectId] &&
+        getUserProjectPermission(projectId) == 'admin'
+      );
+    }
+
     // Client rules
     match /clients/{clientId} {
       allow create: if hasTeamAccess();
@@ -36,8 +69,15 @@ service cloud.firestore {
       // Projects nested under clients
       match /projects/{projectId} {
         allow create: if hasTeamAccess();
-        allow read: if hasTeamAccess();
-        allow update, delete: if hasTeamAccess();
+        allow read: if hasProjectReadAccess(projectId);
+        allow update: if hasProjectWriteAccess(projectId);
+        allow delete: if hasProjectAdminAccess(projectId);
+
+        // Project tasks
+        match /tasks/{taskId} {
+          allow read: if hasProjectReadAccess(projectId);
+          allow write: if hasProjectWriteAccess(projectId);
+        }
       }
     }
 

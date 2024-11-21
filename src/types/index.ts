@@ -5,7 +5,7 @@ export interface Project {
   description: string;
   status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed' | 'On Hold';
   lastUpdated: string;
-  deadline: string;  // Add deadline field
+  deadline: string;
   tasks: Task[];
 }
 
@@ -113,6 +113,18 @@ export interface UserProfile {
   displayName?: string;
   photoURL?: string;
   lastLogin?: string;
+  projectPermissions?: ProjectPermissions;
+}
+
+// New Permission Types
+export interface ProjectPermissions {
+  [projectId: string]: ProjectPermission;
+}
+
+export interface ProjectPermission {
+  access: 'read' | 'write' | 'admin';
+  grantedAt: string;
+  grantedBy: string;
 }
 
 // Message Types
