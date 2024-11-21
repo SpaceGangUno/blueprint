@@ -28,17 +28,17 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
-    "src/**/*.jsx",
-    "vite.config.ts"
+    "src/**/*.jsx"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "build",
-    "scripts"
+    "scripts",
+    "src/scripts",
+    "src/config/admin-firebase.ts"
   ],
   "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.admin.json" }
+    { "path": "./tsconfig.node.json" }
   ]
 }

@@ -27,8 +27,11 @@
     "src/scripts/createAdmin.ts",
     "src/types/index.ts"
   ],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "./tsconfig.json" }
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/components",
+    "src/pages",
+    "src/utils"
   ]
 }
