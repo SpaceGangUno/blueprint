@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit2, Trash2, ChevronDown, ChevronRight, Check } from 'lucide-react';
-import Calendar from 'react-calendar';
-import type { Value } from 'react-calendar/dist/cjs/shared/types';
-import 'react-calendar/dist/Calendar.css';
 import { 
   subscribeToClient, 
   subscribeToClientProjects,
@@ -19,6 +16,7 @@ import {
 import { type Client, type Project, type Task } from '../../types';
 import EventModal from './modals/EventModal';
 import ProjectModal from './modals/ProjectModal';
+import MonthCalendar from './calendar/MonthCalendar';
 
 const ClientDetailsDashboard: React.FC = () => {
   const { clientId } = useParams();
@@ -26,7 +24,7 @@ const ClientDetailsDashboard: React.FC = () => {
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [date, setDate] = useState<Value>(new Date());
+  const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
@@ -172,69 +170,24 @@ const ClientDetailsDashboard: React.FC = () => {
       </div>
 
       {/* Calendar Section */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Calendar</h3>
-          <button
-            onClick={() => {
-              setSelectedEvent(undefined);
-              setShowEventModal(true);
-            }}
-            className="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Event
-          </button>
-        </div>
-        <Calendar
-          onChange={(value: Value) => setDate(value)}
-          value={date}
-          className="w-full border-0"
-          tileContent={({ date }) => {
-            const dayEvents = events.filter(event => {
-              const eventDate = new Date(event.start);
-              return eventDate.toDateString() === date.toDateString();
-            });
-            return dayEvents.length > 0 ? (
-              <div className="absolute bottom-0 left-0 right-0">
-                <div className="h-1 bg-blue-500 rounded-full mx-1"></div>
-              </div>
-            ) : null;
+      <div className="relative">
+        <button
+          onClick={() => {
+            setSelectedEvent(undefined);
+            setShowEventModal(true);
           }}
+          className="absolute top-4 right-4 z-10 flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Event
+        </button>
+        <MonthCalendar
+          date={date}
+          events={events}
+          onDateChange={setDate}
+          onSelectEvent={setSelectedEvent}
+          onDeleteEvent={handleDeleteEvent}
         />
-        <div className="mt-4 space-y-2">
-          {events
-            .filter(event => {
-              if (!date) return false;
-              const eventDate = new Date(event.start);
-              return eventDate.toDateString() === (date as Date).toDateString();
-            })
-            .map(event => (
-              <div key={event.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                <div>
-                  <h4 className="font-medium">{event.title}</h4>
-                  <p className="text-sm text-gray-500">{event.description}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => {
-                      setSelectedEvent(event);
-                      setShowEventModal(true);
-                    }}
-                    className="p-1 text-gray-500 hover:text-gray-700"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteEvent(event.id)}
-                    className="p-1 text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-        </div>
       </div>
 
       {/* Projects Section */}
