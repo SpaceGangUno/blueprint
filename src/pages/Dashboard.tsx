@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ClientDashboard from '../components/dashboard/ClientDashboard';
-import ProjectBoard from '../components/dashboard/ProjectBoard';
 import TeamView from '../components/dashboard/TeamView';
 import Overview from '../components/dashboard/Overview';
 import Invoices from '../components/dashboard/Invoices';
-import Messages from '../components/dashboard/Messages';
 
-type TabType = 'overview' | 'projects' | 'clients' | 'team' | 'invoices' | 'messages';
+type TabType = 'overview' | 'clients' | 'team' | 'invoices';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -32,16 +30,12 @@ const Dashboard: React.FC = () => {
     switch (activeTab) {
       case 'overview':
         return <Overview />;
-      case 'projects':
-        return <ProjectBoard />;
       case 'clients':
         return <ClientDashboard />;
       case 'team':
         return <TeamView />;
       case 'invoices':
         return <Invoices />;
-      case 'messages':
-        return <Messages />;
       default:
         return <Overview />;
     }
@@ -66,16 +60,6 @@ const Dashboard: React.FC = () => {
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Overview
-                </button>
-                <button
-                  onClick={() => setActiveTab('projects')}
-                  className={`${
-                    activeTab === 'projects'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-                >
-                  Projects
                 </button>
                 <button
                   onClick={() => setActiveTab('clients')}
@@ -106,16 +90,6 @@ const Dashboard: React.FC = () => {
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Invoices
-                </button>
-                <button
-                  onClick={() => setActiveTab('messages')}
-                  className={`${
-                    activeTab === 'messages'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-                >
-                  Messages
                 </button>
               </div>
             </div>
