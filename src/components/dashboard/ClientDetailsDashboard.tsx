@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, ChevronDown, ChevronRight, Check } from 'lucide-react';
 import Calendar from 'react-calendar';
 import type { Value } from 'react-calendar/dist/cjs/shared/types';
 import 'react-calendar/dist/Calendar.css';
@@ -9,124 +9,16 @@ import {
   subscribeToClientProjects,
   subscribeToClientEvents,
   addClientProject,
+  updateClientProject,
+  deleteClientProject,
   addClientEvent,
   updateClientEvent,
   deleteClientEvent,
-  type CalendarEvent,
-  type EventType
+  type CalendarEvent
 } from '../../config/firebase';
-import { type Client, type Project } from '../../types';
-
-interface EventModalProps {
-  event?: CalendarEvent;
-  onClose: () => void;
-  onSave: (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
-}
-
-const EventModal: React.FC<EventModalProps> = ({ event, onClose, onSave }) => {
-  const [form, setForm] = useState({
-    title: event?.title || '',
-    description: event?.description || '',
-    start: event?.start || new Date().toISOString().split('T')[0],
-    end: event?.end || new Date().toISOString().split('T')[0],
-    allDay: event?.allDay || false,
-    type: event?.type || 'other' as EventType
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(form);
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">{event ? 'Edit Event' : 'New Event'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              rows={3}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Start Date</label>
-              <input
-                type="date"
-                value={form.start}
-                onChange={e => setForm({ ...form, start: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">End Date</label>
-              <input
-                type="date"
-                value={form.end}
-                onChange={e => setForm({ ...form, end: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              checked={form.allDay}
-              onChange={e => setForm({ ...form, allDay: e.target.checked })}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label className="ml-2 block text-sm text-gray-900">All Day</label>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Type</label>
-            <select
-              value={form.type}
-              onChange={e => setForm({ ...form, type: e.target.value as EventType })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="meeting">Meeting</option>
-              <option value="deadline">Deadline</option>
-              <option value="milestone">Milestone</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+import { type Client, type Project, type Task } from '../../types';
+import EventModal from './modals/EventModal';
+import ProjectModal from './modals/ProjectModal';
 
 const ClientDetailsDashboard: React.FC = () => {
   const { clientId } = useParams();
@@ -139,6 +31,9 @@ const ClientDetailsDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(undefined);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>(undefined);
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!clientId) return;
@@ -202,20 +97,38 @@ const ClientDetailsDashboard: React.FC = () => {
     }
   };
 
-  const handleAddProject = async () => {
+  const handleAddProject = async (projectData: Omit<Project, 'id'>) => {
     if (!clientId) return;
     try {
-      const newProject: Omit<Project, 'id'> = {
-        title: 'New Project',
-        description: '',
-        status: 'Sourcing',
-        lastUpdated: new Date().toISOString(),
-        tasks: []
-      };
-      await addClientProject(clientId, newProject);
+      await addClientProject(clientId, projectData);
     } catch (error) {
       console.error('Error adding project:', error);
     }
+  };
+
+  const handleUpdateProject = async (projectData: Omit<Project, 'id'>) => {
+    if (!clientId || !selectedProject) return;
+    try {
+      await updateClientProject(clientId, selectedProject.id, projectData);
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!clientId) return;
+    try {
+      await deleteClientProject(clientId, projectId);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
+  };
+
+  const toggleTaskExpansion = (projectId: string) => {
+    setExpandedTasks(prev => ({
+      ...prev,
+      [projectId]: !prev[projectId]
+    }));
   };
 
   if (loading) {
@@ -329,7 +242,10 @@ const ClientDetailsDashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-medium text-gray-900">Projects</h2>
           <button
-            onClick={handleAddProject}
+            onClick={() => {
+              setSelectedProject(undefined);
+              setShowProjectModal(true);
+            }}
             className="flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -344,19 +260,83 @@ const ClientDetailsDashboard: React.FC = () => {
               {projects.map((project) => (
                 <div key={project.id} className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">{project.title}</h3>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => toggleTaskExpansion(project.id)}
+                          className="p-1 hover:bg-gray-200 rounded"
+                        >
+                          {expandedTasks[project.id] ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
+                        <h3 className="text-lg font-medium text-gray-900">{project.title}</h3>
+                      </div>
                       <p className="mt-1 text-sm text-gray-500">{project.description}</p>
                     </div>
-                    <span className={`px-2 py-1 text-sm font-medium rounded-full
-                      ${project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                        project.status === 'Sourcing' ? 'bg-purple-100 text-purple-800' :
-                        project.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                        project.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'}`}>
-                      {project.status}
-                    </span>
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-2 py-1 text-sm font-medium rounded-full
+                        ${project.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                          project.status === 'Sourcing' ? 'bg-purple-100 text-purple-800' :
+                          project.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                          project.status === 'Under Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'}`}>
+                        {project.status}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setShowProjectModal(true);
+                        }}
+                        className="p-1 text-gray-500 hover:text-gray-700"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProject(project.id)}
+                        className="p-1 text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
+
+                  {expandedTasks[project.id] && (
+                    <div className="mt-4 pl-6 space-y-3">
+                      {project.tasks.map((task: Task) => (
+                        <div key={task.id} className="border-l-2 border-gray-200 pl-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium">{task.title}</h4>
+                              <p className="text-sm text-gray-500">{task.description}</p>
+                            </div>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full
+                              ${task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                                task.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                'bg-gray-100 text-gray-800'}`}>
+                              {task.status}
+                            </span>
+                          </div>
+
+                          {task.miniTasks.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {task.miniTasks.map(miniTask => (
+                                <div key={miniTask.id} className="flex items-center space-x-2 text-sm">
+                                  <Check className={`w-4 h-4 ${miniTask.completed ? 'text-green-500' : 'text-gray-400'}`} />
+                                  <span className={miniTask.completed ? 'line-through text-gray-500' : ''}>
+                                    {miniTask.title}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="mt-2 text-sm text-gray-500">
                     Last Updated: {new Date(project.lastUpdated).toLocaleDateString()}
                   </div>
@@ -375,6 +355,17 @@ const ClientDetailsDashboard: React.FC = () => {
             setSelectedEvent(undefined);
           }}
           onSave={selectedEvent ? handleUpdateEvent : handleAddEvent}
+        />
+      )}
+
+      {showProjectModal && (
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => {
+            setShowProjectModal(false);
+            setSelectedProject(undefined);
+          }}
+          onSave={selectedProject ? handleUpdateProject : handleAddProject}
         />
       )}
     </div>
