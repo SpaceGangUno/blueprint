@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { subscribeToUserClients, subscribeToAllClients, type Client } from '../../config/firebase';
+import { subscribeToUserClients, subscribeToAllClients } from '../../config/firebase';
+import { type Client } from '../../types';
 
 const ClientBoard: React.FC = () => {
   const navigate = useNavigate();
