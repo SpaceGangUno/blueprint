@@ -108,7 +108,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow create: if isAuthenticated() && (
         !exists(/databases/$(database)/documents/users/$(request.auth.uid)) || 
-        request.auth.uid == userId
+        request.auth.uid == userId ||
+        isAdmin()
       );
       allow read: if isAuthenticated() && (isOwner(userId) || hasTeamAccess());
       allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
@@ -120,6 +121,14 @@ service cloud.firestore {
       allow create: if isAdmin();
       allow read: if hasTeamAccess();
       allow update: if hasTeamAccess();
+      allow delete: if isAdmin();
+    }
+
+    // Invites collection rules
+    match /invites/{inviteId} {
+      allow create: if isAdmin();
+      allow read: if isAdmin();
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
   }
