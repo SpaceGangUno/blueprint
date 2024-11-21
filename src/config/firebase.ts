@@ -13,7 +13,8 @@ import {
   addDoc,
   updateDoc,
   serverTimestamp,
-  deleteDoc
+  deleteDoc,
+  setDoc
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -245,17 +246,38 @@ export const subscribeToTeamMembers = (onNext: SnapshotCallback<UserProfile>, on
   );
 };
 
-export const sendTeamInvite = async (email: string) => {
-  const invitesRef = collection(db, 'invites');
-  const inviteData = {
-    email,
-    role: 'team_member' as const,
-    status: 'pending',
-    createdAt: serverTimestamp()
-  };
-  
-  await addDoc(invitesRef, inviteData);
-  return { message: 'Invitation sent successfully' };
+// New function to create team member
+export const createTeamMember = async (email: string) => {
+  try {
+    // Generate a random password for initial account creation
+    const tempPassword = Math.random().toString(36).slice(-8);
+    
+    // Create the user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, tempPassword);
+    const userId = userCredential.user.uid;
+
+    // Create the user profile in Firestore
+    const userProfile: UserProfile = {
+      id: userId,
+      email,
+      role: 'team_member',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      passwordUpdated: false,
+      projectPermissions: {}
+    };
+
+    // Save user profile to Firestore
+    await setDoc(doc(db, 'users', userId), userProfile);
+
+    // Send password reset email so user can set their own password
+    await sendPasswordResetEmail(auth, email);
+
+    return { message: 'Team member created successfully' };
+  } catch (error: any) {
+    console.error('Error creating team member:', error);
+    throw new Error(error.message || 'Failed to create team member');
+  }
 };
 
 export const updateTeamMemberAccount = async (userId: string, password: string) => {

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Mail, X } from 'lucide-react';
-import { sendTeamInvite, subscribeToTeamMembers } from '../../config/firebase';
+import { createTeamMember, subscribeToTeamMembers } from '../../config/firebase';
 import { auth } from '../../config/firebase';
 import { type UserProfile } from '../../types';
 
 const TeamView: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<UserProfile[]>([]);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -30,15 +30,15 @@ const TeamView: React.FC = () => {
     return () => unsubscribe();
   }, [auth.currentUser]); // Add auth.currentUser as dependency
 
-  const handleInvite = async (e: React.FormEvent) => {
+  const handleAddTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail) {
+    if (!email) {
       setError('Please enter an email address');
       return;
     }
 
     if (!auth.currentUser) {
-      setError('You must be logged in to invite team members');
+      setError('You must be logged in to add team members');
       return;
     }
 
@@ -47,22 +47,18 @@ const TeamView: React.FC = () => {
     setSuccess('');
 
     try {
-      const result = await sendTeamInvite(inviteEmail);
-      
-      // Store the email for verification
-      window.localStorage.setItem('emailForSignIn', inviteEmail);
-      
+      const result = await createTeamMember(email);
       setSuccess(result.message);
-      setInviteEmail('');
+      setEmail('');
       
       // Close modal after short delay
       setTimeout(() => {
-        setShowInviteModal(false);
+        setShowAddModal(false);
         setSuccess('');
       }, 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to send invitation. Please try again.');
-      console.error('Invite error:', err);
+      setError(err.message || 'Failed to create team member. Please try again.');
+      console.error('Create team member error:', err);
     } finally {
       setLoading(false);
     }
@@ -70,8 +66,8 @@ const TeamView: React.FC = () => {
 
   const closeModal = () => {
     if (!loading) {
-      setShowInviteModal(false);
-      setInviteEmail('');
+      setShowAddModal(false);
+      setEmail('');
       setError('');
       setSuccess('');
     }
@@ -82,14 +78,14 @@ const TeamView: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Team Members</h1>
         <button 
-          onClick={() => setShowInviteModal(true)}
+          onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Add Team Member
         </button>
       </div>
 
-      {error && !showInviteModal && (
+      {error && !showAddModal && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
           {error}
         </div>
@@ -146,8 +142,8 @@ const TeamView: React.FC = () => {
         )}
       </div>
 
-      {/* Invite Modal */}
-      {showInviteModal && (
+      {/* Add Team Member Modal */}
+      {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
@@ -161,7 +157,7 @@ const TeamView: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleInvite}>
+            <form onSubmit={handleAddTeamMember}>
               <div className="mb-4">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
@@ -169,15 +165,15 @@ const TeamView: React.FC = () => {
                 <input
                   type="email"
                   id="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   required
                   disabled={loading}
                   placeholder="Enter team member's email"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  An account will be created and the team member will be notified to set their password.
+                  An account will be created and the team member will receive an email to set their password.
                 </p>
               </div>
 
