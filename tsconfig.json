@@ -4,7 +4,7 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,11 +18,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node", "react", "react-dom"],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/custom.d.ts"
-    ],
+    "types": ["vite/client", "node"],
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
