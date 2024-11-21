@@ -46,20 +46,20 @@ const ClientDetailsDashboard: React.FC = () => {
 
     // Fetch user permissions
     if (!isAdmin) {
-      getUserPermissions(user.uid).then(perms => {
+      getUserPermissions(user.uid).then((perms: Record<string, ProjectPermission>) => {
         setPermissions(perms);
-      }).catch(error => {
+      }).catch((error: Error) => {
         console.error('Error fetching permissions:', error);
       });
     }
 
     const unsubscribeClient = subscribeToClient(
       clientId,
-      (updatedClient) => {
+      (updatedClient: Client | null) => {
         setClient(updatedClient);
         setLoading(false);
       },
-      (error) => {
+      (error: Error) => {
         console.error('Error fetching client:', error);
         setError('Failed to load client details');
         setLoading(false);
@@ -68,7 +68,7 @@ const ClientDetailsDashboard: React.FC = () => {
 
     const unsubscribeProjects = subscribeToClientProjects(
       clientId,
-      (updatedProjects) => {
+      (updatedProjects: Project[]) => {
         // Filter projects based on permissions if not admin
         if (isAdmin) {
           setProjects(updatedProjects);
@@ -84,13 +84,13 @@ const ClientDetailsDashboard: React.FC = () => {
           setProjects(accessibleProjects);
         }
       },
-      (error) => console.error('Error fetching projects:', error)
+      (error: Error) => console.error('Error fetching projects:', error)
     );
 
     const unsubscribeEvents = subscribeToClientEvents(
       clientId,
-      (updatedEvents) => setEvents(updatedEvents),
-      (error) => console.error('Error fetching events:', error)
+      (updatedEvents: CalendarEvent[]) => setEvents(updatedEvents),
+      (error: Error) => console.error('Error fetching events:', error)
     );
 
     return () => {
@@ -102,8 +102,7 @@ const ClientDetailsDashboard: React.FC = () => {
 
   const hasWriteAccess = (projectId: string) => {
     if (isAdmin) return true;
-    const permission = permissions[projectId]?.access;
-    return permission === 'write' || permission === 'admin';
+    return permissions[projectId]?.access === 'write' || permissions[projectId]?.access === 'admin';
   };
 
   const hasAdminAccess = (projectId: string) => {

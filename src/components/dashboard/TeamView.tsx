@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, X } from 'lucide-react';
-import { createTeamMember, subscribeToTeamMembers } from '../../config/firebase';
-import { auth } from '../../config/firebase';
+import { createTeamMember, subscribeToTeamMembers, auth } from '../../config/firebase';
 import { type UserProfile } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 

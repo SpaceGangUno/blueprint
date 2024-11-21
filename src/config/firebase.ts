@@ -346,6 +346,22 @@ export const createTeamMember = async (email: string) => {
   }
 };
 
+// Update team member account
+export const updateTeamMemberAccount = async (userId: string, password: string) => {
+  const userRef = doc(db, 'users', userId);
+  
+  // Update the user's password in Firebase Auth
+  if (auth.currentUser) {
+    await updatePassword(auth.currentUser, password);
+  }
+  
+  // Update the user's status in Firestore
+  await updateDoc(userRef, {
+    passwordUpdated: true,
+    updatedAt: serverTimestamp()
+  });
+};
+
 // Auth Functions
 export const loginWithEmail = (email: string, password: string) => {
   return signInWithEmailAndPassword(auth, email, password);

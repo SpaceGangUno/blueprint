@@ -21,11 +21,11 @@ const ClientDashboard: React.FC = () => {
 
     const unsubscribe = isAdmin
       ? subscribeToAllClients(
-          (updatedClients) => {
+          (updatedClients: Client[]) => {
             setClients(updatedClients);
             setLoading(false);
           },
-          (error) => {
+          (error: Error) => {
             console.error('Error fetching clients:', error);
             setError('Failed to load clients');
             setLoading(false);
@@ -33,11 +33,11 @@ const ClientDashboard: React.FC = () => {
         )
       : subscribeToAccessibleClients(
           user.uid,
-          (updatedClients) => {
+          (updatedClients: Client[]) => {
             setClients(updatedClients);
             setLoading(false);
           },
-          (error) => {
+          (error: Error) => {
             console.error('Error fetching clients:', error);
             setError('Failed to load clients');
             setLoading(false);
