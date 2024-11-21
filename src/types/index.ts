@@ -71,7 +71,7 @@ export interface Invoice {
   id: string;
   invoiceNumber: string;
   clientId: string;
-  projectId?: string;  // Optional since not all invoices might be tied to a project
+  projectId?: string;
   userId: string;
   status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
   issueDate: string;
@@ -94,4 +94,37 @@ export interface InvoiceItem {
   quantity: number;
   rate: number;
   amount: number;
+}
+
+// User Types
+export interface UserProfile {
+  email: string;
+  role: 'admin' | 'team_member';
+  createdAt: string;
+  updatedAt?: string;
+  inviteId?: string;
+  passwordUpdated?: boolean;
+  displayName?: string;
+  photoURL?: string;
+  lastLogin?: string;
+}
+
+// Message Types
+export interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  content: string;
+  createdAt: string;
+  read: boolean;
+  attachments?: MessageAttachment[];
+}
+
+export interface MessageAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  uploadedAt: string;
 }

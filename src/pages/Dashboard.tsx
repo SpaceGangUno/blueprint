@@ -1,140 +1,146 @@
-import { useState } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { 
-  Layout, 
-  Grid, 
-  MessageSquare, 
-  Users, 
-  Settings, 
-  LogOut,
-  Activity,
-  FileText
-} from 'lucide-react';
-import Overview from '../components/dashboard/Overview';
-import ClientBoard from '../components/dashboard/ClientBoard';
-import ClientDashboard from '../components/dashboard/ClientDashboard';
-import ProjectDetails from '../components/dashboard/ProjectDetails';
-import Messages from '../components/dashboard/Messages';
-import TeamView from '../components/dashboard/TeamView';
-import Invoices from '../components/dashboard/Invoices';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ClientDashboard from '../components/dashboard/ClientDashboard';
+import ProjectBoard from '../components/dashboard/ProjectBoard';
+import TeamView from '../components/dashboard/TeamView';
+import Overview from '../components/dashboard/Overview';
+import Invoices from '../components/dashboard/Invoices';
+import Messages from '../components/dashboard/Messages';
 
-export default function Dashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, isAdmin, logout } = useAuth();
+type TabType = 'overview' | 'projects' | 'clients' | 'team' | 'invoices' | 'messages';
+
+const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <Overview />;
+      case 'projects':
+        return <ProjectBoard />;
+      case 'clients':
+        return <ClientDashboard />;
+      case 'team':
+        return <TeamView />;
+      case 'invoices':
+        return <Invoices />;
+      case 'messages':
+        return <Messages />;
+      default:
+        return <Overview />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation */}
-      <header className="bg-white shadow-sm fixed w-full z-40">
-        <div className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="text-gray-500 hover:text-gray-900"
-            >
-              <Layout className="w-6 h-6" />
-            </button>
-            <div className="ml-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">BS</span>
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <span className="text-xl font-bold text-blue-600">Blueprint Studios</span>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`${
+                    activeTab === 'overview'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab('projects')}
+                  className={`${
+                    activeTab === 'projects'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Projects
+                </button>
+                <button
+                  onClick={() => setActiveTab('clients')}
+                  className={`${
+                    activeTab === 'clients'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Clients
+                </button>
+                <button
+                  onClick={() => setActiveTab('team')}
+                  className={`${
+                    activeTab === 'team'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Team
+                </button>
+                <button
+                  onClick={() => setActiveTab('invoices')}
+                  className={`${
+                    activeTab === 'invoices'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Invoices
+                </button>
+                <button
+                  onClick={() => setActiveTab('messages')}
+                  className={`${
+                    activeTab === 'messages'
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                >
+                  Messages
+                </button>
               </div>
             </div>
-          </div>
-          <div className="flex items-center">
-            {user && (
-              <span className="text-sm text-gray-600 mr-4">
-                {user.email}
-              </span>
-            )}
+            <div className="flex items-center">
+              <button
+                onClick={() => {
+                  // Handle logout
+                  navigate('/login');
+                }}
+                className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Sidebar */}
-      <aside className={`fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <nav className="flex flex-col h-full p-4">
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <Activity className="w-5 h-5" />
-            <span>Overview</span>
-          </Link>
-          <Link
-            to="/dashboard/clients"
-            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <Grid className="w-5 h-5" />
-            <span>Clients</span>
-          </Link>
-          <Link
-            to="/dashboard/invoices"
-            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <FileText className="w-5 h-5" />
-            <span>Invoices</span>
-          </Link>
-          <Link
-            to="/dashboard/messages"
-            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <MessageSquare className="w-5 h-5" />
-            <span>Messages</span>
-          </Link>
-          {isAdmin && (
-            <Link
-              to="/dashboard/team"
-              className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-            >
-              <Users className="w-5 h-5" />
-              <span>Team</span>
-            </Link>
-          )}
-          <div className="flex-grow" />
-          <Link
-            to="/dashboard/settings"
-            className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-          >
-            <Settings className="w-5 h-5" />
-            <span>Settings</span>
-          </Link>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Logout</span>
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className={`pt-16 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-200 ease-in-out`}>
-        <div className="p-6">
-          <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/clients" element={<ClientBoard />} />
-            <Route path="/client/:clientId" element={<ClientDashboard />} />
-            <Route path="/client/:clientId/project/:projectId/*" element={<ProjectDetails />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/team" element={<TeamView />} />
-            <Route path="/invoices" element={<Invoices />} />
-          </Routes>
+      <main className="py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {renderContent()}
         </div>
       </main>
     </div>
   );
-}
+};
+
+export default Dashboard;
