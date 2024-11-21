@@ -4,6 +4,7 @@ import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.NODE_ENV === 'production' ? 'https://blueprintstudios.tech/' : '/',
   plugins: [
     react({
       jsxRuntime: 'automatic',
@@ -21,13 +22,24 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom']
+    include: ['react', 'react-dom', 'jspdf', 'jspdf-autotable', 'lucide-react'],
+    exclude: ['firebase', 'firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage']
   },
   build: {
     sourcemap: true,
-    commonjsOptions: {
-      include: [/node_modules/],
-      extensions: ['.js', '.cjs']
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html')
+      },
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+          'pdf': ['jspdf', 'jspdf-autotable']
+        }
+      },
+      external: ['firebase']
     }
   },
   server: {
