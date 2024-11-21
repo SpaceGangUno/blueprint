@@ -2,10 +2,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { UserProfile } from '../types';
 
@@ -17,6 +18,12 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+}
+
+interface ExtendedUser extends User {
+  role?: string;
+  id?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +37,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,13 +45,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             const profile = userDoc.data() as UserProfile;
+            const extendedUser = {
+              ...user,
+              role: profile.role,
+              id: user.uid
+            };
+            setUser(extendedUser);
             setUserProfile(profile);
             setIsAdmin(profile.role === 'admin');
           }
@@ -52,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Error fetching user profile:', err);
         }
       } else {
+        setUser(null);
         setUserProfile(null);
         setIsAdmin(false);
       }
@@ -70,12 +82,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (userDoc.exists()) {
         const profile = userDoc.data() as UserProfile;
+        const extendedUser = {
+          ...userCredential.user,
+          role: profile.role,
+          id: userCredential.user.uid
+        };
+        setUser(extendedUser);
         setUserProfile(profile);
         setIsAdmin(profile.role === 'admin');
       }
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to log in');
+      throw err;
+    }
+  };
+
+  const register = async (email: string, password: string) => {
+    try {
+      setError(null);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      const userData: UserProfile = {
+        email,
+        role: 'team_member',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        passwordUpdated: true
+      };
+
+      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
+      
+      const extendedUser = {
+        ...userCredential.user,
+        role: userData.role,
+        id: userCredential.user.uid
+      };
+      setUser(extendedUser);
+      setUserProfile(userData);
+      setIsAdmin(false);
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Failed to register');
       throw err;
     }
   };
@@ -94,13 +142,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const value = {
-    user,
+    user: user as User | null,
     userProfile,
     loading,
     error,
     isAdmin,
     login,
-    logout
+    logout,
+    register
   };
 
   return (

@@ -1,9 +1,7 @@
-// Previous imports remain the same...
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   createUserWithEmailAndPassword,
-  User,
   updatePassword
 } from 'firebase/auth';
 import { 
@@ -25,14 +23,17 @@ import {
 import { getStorage } from 'firebase/storage';
 import { Project } from '../types';
 
-// Previous type definitions remain the same...
+// Types
 export interface UserProfile {
+  id?: string;
   email: string;
   role: 'team_member' | 'admin';
   createdAt: string;
   inviteId?: string;
   passwordUpdated?: boolean;
   updatedAt?: string;
+  displayName?: string;
+  photoURL?: string;
 }
 
 export type ClientStatus = 'Active' | 'On Hold' | 'Completed';
@@ -40,11 +41,18 @@ export type ClientStatus = 'Active' | 'On Hold' | 'Completed';
 export interface Client {
   id: string;
   name: string;
-  description: string;
+  email: string;
+  phone?: string;
   status: ClientStatus;
-  lastActivity: string;
-  userId: string;
   projectCount: number;
+  description?: string;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
   billingAddress?: {
     street: string;
     city: string;
@@ -53,8 +61,10 @@ export interface Client {
     country: string;
   };
   billingEmail?: string;
-  billingPhone?: string;
   taxId?: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
 }
 
 // Firebase config
@@ -73,125 +83,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Previous subscription functions remain the same...
-
-// Project subscription
-export const subscribeToProject = (
-  clientId: string,
-  projectId: string,
-  callback: (project: Project | null) => void,
-  errorCallback?: (error: Error) => void
-) => {
-  console.log('Setting up project subscription:', { clientId, projectId });
-  
-  return onSnapshot(
-    doc(db, `clients/${clientId}/projects/${projectId}`),
-    {
-      next: (docSnapshot: DocumentSnapshot<DocumentData>) => {
-        if (docSnapshot.exists()) {
-          const projectData = docSnapshot.data();
-          console.log('Project data received:', projectData);
-          
-          const project: Project = {
-            id: docSnapshot.id,
-            ...projectData,
-            tasks: projectData.tasks || []
-          } as Project;
-          
-          callback(project);
-        } else {
-          console.log('Project document does not exist');
-          callback(null);
-        }
-      },
-      error: (error: Error) => {
-        console.error('Error in project subscription:', error);
-        errorCallback?.(error);
-      }
-    }
-  );
-};
-
-// Previous exports remain the same...
-export const subscribeToUserClients = (
-  userId: string,
-  callback: (clients: Client[]) => void,
-  errorCallback?: (error: Error) => void
-) => {
-  const clientsQuery = query(
-    collection(db, 'clients'),
-    where('userId', '==', userId),
-    orderBy('lastActivity', 'desc'),
-    limit(20)
-  );
-
-  return onSnapshot(
-    clientsQuery,
-    (snapshot: QuerySnapshot<DocumentData>) => {
-      const clients = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Client));
-      callback(clients);
-    },
-    error => {
-      console.error('Error fetching clients:', error);
-      errorCallback?.(error);
-    }
-  );
-};
-
-export const subscribeToAllClients = (
-  callback: (clients: Client[]) => void,
-  errorCallback?: (error: Error) => void
-) => {
-  const clientsQuery = query(
-    collection(db, 'clients'),
-    orderBy('lastActivity', 'desc'),
-    limit(20)
-  );
-
-  return onSnapshot(
-    clientsQuery,
-    (snapshot: QuerySnapshot<DocumentData>) => {
-      const clients = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Client));
-      callback(clients);
-    },
-    error => {
-      console.error('Error fetching clients:', error);
-      errorCallback?.(error);
-    }
-  );
-};
-
-export const subscribeToClient = (
-  clientId: string,
-  callback: (client: Client | null) => void,
-  errorCallback?: (error: Error) => void
-) => {
-  return onSnapshot(
-    doc(db, 'clients', clientId),
-    (doc: DocumentSnapshot<DocumentData>) => {
-      if (doc.exists()) {
-        const client = {
-          id: doc.id,
-          ...doc.data()
-        } as Client;
-        callback(client);
-      } else {
-        callback(null);
-      }
-    },
-    error => {
-      console.error('Error fetching client:', error);
-      errorCallback?.(error);
-    }
-  );
-};
-
+// Team management functions
 export const sendTeamInvite = async (email: string): Promise<{ success: boolean; message: string }> => {
   try {
     const tempPassword = Math.random().toString(36).slice(-8);
@@ -242,6 +134,62 @@ export const updateTeamMemberAccount = async (
   }
 };
 
+// Client subscriptions
+export const subscribeToUserClients = (
+  userId: string,
+  callback: (clients: Client[]) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  const clientsQuery = query(
+    collection(db, 'clients'),
+    where('userId', '==', userId),
+    orderBy('updatedAt', 'desc'),
+    limit(20)
+  );
+
+  return onSnapshot(
+    clientsQuery,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const clients = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Client));
+      callback(clients);
+    },
+    error => {
+      console.error('Error fetching clients:', error);
+      errorCallback?.(error);
+    }
+  );
+};
+
+export const subscribeToAllClients = (
+  callback: (clients: Client[]) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  const clientsQuery = query(
+    collection(db, 'clients'),
+    orderBy('updatedAt', 'desc'),
+    limit(20)
+  );
+
+  return onSnapshot(
+    clientsQuery,
+    (snapshot: QuerySnapshot<DocumentData>) => {
+      const clients = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Client));
+      callback(clients);
+    },
+    error => {
+      console.error('Error fetching clients:', error);
+      errorCallback?.(error);
+    }
+  );
+};
+
+// Team member subscriptions
 export const subscribeToTeamMembers = (
   callback: (members: UserProfile[]) => void,
   errorCallback?: (error: Error) => void
@@ -258,11 +206,46 @@ export const subscribeToTeamMembers = (
       const members = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      } as UserProfile & { id: string }));
+      } as UserProfile));
       callback(members);
     },
     error => {
       console.error('Error fetching team members:', error);
+      errorCallback?.(error);
+    }
+  );
+};
+
+// Project subscriptions
+export const subscribeToProject = (
+  clientId: string,
+  projectId: string,
+  callback: (project: Project | null) => void,
+  errorCallback?: (error: Error) => void
+) => {
+  console.log('Setting up project subscription:', { clientId, projectId });
+  
+  return onSnapshot(
+    doc(db, `clients/${clientId}/projects/${projectId}`),
+    (docSnapshot: DocumentSnapshot<DocumentData>) => {
+      if (docSnapshot.exists()) {
+        const projectData = docSnapshot.data();
+        console.log('Project data received:', projectData);
+        
+        const project = {
+          id: docSnapshot.id,
+          ...projectData,
+          tasks: projectData.tasks || []
+        } as Project;
+        
+        callback(project);
+      } else {
+        console.log('Project document does not exist');
+        callback(null);
+      }
+    },
+    error => {
+      console.error('Error in project subscription:', error);
       errorCallback?.(error);
     }
   );

@@ -1,155 +1,118 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Activity, FileText, Mail, AlertCircle, CheckCircle,
-  Clock, ArrowUp, ArrowRight, Search, Bell, User
-} from 'lucide-react';
+import React from 'react';
+import { Activity, FileText, Mail, User } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
-export default function Overview() {
-  const [searchQuery, setSearchQuery] = useState('');
+const Overview: React.FC = () => {
+  const { userProfile } = useAuth();
 
-  const teamHighlights = [
-    { name: 'Sarah', avatar: 'https://ui-avatars.com/api/?name=Sarah&background=eef2ff&color=3b82f6', status: 'online' },
-    { name: 'Michael', avatar: 'https://ui-avatars.com/api/?name=Michael&background=eef2ff&color=3b82f6' },
-    { name: 'Emily', avatar: 'https://ui-avatars.com/api/?name=Emily&background=eef2ff&color=3b82f6', status: 'online' },
-    { name: 'David', avatar: 'https://ui-avatars.com/api/?name=David&background=eef2ff&color=3b82f6' },
-    { name: 'Jessica', avatar: 'https://ui-avatars.com/api/?name=Jessica&background=eef2ff&color=3b82f6', status: 'online' }
+  const stats = [
+    {
+      title: 'Active Projects',
+      value: '12',
+      icon: <Activity className="w-6 h-6 text-blue-500" />,
+      change: '+2 this month'
+    },
+    {
+      title: 'Documents',
+      value: '34',
+      icon: <FileText className="w-6 h-6 text-green-500" />,
+      change: '+5 this week'
+    },
+    {
+      title: 'Messages',
+      value: '8',
+      icon: <Mail className="w-6 h-6 text-yellow-500" />,
+      change: '3 unread'
+    },
+    {
+      title: 'Team Members',
+      value: '6',
+      icon: <User className="w-6 h-6 text-purple-500" />,
+      change: '+1 this week'
+    }
   ];
 
-  const monthlyStats = {
-    totalValue: '1250k',
-    lowestValue: '210k',
-    highestValue: '764k',
-    averageValue: '250k',
-    graphData: [300, 420, 380, 470, 600, 550, 680, 500, 450]
-  };
-
   return (
-    <div className="space-y-6 p-6">
-      {/* Top Bar */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-          />
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
-        </div>
-        <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-            <Bell className="w-5 h-5" />
-          </button>
-          <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-            <User className="w-5 h-5" />
-          </button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Welcome back, {userProfile?.displayName || 'User'}</h2>
+          <p className="text-gray-600">Here's what's happening with your projects today.</p>
         </div>
       </div>
 
-      {/* Team Highlights */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">Team Highlights</h2>
-        <div className="flex space-x-4">
-          {teamHighlights.map((member, index) => (
-            <div key={index} className="relative">
-              <img
-                src={member.avatar}
-                alt={member.name}
-                className="w-12 h-12 rounded-full border-2 border-white"
-              />
-              {member.status === 'online' && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
-              )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <div key={index} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-gray-50 rounded-lg">
+                {stat.icon}
+              </div>
+              <span className="text-sm text-gray-500">{stat.change}</span>
             </div>
-          ))}
-        </div>
+            <h3 className="text-2xl font-bold">{stat.value}</h3>
+            <p className="text-gray-600">{stat.title}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Statistics Graph */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">Project Statistics</h2>
-          <div className="flex space-x-2">
-            <button className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg">Monthly</button>
-            <button className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">Annual</button>
-          </div>
-        </div>
-        
-        <div className="h-64 relative">
-          {/* Graph visualization */}
-          <div className="absolute inset-0 flex items-end justify-between px-4">
-            {monthlyStats.graphData.map((value, index) => (
-              <div
-                key={index}
-                className="w-8 bg-blue-500 rounded-t-lg opacity-80 hover:opacity-100 transition-all"
-                style={{ height: `${(value / 700) * 100}%` }}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-600">Total Value</p>
-            <p className="text-xl font-bold text-blue-600">{monthlyStats.totalValue}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">Lowest Value</p>
-            <p className="text-xl font-bold text-red-500">{monthlyStats.lowestValue}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">Highest Value</p>
-            <p className="text-xl font-bold text-green-500">{monthlyStats.highestValue}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">Average Value</p>
-            <p className="text-xl font-bold text-gray-900">{monthlyStats.averageValue}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Calendar Section */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">Schedule</h2>
-        <div className="grid grid-cols-7 gap-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-            <div key={day} className="text-center text-sm text-gray-600">
-              {day}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div>
+                <p className="text-sm">New project created: Website Redesign</p>
+                <p className="text-xs text-gray-500">2 hours ago</p>
+              </div>
             </div>
-          ))}
-          {Array.from({ length: 7 }).map((_, index) => (
-            <button
-              key={index}
-              className={`p-2 rounded-lg text-center ${
-                index === 2 ? 'bg-blue-500 text-white' : 'hover:bg-gray-50'
-              }`}
-            >
-              {index + 5}
-            </button>
-          ))}
+            <div className="flex items-center space-x-4">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div>
+                <p className="text-sm">Document uploaded: Project Timeline</p>
+                <p className="text-xs text-gray-500">4 hours ago</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <div>
+                <p className="text-sm">New message from Client</p>
+                <p className="text-xs text-gray-500">Yesterday</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-6">
-        <button className="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow text-left">
-          <FileText className="w-6 h-6 text-blue-500 mb-2" />
-          <h3 className="font-semibold">New Project</h3>
-          <p className="text-sm text-gray-600">Create a new project</p>
-        </button>
-        <button className="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow text-left">
-          <Mail className="w-6 h-6 text-blue-500 mb-2" />
-          <h3 className="font-semibold">Messages</h3>
-          <p className="text-sm text-gray-600">Check your inbox</p>
-        </button>
-        <button className="p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow text-left">
-          <Activity className="w-6 h-6 text-blue-500 mb-2" />
-          <h3 className="font-semibold">Analytics</h3>
-          <p className="text-sm text-gray-600">View detailed reports</p>
-        </button>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Upcoming Deadlines</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Mobile App Development</p>
+                <p className="text-sm text-gray-500">Phase 1 Completion</p>
+              </div>
+              <span className="text-sm text-red-500">2 days left</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Client Presentation</p>
+                <p className="text-sm text-gray-500">Project Review</p>
+              </div>
+              <span className="text-sm text-yellow-500">5 days left</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Website Launch</p>
+                <p className="text-sm text-gray-500">Final Testing</p>
+              </div>
+              <span className="text-sm text-green-500">2 weeks left</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Overview;

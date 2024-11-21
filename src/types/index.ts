@@ -4,10 +4,11 @@ export interface Project {
   title: string;
   description: string;
   status: 'Sourcing' | 'In Progress' | 'Under Review' | 'Completed' | 'On Hold';
-  lastUpdated?: string;
+  lastUpdated: string;  // Making this required since we always want to track when projects are updated
   tasks: Task[];
 }
 
+// Rest of the types remain the same...
 export interface Task {
   id: string;
   title: string;
