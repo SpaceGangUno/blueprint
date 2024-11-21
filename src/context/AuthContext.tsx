@@ -23,7 +23,6 @@ interface AuthContextType {
 
 interface ExtendedUser extends User {
   role?: string;
-  id?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,11 +48,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
-            const profile = userDoc.data() as UserProfile;
+            const data = userDoc.data();
+            const profile: UserProfile = {
+              id: user.uid,
+              email: data.email,
+              role: data.role,
+              createdAt: data.createdAt,
+              updatedAt: data.updatedAt,
+              inviteId: data.inviteId,
+              passwordUpdated: data.passwordUpdated,
+              displayName: data.displayName,
+              photoURL: data.photoURL,
+              lastLogin: data.lastLogin
+            };
             const extendedUser = {
               ...user,
-              role: profile.role,
-              id: user.uid
+              role: profile.role
             };
             setUser(extendedUser);
             setUserProfile(profile);
@@ -81,11 +91,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
       
       if (userDoc.exists()) {
-        const profile = userDoc.data() as UserProfile;
+        const data = userDoc.data();
+        const profile: UserProfile = {
+          id: userCredential.user.uid,
+          email: data.email,
+          role: data.role,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          inviteId: data.inviteId,
+          passwordUpdated: data.passwordUpdated,
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          lastLogin: data.lastLogin
+        };
         const extendedUser = {
           ...userCredential.user,
-          role: profile.role,
-          id: userCredential.user.uid
+          role: profile.role
         };
         setUser(extendedUser);
         setUserProfile(profile);
@@ -104,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
       const userData: UserProfile = {
+        id: userCredential.user.uid,
         email,
         role: 'team_member',
         createdAt: new Date().toISOString(),
@@ -115,8 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const extendedUser = {
         ...userCredential.user,
-        role: userData.role,
-        id: userCredential.user.uid
+        role: userData.role
       };
       setUser(extendedUser);
       setUserProfile(userData);

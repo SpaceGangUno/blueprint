@@ -12,6 +12,7 @@ export const createAdminUser = async (email: string, password: string) => {
 
     // Create the user profile in Firestore
     const userProfile: UserProfile = {
+      id: userRecord.uid,
       email,
       role: 'admin',
       createdAt: new Date().toISOString(),

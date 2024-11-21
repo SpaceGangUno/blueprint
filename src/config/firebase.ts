@@ -10,10 +10,8 @@ import {
   type DocumentData,
   type QuerySnapshot,
   type DocumentSnapshot,
-  getDocs,
   addDoc,
   updateDoc,
-  deleteDoc,
   serverTimestamp
 } from 'firebase/firestore';
 import {

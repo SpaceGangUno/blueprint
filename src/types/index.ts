@@ -102,6 +102,7 @@ export interface InvoiceItem {
 
 // User Types
 export interface UserProfile {
+  id: string;
   email: string;
   role: 'admin' | 'team_member';
   createdAt: string;

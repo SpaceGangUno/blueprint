@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Mail, X } from 'lucide-react';
-import { sendTeamInvite, subscribeToTeamMembers, UserProfile } from '../../config/firebase';
+import { sendTeamInvite, subscribeToTeamMembers } from '../../config/firebase';
 import { auth } from '../../config/firebase';
+import { type UserProfile } from '../../types';
 
-interface TeamMemberWithId extends UserProfile {
-  id: string;
-}
-
-export default function TeamView() {
-  const [teamMembers, setTeamMembers] = useState<TeamMemberWithId[]>([]);
+const TeamView: React.FC = () => {
+  const [teamMembers, setTeamMembers] = useState<UserProfile[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +19,7 @@ export default function TeamView() {
     const unsubscribe = subscribeToTeamMembers(
       (members) => {
         console.log('Received team members:', members); // Debug log
-        setTeamMembers(members as TeamMemberWithId[]);
+        setTeamMembers(members);
       },
       (error) => {
         console.error('Error fetching team members:', error);
@@ -227,4 +224,6 @@ export default function TeamView() {
       )}
     </div>
   );
-}
+};
+
+export default TeamView;
