@@ -17,12 +17,6 @@ export default function Footer() {
           <h3 className="text-white text-3xl font-normal mb-8">Quick Links</h3>
           <nav className="flex flex-col space-y-6">
             <Link
-              to="/about"
-              className="text-xl hover:text-blue-400 transition-colors"
-            >
-              About Us
-            </Link>
-            <Link
               to="/services"
               className="text-xl hover:text-blue-400 transition-colors"
             >

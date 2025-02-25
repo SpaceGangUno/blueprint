@@ -44,7 +44,6 @@ const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
             <Link to="/services" className="text-gray-600 hover:text-gray-900 transition-colors">Services</Link>
             <Link to="/portfolio" className="text-gray-600 hover:text-gray-900 transition-colors">Portfolio</Link>
-            <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">About</Link>
             <Link to="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</Link>
             <Link 
               to="/login" 
@@ -103,12 +102,6 @@ const Navigation: React.FC = () => {
               className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               Portfolio
-            </Link>
-            <Link
-              to="/about"
-              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              About
             </Link>
             <Link
               to="/contact"
