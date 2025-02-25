@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Smile, Frown, Meh, Star, Coffee, Heart, Music, Sun, Moon } from 'lucide-react';
+import { Send, Smile, Frown, Meh, Star, Coffee, Heart, Music, Sun, Moon, Phone } from 'lucide-react';
 
 export default function Contact() {
   const [mood, setMood] = useState<string>('');
@@ -72,9 +72,16 @@ export default function Contact() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
               Let's Create Something Amazing
             </h1>
-            <p className="text-xl text-gray-600">
-              Don't be shy, we're just as excited to hear from you!
-            </p>
+          <p className="text-xl text-gray-600 mb-6">
+            Don't be shy, we're just as excited to hear from you!
+          </p>
+          <a 
+            href="tel:9294132940" 
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all"
+          >
+            <Phone className="w-5 h-5" />
+            Call Us: (929) 413-2940
+          </a>
           </div>
 
           {/* Mood Selector */}
