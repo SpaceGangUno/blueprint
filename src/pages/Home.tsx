@@ -8,32 +8,88 @@ export default function Home() {
   // Service categories
   const serviceCategories = [
     {
+      title: 'Branding That Stands Out',
+      description: 'Create a memorable look and voice that customers love.',
+      image: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&q=80',
+      services: [
+        {
+          title: 'Logo & Visual Identity',
+          description: 'Design or refresh your logo, colors, and style to look professional instantly.',
+          features: [
+            'Simple updates to your current branding',
+            'Full brand kits for new businesses'
+          ]
+        },
+        {
+          title: 'Brand Personality',
+          description: 'Define your vibe (fun, trustworthy, bold) so customers connect with you.',
+          features: [
+            'Help with taglines, social media voice, or packaging design'
+          ]
+        }
+      ],
+      ctaText: 'Make Your Mark',
+      ctaLink: '/services#branding'
+    },
+    {
+      title: 'Marketing That Works',
+      description: 'Get new customers and keep them coming back.',
+      image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80',
+      services: [
+        {
+          title: 'Hype Campaigns',
+          description: 'Launch products/services with excitement.',
+          features: [
+            'Social media teasers',
+            'Email announcements',
+            'Limited-time discounts'
+          ]
+        },
+        {
+          title: 'Loyalty Programs',
+          description: 'Reward repeat customers.',
+          features: [
+            'Refer-a-friend discounts',
+            'VIP perks or points systems'
+          ]
+        },
+        {
+          title: 'Simple Ads',
+          description: 'Run Facebook/Google ads that actually sell.',
+          features: [
+            'No confusing jargon—we set them up for you',
+            'Track what\'s working'
+          ]
+        }
+      ],
+      ctaText: 'Grow Your Reach',
+      ctaLink: '/services#marketing'
+    },
+    {
       title: 'Digital Tools & Apps',
-      description: 'Build easy-to-use websites, apps, and tools that grow your business.',
+      description: 'Build easy-to-use websites, apps, and tools.',
       image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80',
       services: [
         {
           title: 'Custom Websites',
           description: 'Mobile-friendly sites that let customers find, trust, and buy from you.',
           features: [
-            'Simple updates (you can edit text/images yourself!)',
-            'Built-in contact forms or booking systems'
+            'Edit text/images yourself',
+            'Built-in booking/contact forms'
           ]
         },
         {
           title: 'Business Apps',
-          description: 'Apps that save you time, like scheduling tools or customer loyalty programs.',
+          description: 'Save time with tools like appointment reminders or loyalty apps.',
           features: [
-            'Affordable monthly plans',
-            'Automate repetitive tasks (e.g., appointment reminders)'
+            'Affordable monthly plans'
           ]
         },
         {
           title: 'Online Stores',
-          description: 'Sell products or services with secure payment options.',
+          description: 'Sell products/services securely.',
           features: [
-            'Connect to social media or local pickup',
-            'Track orders in real time'
+            'Connect to social media or local pickup'
           ]
         }
       ],
@@ -42,23 +98,22 @@ export default function Home() {
     },
     {
       title: 'Products & Spaces',
-      description: 'Create physical products or eye-catching spaces that reflect your brand.',
+      description: 'Create physical products or eye-catching spaces.',
       image: 'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80',
       services: [
         {
           title: 'Product Design',
-          description: 'Turn your idea into a real, sellable product.',
+          description: 'Turn your idea into a real product.',
           features: [
             'Work with local manufacturers',
-            'Eco-friendly material options'
+            'Eco-friendly options'
           ]
         },
         {
           title: 'Storefronts & Events',
-          description: 'Design spaces that attract customers—like pop-up shops or trade show booths.',
+          description: 'Design pop-up shops or booths that attract customers.',
           features: [
-            'Budget-friendly setups',
-            'Reusable displays for future events'
+            'Budget-friendly setups'
           ]
         }
       ],
@@ -67,23 +122,21 @@ export default function Home() {
     },
     {
       title: 'Guidance & Planning',
-      description: 'Get clear, practical advice to make smart tech decisions.',
+      description: 'Get clear advice to make smart decisions.',
       image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
       services: [
         {
           title: 'Tech Roadmaps',
-          description: 'Affordable plans to choose the right tools for your goals.',
+          description: 'Choose the right tools without overspending.',
           features: [
-            'No confusing tech talk—we explain things simply',
-            'Avoid overspending on unnecessary features'
+            'No confusing tech talk'
           ]
         },
         {
           title: 'Website Checkups',
-          description: 'Fix issues that might be turning customers away.',
+          description: 'Fix issues that might turn customers away.',
           features: [
-            'Make your site faster and easier to navigate',
-            'Ensure it looks great on phones'
+            'Make your site faster and phone-friendly'
           ]
         }
       ],
