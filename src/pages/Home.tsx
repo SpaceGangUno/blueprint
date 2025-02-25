@@ -46,11 +46,17 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
-              From Concept
+              Bringing Your Vision
               <span className="text-blue-400 ml-2 sm:ml-4">
-                to Reality
+                to Life
               </span>
             </h1>
+<<<<<<< HEAD
+=======
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
+              Full-service consulting and creative studio focused on transforming ideas into exceptional digital experiences
+            </p>
+>>>>>>> parent of f32910f (Update Home.tsx)
             <div className="flex justify-center pt-2">
               <button
                 onClick={() => setShowQuoteModal(true)}
