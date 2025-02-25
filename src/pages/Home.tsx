@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Lightbulb, Code, Palette, Briefcase, ChevronDown } from 'lucide-react';
-import ServiceCard from '../components/ServiceCard';
 import QuoteRequest from '../components/QuoteRequest';
 import ClientBanner from '../components/ClientBanner';
 
@@ -32,32 +31,24 @@ export default function Home() {
 
   return (
     <div className="pt-16">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[400px] max-h-[600px] flex items-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
-            alt="Hero background"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40" />
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="space-y-4 sm:space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
-              Bringing Your Vision
-              <span className="text-blue-400 ml-2 sm:ml-4">
-                to Life
+      {/* Hero Section - Inspired by Elite Media */}
+      <section className="relative h-[80vh] min-h-[500px] flex items-center overflow-hidden bg-purple-700">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-6 sm:space-y-8">
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-white/90 tracking-tight leading-none">
+              FROM<br />
+              CONCEPT<br />
+              <span className="text-white">
+                TO REALITY
               </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-              Full-service consulting and creative studio focused on transforming ideas into exceptional digital experiences
+            <p className="text-xl sm:text-2xl md:text-3xl text-white/80 max-w-3xl leading-relaxed">
+              Full-service creative studio dedicated to bringing your ideas to life
             </p>
-            <div className="flex justify-center pt-2">
+            <div className="pt-4">
               <button
                 onClick={() => setShowQuoteModal(true)}
-                className="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="inline-block px-8 py-4 bg-white text-purple-700 font-semibold rounded-lg hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
               >
                 Get Started
               </button>
@@ -66,27 +57,38 @@ export default function Home() {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
-          <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 animate-bounce hover:bg-white/20 transition-colors cursor-pointer">
-            <ChevronDown className="w-6 h-6 text-white" />
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20">
+          <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 animate-bounce hover:bg-white/20 transition-colors cursor-pointer">
+            <ChevronDown className="w-7 h-7 text-white" />
           </div>
         </div>
       </section>
 
-      {/* Client Banner */}
-      <ClientBanner />
-
-      {/* Services Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-blue-50">
+      {/* Client Banner - Styled to match Elite Media aesthetic */}
+      <div className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service) => (
-              <ServiceCard
-                key={service.title}
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-              />
+          <h2 className="text-2xl font-semibold text-gray-500 mb-8">OUR CLIENTS</h2>
+          <ClientBanner />
+        </div>
+      </div>
+
+      {/* Services Section - Inspired by Elite Media */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-semibold text-gray-500 mb-12">SELECTED SERVICES</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {services.map((service, index) => (
+              <div key={service.title} className="group relative">
+                <div className="flex items-start">
+                  <div className="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center mr-4 font-medium">
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                    <p className="text-gray-600">{service.description}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
