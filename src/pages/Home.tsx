@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, Code, Palette, Briefcase, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 
 export default function Home() {
