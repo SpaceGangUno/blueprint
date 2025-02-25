@@ -32,7 +32,7 @@ export default function Home() {
       title: 'Digital Innovation',
       description: 'Forward-thinking solutions for the digital landscape.',
       icon: <Lightbulb className="w-6 h-6" />,
-      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80',
+      image: 'https://images.unsplash.com/photo-1539189017399-63b9d09f6daf?auto=format&fit=crop&q=80',
       category: 'Innovation'
     }
   ];
