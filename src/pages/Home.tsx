@@ -1,61 +1,39 @@
 import { useState } from 'react';
-import { Lightbulb, Code, Palette, Briefcase, BarChart, Users, Clock, Zap, Target, ArrowRight, ChevronDown } from 'lucide-react';
-import ServiceCard from '../components/ServiceCard';
+import { Lightbulb, Code, Palette, Briefcase, ChevronDown } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
-import ClientBanner from '../components/ClientBanner';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
 
+  // Services with portfolio images
   const services = [
     {
       title: 'Project Consulting',
       description: 'Strategic guidance to transform your ideas into actionable plans.',
-      icon: <Briefcase className="w-6 h-6" />
+      icon: <Briefcase className="w-6 h-6" />,
+      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
+      category: 'Strategy'
     },
     {
       title: 'Creative Design',
       description: 'Innovative solutions that capture your brand\'s essence.',
-      icon: <Palette className="w-6 h-6" />
+      icon: <Palette className="w-6 h-6" />,
+      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80',
+      category: 'Design'
     },
     {
       title: 'Tech Integration',
       description: 'Seamless integration of cutting-edge technology.',
-      icon: <Code className="w-6 h-6" />
+      icon: <Code className="w-6 h-6" />,
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80',
+      category: 'Development'
     },
     {
       title: 'Digital Innovation',
       description: 'Forward-thinking solutions for the digital landscape.',
-      icon: <Lightbulb className="w-6 h-6" />
-    }
-  ];
-
-  const metrics = [
-    { number: '98%', label: 'Client Satisfaction', icon: <Users className="w-6 h-6" /> },
-    { number: '45%', label: 'ROI Increase', icon: <BarChart className="w-6 h-6" /> },
-    { number: '2x', label: 'Faster Delivery', icon: <Clock className="w-6 h-6" /> }
-  ];
-
-  const process = [
-    {
-      title: 'Discovery',
-      description: 'Understanding your unique needs and goals.',
-      icon: <Target className="w-6 h-6" />
-    },
-    {
-      title: 'Strategy',
-      description: 'Developing a tailored plan for success.',
-      icon: <Lightbulb className="w-6 h-6" />
-    },
-    {
-      title: 'Execution',
-      description: 'Bringing your vision to life with precision.',
-      icon: <Code className="w-6 h-6" />
-    },
-    {
-      title: 'Launch',
-      description: 'Ensuring successful deployment and growth.',
-      icon: <Zap className="w-6 h-6" />
+      icon: <Lightbulb className="w-6 h-6" />,
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80',
+      category: 'Innovation'
     }
   ];
 
@@ -102,109 +80,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Client Banner */}
-      <ClientBanner />
-
-      {/* Services & Metrics Combined Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-blue-50">
+      {/* Visual Portfolio Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            {metrics.map((metric, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
-                  {metric.icon}
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-blue-600">{metric.number}</div>
-                  <div className="text-gray-600 text-sm">{metric.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Services */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Do</h2>
             <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full mb-8"></div>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Our expertise spans across multiple disciplines, delivering innovative solutions tailored to your unique needs.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service) => (
-              <ServiceCard
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {services.map((service, index) => (
+              <div 
                 key={service.title}
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">How We Work</h2>
-            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {process.map((step, index) => (
-              <div key={index} className="relative group">
-                <div className="bg-gray-50 p-6 rounded-xl hover:bg-blue-50 transition-all duration-300">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-4">
-                    {step.icon}
+                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500"
+              >
+                <div className="relative h-64 overflow-hidden">
+                  <img 
+                    src={service.image} 
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                      {service.category}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
                 </div>
-                {index < process.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 left-full w-6 transform -translate-y-1/2 -translate-x-3">
-                    <ArrowRight className="w-6 h-6 text-blue-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <div className="flex items-center mb-3">
+                    <div className="w-10 h-10 bg-blue-600/90 backdrop-blur-sm rounded-lg flex items-center justify-center mr-3">
+                      {service.icon}
+                    </div>
+                    <h3 className="text-xl font-bold">{service.title}</h3>
                   </div>
-                )}
+                  <p className="text-gray-200 text-sm">{service.description}</p>
+                </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Client Success Stories</h2>
-            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote: "Blueprint Studios modernized our infrastructure, reducing costs by 32% and improving response times.",
-                author: "Sarah Johnson",
-                role: "Director of Digital Operations, TechStart"
-              },
-              {
-                quote: "Launched our e-commerce platform 2 weeks early, increasing online sales by 45% in Q1.",
-                author: "Michael Chen",
-                role: "Head of E-commerce, Innovate Inc"
-              },
-              {
-                quote: "UI/UX redesign boosted user engagement by 28% with a 4.8-star app rating.",
-                author: "Emily Rodriguez",
-                role: "Product Manager, Design Co"
-              }
-            ].map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-                <p className="text-gray-600 mb-4 text-sm italic">{testimonial.quote}</p>
-                <div>
-                  <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
-                </div>
-              </div>
-            ))}
+          <div className="text-center">
+            <a 
+              href="/services" 
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              View All Services
+            </a>
           </div>
         </div>
       </section>
