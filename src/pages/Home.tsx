@@ -5,35 +5,90 @@ import QuoteRequest from '../components/QuoteRequest';
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
 
-  // Services with portfolio images
-  const services = [
+  // Service categories
+  const serviceCategories = [
     {
-      title: 'Project Consulting',
-      description: 'Strategic guidance to transform your ideas into actionable plans.',
-      icon: <Briefcase className="w-6 h-6" />,
-      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80',
-      category: 'Strategy'
+      title: 'Digital Tools & Apps',
+      description: 'Build easy-to-use websites, apps, and tools that grow your business.',
+      image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80',
+      services: [
+        {
+          title: 'Custom Websites',
+          description: 'Mobile-friendly sites that let customers find, trust, and buy from you.',
+          features: [
+            'Simple updates (you can edit text/images yourself!)',
+            'Built-in contact forms or booking systems'
+          ]
+        },
+        {
+          title: 'Business Apps',
+          description: 'Apps that save you time, like scheduling tools or customer loyalty programs.',
+          features: [
+            'Affordable monthly plans',
+            'Automate repetitive tasks (e.g., appointment reminders)'
+          ]
+        },
+        {
+          title: 'Online Stores',
+          description: 'Sell products or services with secure payment options.',
+          features: [
+            'Connect to social media or local pickup',
+            'Track orders in real time'
+          ]
+        }
+      ],
+      ctaText: 'See How We Can Help',
+      ctaLink: '/services#digital'
     },
     {
-      title: 'Creative Design',
-      description: 'Innovative solutions that capture your brand\'s essence.',
-      icon: <Palette className="w-6 h-6" />,
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80',
-      category: 'Design'
+      title: 'Products & Spaces',
+      description: 'Create physical products or eye-catching spaces that reflect your brand.',
+      image: 'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80',
+      services: [
+        {
+          title: 'Product Design',
+          description: 'Turn your idea into a real, sellable product.',
+          features: [
+            'Work with local manufacturers',
+            'Eco-friendly material options'
+          ]
+        },
+        {
+          title: 'Storefronts & Events',
+          description: 'Design spaces that attract customers—like pop-up shops or trade show booths.',
+          features: [
+            'Budget-friendly setups',
+            'Reusable displays for future events'
+          ]
+        }
+      ],
+      ctaText: 'Make It Real',
+      ctaLink: '/services#products'
     },
     {
-      title: 'Tech Integration',
-      description: 'Seamless integration of cutting-edge technology.',
-      icon: <Code className="w-6 h-6" />,
-      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80',
-      category: 'Development'
-    },
-    {
-      title: 'Digital Innovation',
-      description: 'Forward-thinking solutions for the digital landscape.',
-      icon: <Lightbulb className="w-6 h-6" />,
-      image: 'https://images.unsplash.com/photo-1539189017399-63b9d09f6daf?auto=format&fit=crop&q=80',
-      category: 'Innovation'
+      title: 'Guidance & Planning',
+      description: 'Get clear, practical advice to make smart tech decisions.',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
+      services: [
+        {
+          title: 'Tech Roadmaps',
+          description: 'Affordable plans to choose the right tools for your goals.',
+          features: [
+            'No confusing tech talk—we explain things simply',
+            'Avoid overspending on unnecessary features'
+          ]
+        },
+        {
+          title: 'Website Checkups',
+          description: 'Fix issues that might be turning customers away.',
+          features: [
+            'Make your site faster and easier to navigate',
+            'Ensure it looks great on phones'
+          ]
+        }
+      ],
+      ctaText: 'Talk to Us',
+      ctaLink: '/contact'
     }
   ];
 
@@ -80,57 +135,65 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Visual Portfolio Section */}
+      {/* What We Do Section */}
       <section className="py-20 bg-gradient-to-b from-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Do</h2>
             <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full mb-8"></div>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Our expertise spans across multiple disciplines, delivering innovative solutions tailored to your unique needs.
+              Practical solutions that help small businesses grow without the tech headaches.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {services.map((service) => (
-              <div 
-                key={service.title}
-                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500"
-              >
-                <div className="relative h-64 overflow-hidden">
+          {serviceCategories.map((category, categoryIndex) => (
+            <div key={category.title} className={`mb-24 ${categoryIndex % 2 === 1 ? 'lg:flex-row-reverse' : ''} lg:flex gap-8 items-center`}>
+              {/* Category Image */}
+              <div className="lg:w-2/5 mb-8 lg:mb-0">
+                <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96">
                   <img 
-                    src={service.image} 
-                    alt={service.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    src={category.image} 
+                    alt={category.title}
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-                      {service.category}
-                    </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-2xl font-bold text-white mb-2">{category.title}</h3>
+                    <p className="text-gray-200">{category.description}</p>
                   </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 bg-blue-600/90 backdrop-blur-sm rounded-lg flex items-center justify-center mr-3">
-                      {service.icon}
-                    </div>
-                    <h3 className="text-xl font-bold">{service.title}</h3>
-                  </div>
-                  <p className="text-gray-200 text-sm">{service.description}</p>
                 </div>
               </div>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <a 
-              href="/services" 
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              View All Services
-            </a>
-          </div>
+
+              {/* Category Services */}
+              <div className="lg:w-3/5">
+                <div className="space-y-6">
+                  {category.services.map((service) => (
+                    <div key={service.title} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all p-6 border-l-4 border-blue-500">
+                      <h4 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h4>
+                      <p className="text-gray-600 mb-4">{service.description}</p>
+                      <ul className="space-y-2">
+                        {service.features.map((feature, index) => (
+                          <li key={index} className="flex items-start">
+                            <span className="text-blue-500 mr-2">•</span>
+                            <span className="text-gray-700 text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  
+                  <div className="text-center mt-8">
+                    <a 
+                      href={category.ctaLink} 
+                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                    >
+                      {category.ctaText}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
