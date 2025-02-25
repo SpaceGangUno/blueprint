@@ -92,7 +92,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {services.map((service, index) => (
+            {services.map((service) => (
               <div 
                 key={service.title}
                 className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-500"
