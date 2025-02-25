@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lightbulb, Code, Palette, Briefcase } from 'lucide-react';
+import { Lightbulb, Code, Palette, Briefcase, ChevronDown } from 'lucide-react';
 import ServiceCard from '../components/ServiceCard';
 import QuoteRequest from '../components/QuoteRequest';
 import ClientBanner from '../components/ClientBanner';
@@ -51,12 +51,9 @@ export default function Home() {
                 to Life
               </span>
             </h1>
-<<<<<<< HEAD
-=======
             <p className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
               Full-service consulting and creative studio focused on transforming ideas into exceptional digital experiences
             </p>
->>>>>>> parent of f32910f (Update Home.tsx)
             <div className="flex justify-center pt-2">
               <button
                 onClick={() => setShowQuoteModal(true)}
@@ -68,6 +65,12 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+          <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 animate-bounce hover:bg-white/20 transition-colors cursor-pointer">
+            <ChevronDown className="w-6 h-6 text-white" />
+          </div>
+        </div>
       </section>
 
       {/* Client Banner */}
@@ -88,7 +91,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
 
       <QuoteRequest 
         isOpen={showQuoteModal} 
