@@ -1,45 +1,13 @@
 import { useState } from 'react';
-import { Send, Star, Coffee, Heart, Music, Sun, Moon, Phone, Mail } from 'lucide-react';
+import { Star, Coffee, Heart, Phone, Mail, Zap } from 'lucide-react';
+import QuoteRequest from '../components/QuoteRequest';
 
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    message: '',
-    preferredTime: 'morning',
-    communicationStyle: 'email',
-    projectType: ''
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    // Handle form submission
-  };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-2xl mx-auto px-4 py-32 text-center">
-          <div className="animate-bounce mb-8">
-            <Heart className="w-16 h-16 text-red-500 mx-auto" />
-          </div>
-          <h2 className="text-3xl font-bold mb-4">Message Sent with Love! ❤️</h2>
-          <p className="text-gray-600 mb-8">We'll get back to you faster than a caffeinated developer can type!</p>
-          <button
-            onClick={() => setSubmitted(false)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all"
-          >
-            Send Another Message
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   return (
-    <div className="min-h-screen pt-16">
+    <>
+      <div className="min-h-screen pt-16">
       <div className="relative">
         {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
@@ -86,111 +54,63 @@ export default function Contact() {
           </div>
 
 
-          {/* Main Form */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="space-y-6">
-              {/* Name Input */}
-              <div className="group">
-                <input
-                  type="text"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none transition-all"
-                  placeholder="Your Name"
-                />
+          {/* Interactive Call-to-Action */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="mb-8">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-10 h-10 text-blue-600" />
               </div>
-
-              {/* Email Input */}
-              <div>
-                <input
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none transition-all"
-                  placeholder="Your Email"
-                />
-              </div>
-
-              {/* Time Preference */}
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, preferredTime: 'morning' })}
-                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    form.preferredTime === 'morning'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-200'
-                  }`}
-                >
-                  <Sun className="w-5 h-5" />
-                  Morning Person
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, preferredTime: 'night' })}
-                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    form.preferredTime === 'night'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-200'
-                  }`}
-                >
-                  <Moon className="w-5 h-5" />
-                  Night Owl
-                </button>
-              </div>
-
-              {/* Communication Style */}
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, communicationStyle: 'email' })}
-                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    form.communicationStyle === 'email'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-200'
-                  }`}
-                >
-                  <Send className="w-5 h-5" />
-                  Email
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, communicationStyle: 'call' })}
-                  className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    form.communicationStyle === 'call'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-200'
-                  }`}
-                >
-                  <Music className="w-5 h-5" />
-                  Video Call
-                </button>
-              </div>
-
-              {/* Message Input */}
-              <div>
-                <textarea
-                  required
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none transition-all min-h-[150px] resize-none"
-                  placeholder="Tell us about your dream project... Be as creative as you want!"
-                />
-              </div>
-
+              <h3 className="text-2xl font-bold mb-3">Ready to Start Your Project?</h3>
+              <p className="text-gray-600 mb-6">
+                Tell us about your vision and let's create something amazing together. Our team is ready to bring your ideas to life!
+              </p>
               <button
-                type="submit"
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group"
+                onClick={() => setShowQuoteModal(true)}
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:opacity-90 transition-all inline-flex items-center justify-center gap-2 group"
               >
-                <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                Send Message
+                <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                Request a Quote
               </button>
             </div>
-          </form>
+            
+            <div className="grid md:grid-cols-2 gap-6 mt-12">
+              <div className="p-6 border-2 border-gray-100 rounded-xl hover:border-blue-200 transition-all hover:shadow-md">
+                <h4 className="text-lg font-semibold mb-2">Our Process</h4>
+                <p className="text-gray-600">
+                  We follow a collaborative approach to ensure your vision comes to life exactly as you imagined.
+                </p>
+              </div>
+              
+              <div className="p-6 border-2 border-gray-100 rounded-xl hover:border-blue-200 transition-all hover:shadow-md">
+                <h4 className="text-lg font-semibold mb-2">Transparent Pricing</h4>
+                <p className="text-gray-600">
+                  No hidden fees or surprises. We provide clear estimates before any work begins.
+                </p>
+              </div>
+              
+              <div className="p-6 border-2 border-gray-100 rounded-xl hover:border-blue-200 transition-all hover:shadow-md">
+                <h4 className="text-lg font-semibold mb-2">Fast Turnaround</h4>
+                <p className="text-gray-600">
+                  We value your time and work efficiently to deliver quality results on schedule.
+                </p>
+              </div>
+              
+              <div className="p-6 border-2 border-gray-100 rounded-xl hover:border-blue-200 transition-all hover:shadow-md">
+                <h4 className="text-lg font-semibold mb-2">Ongoing Support</h4>
+                <p className="text-gray-600">
+                  Our relationship doesn't end at delivery. We provide continued support for your project.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      </div>
+    
+      <QuoteRequest 
+        isOpen={showQuoteModal} 
+        onClose={() => setShowQuoteModal(false)} 
+      />
+    </>
   );
 }
