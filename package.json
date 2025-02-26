@@ -16,6 +16,7 @@
     "admin:setup": "ts-node -P tsconfig.admin.json src/scripts/setupAdmin.ts"
   },
   "dependencies": {
+    "@types/react-helmet": "^6.1.11",
     "dotenv": "^16.3.1",
     "firebase": "^10.5.2",
     "firebase-admin": "^11.11.0",
@@ -25,6 +26,8 @@
     "react": "^18.2.0",
     "react-calendar": "^5.1.0",
     "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-helmet-async": "^2.0.5",
     "react-router-dom": "^6.17.0"
   },
   "devDependencies": {

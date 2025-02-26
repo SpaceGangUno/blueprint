@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { updateTeamMemberAccount, auth } from '../config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function TeamInvite() {
+  // Meta description for the Team Invite page
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -65,6 +67,10 @@ export default function TeamInvite() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <Helmet>
+        <title>Team Invitation | Blueprint Studios</title>
+        <meta name="description" content="Complete your Blueprint Studios team account setup. Join our creative team and start collaborating on exciting projects." />
+      </Helmet>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="w-16 h-16 bg-blue-600 rounded-lg mx-auto flex items-center justify-center">
           <span className="text-white text-2xl font-bold">BS</span>

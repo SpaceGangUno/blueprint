@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Star, Coffee, Phone, Mail, Zap } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 
@@ -7,6 +8,10 @@ export default function Contact() {
 
   return (
     <>
+      <Helmet>
+        <title>Contact Us | Blueprint Studios</title>
+        <meta name="description" content="Get in touch with Blueprint Studios. We're ready to bring your ideas to life with our expert design and development services. Contact us today to start your project." />
+      </Helmet>
       <div className="min-h-screen pt-16">
       <div className="relative">
         {/* Animated background */}

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { PenTool, Megaphone, Globe, Package2, Lightbulb, ArrowRight, Plus, Minus, Sparkles, Zap } from 'lucide-react';
 
 export default function Services() {
+  // Meta description for the Services page
   const [expandedService, setExpandedService] = useState<{category: string, service: number} | null>(null);
 
   // Function to toggle expanded service
@@ -154,6 +156,10 @@ export default function Services() {
 
   return (
     <div className="pt-16">
+      <Helmet>
+        <title>Our Services | Blueprint Studios</title>
+        <meta name="description" content="Explore Blueprint Studios' comprehensive services including branding, marketing, digital tools, product design, and strategic guidance. Tailored solutions to transform your business." />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-blue-600 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -208,7 +214,7 @@ export default function Services() {
                   <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96 transform transition-all duration-700 hover:scale-[1.02] group">
                     <img 
                       src={category.image} 
-                      alt={category.title}
+                      alt={`${category.title} - ${category.description} services by Blueprint Studios`}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     />
                     <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0 absolute top-4 left-4 z-10 bg-white/80 backdrop-blur-sm">

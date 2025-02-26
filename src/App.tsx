@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -12,8 +13,9 @@ import { AuthProvider } from './context/AuthContext';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <HelmetProvider>
+      <AuthProvider>
+        <Router>
         <div className="min-h-screen bg-gray-50 flex flex-col">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -38,7 +40,8 @@ export default function App() {
             />
           </Routes>
         </div>
-      </Router>
-    </AuthProvider>
+        </Router>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }

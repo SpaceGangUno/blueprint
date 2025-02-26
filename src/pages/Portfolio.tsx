@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import HeroSection from '../components/portfolio/HeroSection';
 import CategoryFilter from '../components/portfolio/CategoryFilter';
 import ProjectCard from '../components/portfolio/ProjectCard';
@@ -11,6 +12,7 @@ interface Project {
   image: string;
   link: string;
   tags: string[];
+  imageAlt?: string;
 }
 
 const projects: Project[] = [
@@ -21,7 +23,8 @@ const projects: Project[] = [
     category: 'web',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['React', 'TypeScript', 'Tailwind CSS']
+    tags: ['React', 'TypeScript', 'Tailwind CSS'],
+    imageAlt: 'TechCorp website redesign showing responsive layout on desktop and mobile devices with modern UI elements'
   },
   {
     id: '2',
@@ -30,7 +33,8 @@ const projects: Project[] = [
     category: 'mobile',
     image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['React Native', 'Firebase', 'Maps API']
+    tags: ['React Native', 'Firebase', 'Maps API'],
+    imageAlt: 'EcoTrack mobile app interface showing environmental impact tracking dashboard with graphs and maps'
   },
   {
     id: '3',
@@ -39,7 +43,8 @@ const projects: Project[] = [
     category: 'branding',
     image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['Branding', 'Logo Design', 'Guidelines']
+    tags: ['Branding', 'Logo Design', 'Guidelines'],
+    imageAlt: 'GreenLeaf brand identity package showing logo variations, color palette, and marketing materials'
   },
   {
     id: '4',
@@ -48,7 +53,8 @@ const projects: Project[] = [
     category: 'development',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['Cloud', 'React', 'Node.js']
+    tags: ['Cloud', 'React', 'Node.js'],
+    imageAlt: 'CloudSync platform dashboard showing cloud synchronization status and management controls'
   },
   {
     id: '5',
@@ -57,7 +63,8 @@ const projects: Project[] = [
     category: 'mobile',
     image: 'https://images.unsplash.com/photo-1616348436168-de43ad0db179?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['iOS', 'Android', 'React Native']
+    tags: ['iOS', 'Android', 'React Native'],
+    imageAlt: 'FitLife mobile app screens showing workout tracking, fitness goals, and health statistics'
   },
   {
     id: '6',
@@ -66,11 +73,13 @@ const projects: Project[] = [
     category: 'web',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&h=1366',
     link: '#',
-    tags: ['Three.js', 'WebGL', 'React']
+    tags: ['Three.js', 'WebGL', 'React'],
+    imageAlt: 'ArtGallery website showing 3D virtual gallery space with interactive art displays'
   }
 ];
 
 export default function Portfolio() {
+  // Meta description for the Portfolio page
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const filteredProjects = projects.filter(
@@ -79,10 +88,15 @@ export default function Portfolio() {
 
   return (
     <div className="pt-16">
+      <Helmet>
+        <title>Our Work | Blueprint Studios</title>
+        <meta name="description" content="Explore Blueprint Studios' portfolio of web development, mobile apps, branding, and design projects. See how we've helped businesses transform their digital presence." />
+      </Helmet>
       <HeroSection
         title="Our Work"
         subtitle="Showcasing our finest projects and creative solutions"
         image="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&q=80&w=2426&h=1366"
+        imageAlt="Blueprint Studios portfolio showcase - creative design projects displayed on a modern workspace"
       />
 
       <section className="py-12 bg-white">
@@ -105,6 +119,7 @@ export default function Portfolio() {
                 image={project.image}
                 link={project.link}
                 tags={project.tags}
+                imageAlt={project.imageAlt}
               />
             ))}
           </div>

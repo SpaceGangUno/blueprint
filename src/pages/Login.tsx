@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import AuthLayout from '../components/AuthLayout';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
+  // Meta description for the Login page
   const navigate = useNavigate();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +38,10 @@ export default function Login() {
       title="Welcome back"
       subtitle="Sign in to access your project dashboard"
     >
+      <Helmet>
+        <title>Login | Blueprint Studios</title>
+        <meta name="description" content="Sign in to access your Blueprint Studios dashboard. Manage your projects, view updates, and collaborate with our team." />
+      </Helmet>
       <form className="space-y-6" onSubmit={handleSubmit}>
         {error && (
           <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">

@@ -2,15 +2,16 @@ interface HeroSectionProps {
   title: string;
   subtitle: string;
   image: string;
+  imageAlt?: string;
 }
 
-export default function HeroSection({ title, subtitle, image }: HeroSectionProps) {
+export default function HeroSection({ title, subtitle, image, imageAlt }: HeroSectionProps) {
   return (
     <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <img
           src={image}
-          alt="Portfolio hero"
+          alt={imageAlt || `${title} - ${subtitle}`}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-blue-600/50" />

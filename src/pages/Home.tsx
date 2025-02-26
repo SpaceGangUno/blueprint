@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ChevronDown, Plus, Minus, ArrowRight, Zap, Sparkles } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 
 export default function Home() {
+  // Meta description for the Home page
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [expandedService, setExpandedService] = useState<number | null>(null);
@@ -177,12 +179,16 @@ export default function Home() {
 
   return (
     <div className="pt-16">
+      <Helmet>
+        <title>Blueprint Studios - Digital Design & Development</title>
+        <meta name="description" content="Blueprint Studios is a full-service creative studio dedicated to bringing your ideas to life. We offer branding, marketing, digital tools, product design, and strategic guidance for businesses of all sizes." />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[400px] max-h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
-            alt="Hero background"
+            alt="Blueprint Studios creative workspace with modern design elements"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40" />
@@ -280,7 +286,7 @@ export default function Home() {
                 <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96 transform transition-all duration-700 hover:scale-[1.02] group">
                   <img 
                     src={serviceCategories[activeCategory].image} 
-                    alt={serviceCategories[activeCategory].title}
+                    alt={`${serviceCategories[activeCategory].title} - ${serviceCategories[activeCategory].description}`}
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>

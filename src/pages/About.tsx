@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Users, Target, Award, Briefcase, Heart, Coffee, Code, Zap, Sparkles } from 'lucide-react';
 
 export default function About() {
+  // Meta description for the About page
   const [hoveredValue, setHoveredValue] = useState<number | null>(null);
 
   const team = [
@@ -60,6 +62,10 @@ export default function About() {
 
   return (
     <div className="pt-16">
+      <Helmet>
+        <title>About Us | Blueprint Studios</title>
+        <meta name="description" content="Meet the team behind Blueprint Studios. We're passionate creators, innovators, and problem solvers dedicated to bringing your digital vision to life through design and development." />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-600">
         <div className="absolute inset-0">

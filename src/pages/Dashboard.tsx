@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import ClientDashboard from '../components/dashboard/ClientDashboard';
 import ClientDetailsDashboard from '../components/dashboard/ClientDetailsDashboard';
@@ -41,6 +42,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>Dashboard | Blueprint Studios</title>
+        <meta name="description" content="Access your Blueprint Studios client dashboard. Manage projects, view team updates, track invoices, and collaborate with our creative team." />
+      </Helmet>
       <nav className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
