@@ -1,9 +1,37 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronDown, Plus, Minus, ArrowRight, Zap, Sparkles } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [expandedService, setExpandedService] = useState<number | null>(null);
+
+  // Function to toggle expanded service
+  const toggleService = (index: number) => {
+    if (expandedService === index) {
+      setExpandedService(null);
+    } else {
+      setExpandedService(index);
+    }
+  };
+
+  // Function to get icon for category
+  const getIconForCategory = (title: string, isActive: boolean) => {
+    const className = `w-5 h-5 ${isActive ? 'text-white' : 'text-blue-500'}`;
+    
+    // You could add different icons for different categories here
+    return <Sparkles className={className} />;
+  };
+
+  // Auto-rotate categories every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCategory((prev) => (prev + 1) % serviceCategories.length);
+    }, 8000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Service categories
   const serviceCategories = [
@@ -188,31 +216,79 @@ export default function Home() {
         </div>
       </section>
 
-      {/* What We Do Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* What We Do Section - Interactive Version */}
+      <section className="py-20 bg-gradient-to-b from-white to-blue-50 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(15)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute rounded-full bg-blue-400/10 animate-float"
+              style={{
+                width: `${Math.random() * 100 + 50}px`,
+                height: `${Math.random() * 100 + 50}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 10 + 15}s`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Do</h2>
-            <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full mb-8"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <div className="inline-flex items-center justify-center mb-4">
+              <Sparkles className="w-8 h-8 text-yellow-400 mr-2 animate-pulse" />
+              <h2 className="text-4xl font-bold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                What We Do
+              </h2>
+              <Sparkles className="w-8 h-8 text-yellow-400 ml-2 animate-pulse" />
+            </div>
+            <div className="w-24 h-2 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mb-8"></div>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
               Practical solutions that help small businesses grow without the tech headaches.
             </p>
           </div>
 
-          {serviceCategories.map((category, categoryIndex) => (
-            <div key={category.title} className={`mb-24 ${categoryIndex % 2 === 1 ? 'lg:flex-row-reverse' : ''} lg:flex gap-8 items-center`}>
-              {/* Category Image */}
+          {/* Category Tabs */}
+          <div className="mb-12">
+            <div className="flex flex-wrap justify-center gap-2 md:gap-4">
+              {serviceCategories.map((category, index) => (
+                <button
+                  key={category.title}
+                  onClick={() => setActiveCategory(index)}
+                  className={`px-4 py-3 rounded-full transition-all duration-300 text-sm md:text-base font-medium flex items-center
+                    ${activeCategory === index 
+                      ? 'bg-blue-600 text-white shadow-lg scale-105' 
+                      : 'bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600'}`}
+                >
+                  {getIconForCategory(category.title, activeCategory === index)}
+                  <span className="ml-2">{category.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Category Content */}
+          <div className="transition-all duration-500 transform">
+            <div className="lg:flex gap-8 items-center">
+              {/* Category Image with Animation */}
               <div className="lg:w-2/5 mb-8 lg:mb-0">
-                <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96">
+                <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96 transform transition-all duration-700 hover:scale-[1.02] group">
                   <img 
-                    src={category.image} 
-                    alt={category.title}
-                    className="w-full h-full object-cover"
+                    src={serviceCategories[activeCategory].image} 
+                    alt={serviceCategories[activeCategory].title}
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">{category.title}</h3>
-                    <p className="text-gray-200">{category.description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 transform transition-all duration-500">
+                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:translate-y-[-5px]">
+                      {serviceCategories[activeCategory].title}
+                    </h3>
+                    <p className="text-gray-200 group-hover:translate-y-[-5px] transition-all duration-500 delay-100">
+                      {serviceCategories[activeCategory].description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -220,33 +296,62 @@ export default function Home() {
               {/* Category Services */}
               <div className="lg:w-3/5">
                 <div className="space-y-6">
-                  {category.services.map((service) => (
-                    <div key={service.title} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all p-6 border-l-4 border-blue-500">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h4>
-                      <p className="text-gray-600 mb-4">{service.description}</p>
-                      <ul className="space-y-2">
-                        {service.features.map((feature, index) => (
-                          <li key={index} className="flex items-start">
-                            <span className="text-blue-500 mr-2">•</span>
-                            <span className="text-gray-700 text-sm">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  {serviceCategories[activeCategory].services.map((service, serviceIndex) => (
+                    <div 
+                      key={service.title}
+                      className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-500 
+                        border-l-4 border-blue-500 overflow-hidden
+                        ${expandedService === serviceIndex ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
+                        transform hover:-translate-y-1`}
+                    >
+                      <div 
+                        className="p-6 cursor-pointer"
+                        onClick={() => toggleService(serviceIndex)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-xl font-semibold text-gray-900">{service.title}</h4>
+                          <button className="text-blue-500 hover:text-blue-700 transition-colors">
+                            {expandedService === serviceIndex ? 
+                              <Minus className="w-5 h-5" /> : 
+                              <Plus className="w-5 h-5" />
+                            }
+                          </button>
+                        </div>
+                        <p className="text-gray-600 mt-2">{service.description}</p>
+                      </div>
+                      
+                      {/* Expandable Features */}
+                      <div 
+                        className={`px-6 transition-all duration-500 ease-in-out overflow-hidden
+                          ${expandedService === serviceIndex ? 'max-h-40 pb-6 opacity-100' : 'max-h-0 opacity-0'}`}
+                      >
+                        <ul className="space-y-3 border-t border-gray-100 pt-4">
+                          {service.features.map((feature, index) => (
+                            <li key={index} className="flex items-start">
+                              <ArrowRight className="w-4 h-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                              <span className="text-gray-700">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   ))}
                   
-                  <div className="text-center mt-8">
+                  <div className="text-center mt-10">
                     <a 
-                      href={category.ctaLink} 
-                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                      href={serviceCategories[activeCategory].ctaLink} 
+                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg 
+                        hover:from-blue-700 hover:to-blue-800 transition-all duration-300 
+                        shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                     >
-                      {category.ctaText}
+                      <Zap className="w-5 h-5 mr-2" />
+                      {serviceCategories[activeCategory].ctaText}
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
