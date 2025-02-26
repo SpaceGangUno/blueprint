@@ -43,10 +43,10 @@ export default function Footer() {
           <div className="space-y-6 text-xl">
             <p>85 Broad Street, New York, NY 10004</p>
             <a 
-              href="mailto:contact@blueprintstudios.com"
+              href="mailto:create@blueprintstudios.tech"
               className="block hover:text-blue-400 transition-colors"
             >
-              contact@blueprintstudios.com
+              create@blueprintstudios.tech
             </a>
             <a 
               href="tel:+1-929-413-2940"
