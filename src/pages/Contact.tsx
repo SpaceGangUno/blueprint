@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Send, Smile, Frown, Meh, Star, Coffee, Heart, Music, Sun, Moon, Phone } from 'lucide-react';
+import { Send, Star, Coffee, Heart, Music, Sun, Moon, Phone } from 'lucide-react';
 
 export default function Contact() {
-  const [mood, setMood] = useState<string>('');
-  const [excitement, setExcitement] = useState<number>(0);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -13,12 +11,6 @@ export default function Contact() {
     communicationStyle: 'email',
     projectType: ''
   });
-
-  const moods = [
-    { icon: Smile, label: 'Excited', color: 'text-green-500' },
-    { icon: Meh, label: 'Curious', color: 'text-blue-500' },
-    { icon: Frown, label: 'Uncertain', color: 'text-yellow-500' }
-  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,48 +76,6 @@ export default function Contact() {
           </a>
           </div>
 
-          {/* Mood Selector */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 transform hover:scale-[1.02] transition-all">
-            <h2 className="text-2xl font-semibold mb-6 text-center">How are you feeling today?</h2>
-            <div className="flex justify-center gap-8">
-              {moods.map(({ icon: Icon, label, color }) => (
-                <button
-                  key={label}
-                  onClick={() => setMood(label)}
-                  className={`group flex flex-col items-center p-4 rounded-xl transition-all ${
-                    mood === label ? 'bg-blue-50 scale-110' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className={`w-12 h-12 mb-2 ${color} ${
-                    mood === label ? 'animate-bounce' : ''
-                  }`} />
-                  <span className="text-gray-600">{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Excitement Level */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 transform hover:scale-[1.02] transition-all">
-            <h2 className="text-2xl font-semibold mb-6 text-center">
-              How excited are you about your project?
-            </h2>
-            <div className="flex justify-center gap-4">
-              {[...Array(5)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setExcitement(index + 1)}
-                  className={`transform transition-all ${
-                    index < excitement ? 'scale-125' : 'opacity-50 hover:opacity-75'
-                  }`}
-                >
-                  <Star className={`w-8 h-8 ${
-                    index < excitement ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
-                  }`} />
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Main Form */}
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8">
