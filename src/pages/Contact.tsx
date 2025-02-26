@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, Coffee, Heart, Phone, Mail, Zap } from 'lucide-react';
+import { Star, Coffee, Phone, Mail, Zap } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 
 export default function Contact() {
