@@ -42,37 +42,41 @@ export default function Login() {
         <title>Login | Blueprint Studios</title>
         <meta name="description" content="Sign in to access your Blueprint Studios dashboard. Manage your projects, view updates, and collaborate with our team." />
       </Helmet>
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6 animate-fade-in" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+          <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm animate-fade-in">
             {error}
           </div>
         )}
 
-        <Input
-          id="email"
-          type="email"
-          label="Email address"
-          value={form.email}
-          onChange={e => setForm({ ...form, email: e.target.value })}
-          required
-        />
+        <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Input
+            id="email"
+            type="email"
+            label="Email address"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            required
+          />
+        </div>
 
-        <Input
-          id="password"
-          type="password"
-          label="Password"
-          value={form.password}
-          onChange={e => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Input
+            id="password"
+            type="password"
+            label="Password"
+            value={form.password}
+            onChange={e => setForm({ ...form, password: e.target.value })}
+            required
+          />
+        </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center">
             <input
               id="remember-me"
               type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-300"
               checked={form.rememberMe}
               onChange={e => setForm({ ...form, rememberMe: e.target.checked })}
             />
@@ -82,9 +86,11 @@ export default function Login() {
           </div>
         </div>
 
-        <Button type="submit" isLoading={isLoading}>
-          Sign in
-        </Button>
+        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <Button type="submit" isLoading={isLoading} variant="gradient">
+            Sign in
+          </Button>
+        </div>
       </form>
     </AuthLayout>
   );

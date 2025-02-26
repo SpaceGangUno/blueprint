@@ -16,7 +16,25 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <Router>
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col relative overflow-hidden">
+          {/* Global animated background elements */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
+            {[...Array(20)].map((_, i) => (
+              <div 
+                key={i}
+                className="absolute rounded-full bg-blue-400/30 animate-float"
+                style={{
+                  width: `${Math.random() * 200 + 50}px`,
+                  height: `${Math.random() * 200 + 50}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDuration: `${Math.random() * 20 + 15}s`,
+                  animationDelay: `${Math.random() * 10}s`
+                }}
+              />
+            ))}
+          </div>
+          
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
@@ -26,7 +44,7 @@ export default function App() {
               element={
                 <>
                   <Navigation />
-                  <main className="flex-grow">
+                  <main className="flex-grow relative z-10">
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/portfolio" element={<Portfolio />} />

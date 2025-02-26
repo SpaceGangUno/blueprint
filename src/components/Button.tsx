@@ -1,28 +1,34 @@
 import { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'accent' | 'gradient';
   isLoading?: boolean;
+  animated?: boolean;
 }
 
 export default function Button({ 
   children, 
   variant = 'primary', 
   isLoading, 
+  animated = true,
   className = '', 
   ...props 
 }: ButtonProps) {
-  const baseStyles = 'w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+  const baseStyles = 'w-full flex justify-center py-2 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300';
   
   const variants = {
     primary: 'border-transparent text-white bg-blue-600 hover:bg-blue-700',
-    secondary: 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+    secondary: 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50',
+    accent: 'border-transparent text-white bg-purple-600 hover:bg-purple-700',
+    gradient: 'border-transparent text-white bg-gradient-primary animate-gradient hover:shadow-lg'
   };
+
+  const animationClass = animated ? 'hover-lift' : '';
 
   return (
     <button
       {...props}
-      className={`${baseStyles} ${variants[variant]} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${animationClass} ${className}`}
       disabled={isLoading || props.disabled}
     >
       {isLoading ? (

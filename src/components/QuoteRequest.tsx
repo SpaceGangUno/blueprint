@@ -66,13 +66,13 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto hover-lift">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Request a Quote</h2>
+          <h2 className="text-2xl font-bold gradient-text">Request a Quote</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 transition-colors"
+            className="text-gray-400 hover:text-gray-500 transition-colors hover:rotate-90 transition-transform duration-300"
           >
             <X className="w-6 h-6" />
           </button>
@@ -83,14 +83,14 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
           <div className="flex justify-between mb-8">
             {[1, 2, 3].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= stepNumber ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
+                  step >= stepNumber ? 'bg-gradient-primary animate-gradient text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {stepNumber}
                 </div>
                 {stepNumber < 3 && (
-                  <div className={`w-24 h-1 ${
-                    step > stepNumber ? 'bg-blue-600' : 'bg-gray-200'
+                  <div className={`w-24 h-1 transition-all duration-500 ${
+                    step > stepNumber ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -98,23 +98,24 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
 
           {step === 1 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4">Select Services</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {services.map(service => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {services.map((service, index) => (
                   <button
                     key={service.id}
                     onClick={() => handleServiceToggle(service.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up ${
                       selectedServices.includes(service.id)
                         ? 'border-blue-600 bg-blue-50'
                         : 'border-gray-200 hover:border-blue-300'
                     }`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-medium">{service.title}</span>
                       {selectedServices.includes(service.id) && (
-                        <Check className="w-5 h-5 text-blue-600" />
+                        <Check className="w-5 h-5 text-blue-600 animate-fade-in" />
                       )}
                     </div>
                     <p className="text-sm text-gray-600">{service.description}</p>
@@ -125,19 +126,20 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
           )}
 
           {step === 2 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               <div>
                 <h3 className="text-xl font-semibold mb-4">Budget Range</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {budgetRanges.map(range => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {budgetRanges.map((range, index) => (
                     <button
                       key={range}
                       onClick={() => setBudget(range)}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                      className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up ${
                         budget === range
                           ? 'border-blue-600 bg-blue-50'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       {range}
                     </button>
@@ -147,16 +149,17 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
 
               <div>
                 <h3 className="text-xl font-semibold mb-4">Timeline</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {timelineOptions.map(option => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {timelineOptions.map((option, index) => (
                     <button
                       key={option}
                       onClick={() => setTimeline(option)}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                      className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up ${
                         timeline === option
                           ? 'border-blue-600 bg-blue-50'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
+                      style={{ animationDelay: `${index * 0.1 + 0.4}s` }}
                     >
                       {option}
                     </button>
@@ -167,8 +170,8 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
           )}
 
           {step === 3 && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+            <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+              <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Name
                 </label>
@@ -177,11 +180,11 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
                 />
               </div>
 
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
@@ -190,11 +193,11 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
                   required
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
                 />
               </div>
 
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Company
                 </label>
@@ -202,11 +205,11 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
                   type="text"
                   value={formData.company}
                   onChange={e => setFormData({ ...formData, company: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
                 />
               </div>
 
-              <div>
+              <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Project Description
                 </label>
@@ -215,22 +218,24 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
                 />
               </div>
             </form>
           )}
 
           {step === 4 && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="w-8 h-8 text-green-600" />
+            <div className="text-center py-8 animate-fade-in">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-slow">
+                <Check className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Quote Request Sent!</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-2xl font-bold gradient-text mb-2 animate-slide-up" style={{ animationDelay: '0.2s' }}>Quote Request Sent!</h3>
+              <p className="text-gray-600 mb-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
                 We'll review your request and get back to you within 24 hours.
               </p>
-              <Button onClick={onClose}>Close</Button>
+              <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+                <Button onClick={onClose} variant="gradient">Close</Button>
+              </div>
             </div>
           )}
 
@@ -239,9 +244,9 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
               {step > 1 ? (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="flex items-center text-gray-600 hover:text-gray-900"
+                  className="flex items-center text-gray-600 hover:text-gray-900 transition-all duration-300 hover:-translate-x-1 group"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  <ArrowLeft className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-125" />
                   Back
                 </button>
               ) : (
@@ -256,10 +261,10 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
                     setStep(step + 1);
                   }
                 }}
-                className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center px-6 py-2 bg-gradient-primary text-white rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient hover-lift"
               >
                 {step === 3 ? 'Submit' : 'Next'}
-                {step < 3 && <ArrowRight className="w-4 h-4 ml-2" />}
+                {step < 3 && <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
               </button>
             </div>
           )}
