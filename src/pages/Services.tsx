@@ -1,93 +1,137 @@
-import { Code, Palette, Briefcase, Lightbulb, Layers, Users, LineChart, Rocket } from 'lucide-react';
+import { PenTool, Megaphone, Globe, Package2, Lightbulb } from 'lucide-react';
 
 export default function Services() {
-  const services = [
+  // Service categories
+  const serviceCategories = [
     {
-      icon: <Briefcase className="w-8 h-8" />,
-      title: 'Project Consulting',
-      description: 'Strategic guidance and expert consultation for your digital initiatives. We help transform your ideas into actionable plans.',
-      features: [
-        'Project scoping and planning',
-        'Technical architecture design',
-        'Risk assessment and mitigation',
-        'Resource optimization'
+      id: 'branding',
+      title: 'Branding That Stands Out',
+      description: 'Create a memorable look and voice that customers love.',
+      icon: <PenTool className="w-8 h-8" />,
+      services: [
+        {
+          title: 'Logo & Visual Identity',
+          description: 'Design or refresh your logo, colors, and style to look professional instantly.',
+          features: [
+            'Simple updates to your current branding',
+            'Full brand kits for new businesses'
+          ]
+        },
+        {
+          title: 'Brand Personality',
+          description: 'Define your vibe (fun, trustworthy, bold) so customers connect with you.',
+          features: [
+            'Help with taglines, social media voice, or packaging design'
+          ]
+        }
       ]
     },
     {
-      icon: <Palette className="w-8 h-8" />,
-      title: 'Creative Design',
-      description: 'Innovative design solutions that capture your brand\'s essence and create meaningful user experiences.',
-      features: [
-        'UI/UX design',
-        'Brand identity development',
-        'Design systems',
-        'Interactive prototypes'
+      id: 'marketing',
+      title: 'Marketing That Works',
+      description: 'Get new customers and keep them coming back.',
+      icon: <Megaphone className="w-8 h-8" />,
+      services: [
+        {
+          title: 'Hype Campaigns',
+          description: 'Launch products/services with excitement.',
+          features: [
+            'Social media teasers',
+            'Email announcements',
+            'Limited-time discounts'
+          ]
+        },
+        {
+          title: 'Loyalty Programs',
+          description: 'Reward repeat customers.',
+          features: [
+            'Refer-a-friend discounts',
+            'VIP perks or points systems'
+          ]
+        },
+        {
+          title: 'Simple Ads',
+          description: 'Run Facebook/Google ads that actually sell.',
+          features: [
+            'No confusing jargon—we set them up for you',
+            'Track what\'s working'
+          ]
+        }
       ]
     },
     {
-      icon: <Code className="w-8 h-8" />,
-      title: 'Tech Integration',
-      description: 'Seamless integration of cutting-edge technology to power your digital presence and operations.',
-      features: [
-        'Custom software development',
-        'API integration',
-        'Cloud solutions',
-        'Legacy system modernization'
+      id: 'digital',
+      title: 'Digital Tools & Apps',
+      description: 'Build easy-to-use websites, apps, and tools.',
+      icon: <Globe className="w-8 h-8" />,
+      services: [
+        {
+          title: 'Custom Websites',
+          description: 'Mobile-friendly sites that let customers find, trust, and buy from you.',
+          features: [
+            'Edit text/images yourself',
+            'Built-in booking/contact forms'
+          ]
+        },
+        {
+          title: 'Business Apps',
+          description: 'Save time with tools like appointment reminders or loyalty apps.',
+          features: [
+            'Affordable monthly plans'
+          ]
+        },
+        {
+          title: 'Online Stores',
+          description: 'Sell products/services securely.',
+          features: [
+            'Connect to social media or local pickup'
+          ]
+        }
       ]
     },
     {
+      id: 'products',
+      title: 'Products & Spaces',
+      description: 'Create physical products or eye-catching spaces.',
+      icon: <Package2 className="w-8 h-8" />,
+      services: [
+        {
+          title: 'Product Design',
+          description: 'Turn your idea into a real product.',
+          features: [
+            'Work with local manufacturers',
+            'Eco-friendly options'
+          ]
+        },
+        {
+          title: 'Storefronts & Events',
+          description: 'Design pop-up shops or booths that attract customers.',
+          features: [
+            'Budget-friendly setups'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'guidance',
+      title: 'Guidance & Planning',
+      description: 'Get clear advice to make smart decisions.',
       icon: <Lightbulb className="w-8 h-8" />,
-      title: 'Digital Innovation',
-      description: 'Forward-thinking solutions that keep you ahead in the digital landscape and drive business growth.',
-      features: [
-        'Digital transformation',
-        'Innovation workshops',
-        'Emerging tech adoption',
-        'Process automation'
-      ]
-    },
-    {
-      icon: <Layers className="w-8 h-8" />,
-      title: 'Platform Development',
-      description: 'Building scalable platforms that serve as the foundation for your digital success.',
-      features: [
-        'Web applications',
-        'Mobile apps',
-        'E-commerce solutions',
-        'Content management systems'
-      ]
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: 'Team Augmentation',
-      description: 'Enhance your team with our skilled professionals to accelerate project delivery.',
-      features: [
-        'Technical expertise',
-        'Agile development',
-        'Quality assurance',
-        'DevOps practices'
-      ]
-    },
-    {
-      icon: <LineChart className="w-8 h-8" />,
-      title: 'Analytics & Optimization',
-      description: 'Data-driven insights and optimization strategies to improve performance and ROI.',
-      features: [
-        'Performance monitoring',
-        'User behavior analysis',
-        'Conversion optimization',
-        'SEO enhancement'
-      ]
-    },
-    {
-      icon: <Rocket className="w-8 h-8" />,
-      title: 'Launch & Growth',
-      description: 'Comprehensive support for successful product launches and sustainable growth.',
-      features: [
-        'Launch strategy',
-        'Market penetration',
-        'Scaling solutions',
-        'Growth optimization'
+      services: [
+        {
+          title: 'Tech Roadmaps',
+          description: 'Choose the right tools without overspending.',
+          features: [
+            'No confusing tech talk'
+          ]
+        },
+        {
+          title: 'Website Checkups',
+          description: 'Fix issues that might turn customers away.',
+          features: [
+            'Make your site faster and phone-friendly'
+          ]
+        }
       ]
     }
   ];
@@ -106,33 +150,42 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="py-24 bg-gray-50">
+      {/* Service Categories */}
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">{service.title}</h3>
+          {serviceCategories.map((category) => (
+            <div key={category.id} id={category.id} className="mb-20">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+                  {category.icon}
                 </div>
-                <p className="text-gray-600 mb-6">{service.description}</p>
-                <ul className="space-y-3">
-                  {service.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-gray-700">
-                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">{category.title}</h2>
+                  <p className="text-gray-600 mt-1">{category.description}</p>
+                </div>
               </div>
-            ))}
-          </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {category.services.map((service, serviceIndex) => (
+                  <div
+                    key={`${category.id}-${serviceIndex}`}
+                    className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500"
+                  >
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">{service.title}</h3>
+                    <p className="text-gray-600 mb-6">{service.description}</p>
+                    <ul className="space-y-3">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start text-gray-700">
+                          <span className="text-blue-500 mr-2 mt-1">•</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
