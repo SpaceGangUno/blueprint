@@ -20,7 +20,9 @@ export default function Home() {
   const getIconForCategory = (title: string, isActive: boolean) => {
     const className = `w-5 h-5 ${isActive ? 'text-white' : 'text-blue-500'}`;
     
-    // You could add different icons for different categories here
+    // Use title to determine which icon to show for different categories
+    // For now, we'll just use Sparkles for all categories
+    console.log(`Getting icon for category: ${title}`);
     return <Sparkles className={className} />;
   };
 
