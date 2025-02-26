@@ -69,7 +69,7 @@ export default function Contact() {
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:opacity-90 transition-all inline-flex items-center justify-center gap-2 group"
               >
                 <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Request a Quote
+                Start Your Project
               </button>
             </div>
             
