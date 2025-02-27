@@ -412,8 +412,8 @@ export default function Home() {
                 <div className="bg-gray-900 rounded-lg overflow-hidden border border-[#FF6B00]/20 hover:border-[#FF6B00]/50 transition-all duration-300">
                   <div className="relative">
                     <img 
-                      src="https://images.unsplash.com/photo-1611162616475-46b635cb6868?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
-                      alt="SMS screenshot example showing exclusive drop notification" 
+                      src="https://resources.marsello.com/hs-fs/hubfs/SMS%20Campaign%20from%20Federation%20offering%20a%2020%25%20discount%20overlaid%20on%20a%20phone%20screen.png?width=672&height=352&name=SMS%20Campaign%20from%20Federation%20offering%20a%2020%25%20discount%20overlaid%20on%20a%20phone%20screen.png" 
+                      alt="SMS Campaign from Federation offering a 20% discount overlaid on a phone screen" 
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-3 right-3 bg-[#FF6B00] text-white text-xs font-bold px-2 py-1 rounded">SMS</div>
