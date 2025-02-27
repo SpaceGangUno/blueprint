@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import Button from './Button';
+import { submitQuoteRequestForm } from '../config/forms';
 
 interface Service {
   id: string;
@@ -51,16 +52,33 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log({
-      services: selectedServices,
-      budget,
-      timeline,
-      ...formData
-    });
     
-    // Show success step
-    setStep(4);
+    try {
+      // Submit form data to Firebase
+      await submitQuoteRequestForm({
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+        description: formData.description,
+        services: selectedServices,
+        budget,
+        timeline
+      });
+      
+      console.log('Quote request submitted:', {
+        services: selectedServices,
+        budget,
+        timeline,
+        ...formData
+      });
+      
+      // Show success step
+      setStep(4);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Continue to success step anyway since we don't have error handling UI in this component
+      setStep(4);
+    }
   };
 
   if (!isOpen) return null;

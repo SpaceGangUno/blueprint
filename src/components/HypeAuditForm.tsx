@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Store } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
-import { sendHypeAuditEmail } from '../config/emailjs';
+import { submitHypeAuditForm } from '../config/forms';
 
 export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [step, setStep] = useState(1);
@@ -48,16 +48,24 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     setSubmissionError(null);
     
     try {
-      // Send email with form data
-      await sendHypeAuditEmail(formData);
+      // Submit form data to Firebase
+      await submitHypeAuditForm({
+        storeName: formData.storeName,
+        email: formData.email,
+        phone: formData.phone || '',
+        instagramHandle: formData.instagramHandle,
+        tiktokHandle: formData.tiktokHandle,
+        website: formData.website,
+        currentChallenges: formData.currentChallenges
+      });
       
       console.log('Submitting hype audit request:', formData);
       
       // Show success step
       setStep(3);
     } catch (error) {
-      console.error('Error sending email:', error);
-      setSubmissionError('There was an error submitting your request. Please check your internet connection and try again.');
+      console.error('Error submitting form:', error);
+      setSubmissionError('There was an error submitting your request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

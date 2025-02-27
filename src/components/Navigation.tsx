@@ -75,7 +75,7 @@ const Navigation: React.FC = () => {
             </Link>
             <Link 
               to="/login" 
-              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 hover-lift"
+              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-to-r from-blue-500 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 hover-lift"
             >
               <LogIn className="w-4 h-4 mr-2" />
               Client Portal
@@ -136,7 +136,7 @@ const Navigation: React.FC = () => {
             <div className="px-4 pt-4">
               <Link
                 to="/login"
-                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300"
+                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 <LogIn className="w-5 h-5 mr-2" />
                 Client Portal

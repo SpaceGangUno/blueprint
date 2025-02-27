@@ -116,7 +116,7 @@
 
 /* Gradient text */
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 font-bold;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-orange-500 font-bold;
 }
 
 /* Futuristic text animation */
