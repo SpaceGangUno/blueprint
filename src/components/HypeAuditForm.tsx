@@ -168,7 +168,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                     </svg>
                   </div>
                   <Input
-                    label="TikTok Handle"
+                    label="TikTok Handle (optional)"
                     id="tiktokHandle"
                     name="tiktokHandle"
                     type="text"
@@ -214,27 +214,11 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                   />
                 </div>
                 
-                <div className="relative">
-                  <div className="absolute left-3 top-9 text-gray-400">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <Input
-                    label="Phone"
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    error={errors.phone}
-                    required
-                    className="pl-10"
-                  />
-                </div>
                 
                 <div className="group">
                   <label htmlFor="currentChallenges" className="block text-sm font-medium text-gray-700 transition-colors duration-300 group-focus-within:text-blue-600 flex items-center">
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Current Marketing Challenges
+                    Current Marketing Challenges (optional)
                   </label>
                   <div className="mt-1 relative">
                     <textarea
