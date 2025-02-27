@@ -57,17 +57,17 @@ const Navigation: React.FC = () => {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center animate-gradient">
                 <span className="text-white font-bold">BS</span>
               </div>
-              <span className="font-semibold text-lg sm:text-xl gradient-text">Blueprint Studios</span>
+              <span className="font-semibold text-lg sm:text-xl gradient-text font-bold">Blueprint Studios</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
-            <Link to="/services" className="text-gray-600 hover:text-gray-900 transition-colors relative group">
+            <Link to="/services" className="text-gray-800 hover:text-black font-medium transition-colors relative group">
               Services
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-            <Link to="/contact" className="text-gray-600 hover:text-gray-900 transition-colors relative group">
+            <Link to="/contact" className="text-gray-800 hover:text-black font-medium transition-colors relative group">
               Contact
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
@@ -108,7 +108,7 @@ const Navigation: React.FC = () => {
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100">
-            <span className="font-semibold text-lg gradient-text">Menu</span>
+            <span className="font-semibold text-lg gradient-text font-bold">Menu</span>
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
@@ -119,13 +119,13 @@ const Navigation: React.FC = () => {
           <div className="px-2 py-4 space-y-1 overflow-y-auto max-h-[calc(100vh-4rem)]">
             <Link
               to="/services"
-              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
+              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-800 hover:text-black font-medium hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
             >
               Services
             </Link>
             <Link
               to="/contact"
-              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
+              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-800 hover:text-black font-medium hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
             >
               Contact
             </Link>
