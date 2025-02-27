@@ -21,12 +21,50 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
     description: ''
   });
 
-  const services: Service[] = [
-    { id: 'consulting', title: 'Project Consulting', description: 'Strategic guidance and expert consultation' },
-    { id: 'design', title: 'Creative Design', description: 'Innovative design solutions' },
-    { id: 'development', title: 'Tech Integration', description: 'Seamless technology integration' },
-    { id: 'innovation', title: 'Digital Innovation', description: 'Forward-thinking digital solutions' }
+  const serviceCategories = [
+    {
+      category: 'Branding',
+      services: [
+        { id: 'logo_identity', title: 'Logo & Visual Identity', description: 'Professional logo design and brand identity systems' },
+        { id: 'brand_personality', title: 'Brand Personality', description: 'Define your brand voice, taglines, and overall presence' }
+      ]
+    },
+    {
+      category: 'Marketing',
+      services: [
+        { id: 'hype_campaigns', title: 'Hype Campaigns', description: 'Build excitement with social media teasers and email announcements' },
+        { id: 'loyalty_programs', title: 'Loyalty Programs', description: 'Reward repeat customers with VIP perks and referral systems' },
+        { id: 'simple_ads', title: 'Simple Ads', description: 'Effective Facebook/Google ads that drive conversions' }
+      ]
+    },
+    {
+      category: 'Digital',
+      services: [
+        { id: 'custom_websites', title: 'Custom Websites', description: 'Mobile-friendly sites with built-in forms and self-editing' },
+        { id: 'business_apps', title: 'Business Apps', description: 'Custom applications to streamline your business operations' },
+        { id: 'online_stores', title: 'Online Stores', description: 'E-commerce solutions with secure payment processing' }
+      ]
+    },
+    {
+      category: 'Products & Spaces',
+      services: [
+        { id: 'product_design', title: 'Product Design', description: 'Turn your ideas into real products with local manufacturing' },
+        { id: 'storefronts_events', title: 'Storefronts & Events', description: 'Design eye-catching physical spaces and pop-up shops' }
+      ]
+    },
+    {
+      category: 'Guidance',
+      services: [
+        { id: 'tech_roadmaps', title: 'Tech Roadmaps', description: 'Strategic planning for your technology investments' },
+        { id: 'website_checkups', title: 'Website Checkups', description: 'Identify and fix issues that might turn customers away' }
+      ]
+    }
   ];
+
+  // Flatten services for selection tracking
+  const allServices: Service[] = serviceCategories.flatMap(category => 
+    category.services
+  );
 
   const budgetRanges = [
     '< $10,000',
@@ -118,28 +156,34 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4">Select Services</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {services.map((service, index) => (
-                  <button
-                    key={service.id}
-                    onClick={() => handleServiceToggle(service.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up ${
-                      selectedServices.includes(service.id)
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">{service.title}</span>
-                      {selectedServices.includes(service.id) && (
-                        <Check className="w-5 h-5 text-blue-600 animate-fade-in" />
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600">{service.description}</p>
-                  </button>
-                ))}
-              </div>
+              
+              {serviceCategories.map((category, categoryIndex) => (
+                <div key={category.category} className="mb-6">
+                  <h4 className="text-lg font-medium text-blue-700 mb-3">{category.category}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {category.services.map((service, index) => (
+                      <button
+                        key={service.id}
+                        onClick={() => handleServiceToggle(service.id)}
+                        className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up ${
+                          selectedServices.includes(service.id)
+                            ? 'border-blue-600 bg-blue-50'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                        style={{ animationDelay: `${(categoryIndex * 0.1) + (index * 0.05)}s` }}
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">{service.title}</span>
+                          {selectedServices.includes(service.id) && (
+                            <Check className="w-5 h-5 text-blue-600 animate-fade-in" />
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">{service.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

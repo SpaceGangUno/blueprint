@@ -10,6 +10,9 @@ export interface HypeAuditFormData {
   tiktokHandle?: string;
   website: string;
   currentChallenges?: string;
+  marketingGoals?: string[];
+  targetAudience?: string;
+  competitorUrls?: string;
   submittedAt?: any;
 }
 

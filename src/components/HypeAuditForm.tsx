@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Store } from 'lucide-react';
+import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Store, Megaphone, Target, Users, ShoppingBag } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
 import { submitHypeAuditForm } from '../config/forms';
@@ -7,29 +7,48 @@ import { submitHypeAuditForm } from '../config/forms';
 export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    storeName: '',
+    businessName: '',
     email: '',
     phone: '',
     instagramHandle: '',
     tiktokHandle: '',
     website: '',
-    currentChallenges: ''
+    currentChallenges: '',
+    marketingGoals: [] as string[],
+    targetAudience: '',
+    competitorUrls: ''
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
+  // Marketing goals options
+  const marketingGoalOptions = [
+    { id: 'brand_awareness', label: 'Increase Brand Awareness', icon: <Megaphone className="w-4 h-4" /> },
+    { id: 'customer_acquisition', label: 'Acquire New Customers', icon: <Users className="w-4 h-4" /> },
+    { id: 'customer_retention', label: 'Improve Customer Retention', icon: <Target className="w-4 h-4" /> },
+    { id: 'sales_increase', label: 'Boost Sales', icon: <ShoppingBag className="w-4 h-4" /> },
+    { id: 'social_engagement', label: 'Increase Social Media Engagement', icon: <Instagram className="w-4 h-4" /> }
+  ];
+
+  const toggleMarketingGoal = (goalId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      marketingGoals: prev.marketingGoals.includes(goalId)
+        ? prev.marketingGoals.filter(id => id !== goalId)
+        : [...prev.marketingGoals, goalId]
+    }));
+  };
+
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
     
     if (step === 1) {
-      if (!formData.storeName.trim()) newErrors.storeName = 'Store Name is required';
+      if (!formData.businessName.trim()) newErrors.businessName = 'Business Name is required';
     }
     
     if (step === 2) {
-      if (!formData.instagramHandle.trim()) newErrors.instagramHandle = 'Instagram handle is required';
-      if (!formData.website.trim()) newErrors.website = 'Website is required';
       if (!formData.email.trim()) newErrors.email = 'Email is required';
       else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) newErrors.email = 'Please enter a valid email';
     }
@@ -50,19 +69,23 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     try {
       // Submit form data to Firebase
       await submitHypeAuditForm({
-        storeName: formData.storeName,
+        storeName: formData.businessName,
         email: formData.email,
         phone: formData.phone || '',
         instagramHandle: formData.instagramHandle,
         tiktokHandle: formData.tiktokHandle,
         website: formData.website,
-        currentChallenges: formData.currentChallenges
+        currentChallenges: formData.currentChallenges,
+        // Add additional fields to the form submission
+        marketingGoals: formData.marketingGoals,
+        targetAudience: formData.targetAudience,
+        competitorUrls: formData.competitorUrls
       });
       
       console.log('Submitting hype audit request:', formData);
       
       // Show success step
-      setStep(3);
+      setStep(4);
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmissionError('There was an error submitting your request. Please try again.');
@@ -99,7 +122,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto py-8">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto hover-lift animate-scale-up">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-[#f0e7ff]">
-          <h2 className="text-2xl font-bold text-[#6b21a8]">Get Your Free Hype Audit</h2>
+          <h2 className="text-2xl font-bold text-[#6b21a8]">Start Your Project</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 transition-colors hover:rotate-90 transition-transform duration-300"
@@ -137,7 +160,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 <span className="w-8 h-8 bg-[#6b21a8] rounded-full flex items-center justify-center text-white mr-2">
                   <Store className="w-4 h-4" />
                 </span>
-                Your Store
+                Your Business
               </h3>
               <div className="space-y-4">
                 <div className="relative">
@@ -145,13 +168,13 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                     <Store className="w-5 h-5" />
                   </div>
                   <Input
-                    label="Store Name"
-                    id="storeName"
-                    name="storeName"
+                    label="Business Name"
+                    id="businessName"
+                    name="businessName"
                     type="text"
-                    value={formData.storeName}
+                    value={formData.businessName}
                     onChange={handleInputChange}
-                    error={errors.storeName}
+                    error={errors.businessName}
                     required
                     className="pl-10"
                   />
@@ -161,6 +184,83 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           )}
 
           {step === 2 && (
+            <div className="space-y-6 animate-fade-in">
+              <h3 className="text-xl font-semibold mb-4 flex items-center">
+                <span className="w-8 h-8 bg-[#6b21a8] rounded-full flex items-center justify-center text-white mr-2">
+                  <Target className="w-4 h-4" />
+                </span>
+                Your Marketing Goals
+              </h3>
+              
+              <div className="space-y-4">
+                <p className="text-gray-600">Select all that apply:</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {marketingGoalOptions.map((goal, index) => (
+                    <button
+                      key={goal.id}
+                      type="button"
+                      onClick={() => toggleMarketingGoal(goal.id)}
+                      className={`p-4 rounded-lg border-2 text-left transition-all duration-300 hover-lift animate-slide-up flex items-center ${
+                        formData.marketingGoals.includes(goal.id)
+                          ? 'border-[#6b21a8] bg-purple-50'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                        formData.marketingGoals.includes(goal.id) ? 'bg-[#6b21a8] text-white' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {goal.icon}
+                      </span>
+                      <span className="font-medium">{goal.label}</span>
+                      {formData.marketingGoals.includes(goal.id) && (
+                        <Check className="w-5 h-5 text-[#6b21a8] ml-auto animate-fade-in" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="group mt-6">
+                  <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700 transition-colors duration-300 group-focus-within:text-blue-600 flex items-center">
+                    <Users className="w-4 h-4 mr-2" />
+                    Target Audience (optional)
+                  </label>
+                  <div className="mt-1 relative">
+                    <textarea
+                      id="targetAudience"
+                      name="targetAudience"
+                      rows={2}
+                      value={formData.targetAudience}
+                      onChange={handleInputChange}
+                      placeholder="Describe your ideal customers (age, interests, location, etc.)"
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-300"
+                    />
+                  </div>
+                </div>
+                
+                <div className="group">
+                  <label htmlFor="competitorUrls" className="block text-sm font-medium text-gray-700 transition-colors duration-300 group-focus-within:text-blue-600 flex items-center">
+                    <Globe className="w-4 h-4 mr-2" />
+                    Competitor Websites (optional)
+                  </label>
+                  <div className="mt-1 relative">
+                    <textarea
+                      id="competitorUrls"
+                      name="competitorUrls"
+                      rows={2}
+                      value={formData.competitorUrls}
+                      onChange={handleInputChange}
+                      placeholder="List websites of competitors you admire"
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-300"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
             <div className="space-y-6 animate-fade-in">
               {submissionError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 animate-fade-in">
@@ -273,7 +373,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="text-center py-8 animate-fade-in">
               <div className="w-24 h-24 bg-[#6b21a8] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
                 <Check className="w-12 h-12 text-white animate-bounce-slow" />
@@ -285,10 +385,10 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                   </svg>
                 </div>
                 <h3 className="text-3xl font-bold text-[#6b21a8] mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                  Audit Request Received!
+                  Project Request Received!
                 </h3>
                 <p className="text-gray-600 mb-8 animate-slide-up text-lg" style={{ animationDelay: '0.3s' }}>
-                  Our team will analyze your digital presence and get back to you within 48 hours with your personalized hype audit.
+                  Our team will review your project details and get back to you within 48 hours to discuss next steps.
                 </p>
                 <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                   <div className="relative inline-block">
@@ -300,7 +400,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
             </div>
           )}
 
-          {step < 3 && (
+          {step < 4 && (
             <div className="flex justify-between mt-8">
               {step > 1 ? (
                 <button
@@ -315,7 +415,13 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
               )}
               
               <button
-                onClick={step === 2 ? handleSubmit : nextStep}
+                onClick={() => {
+                  if (step === 3) {
+                    handleSubmit(new Event('submit') as any);
+                  } else {
+                    nextStep();
+                  }
+                }}
                 disabled={isSubmitting}
                 className="flex items-center px-6 py-3 bg-[#6b21a8] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group"
               >
@@ -327,8 +433,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                   ) : null}
-                  {step === 2 ? 'Submit' : 'Next'}
-                  {step < 2 && <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
+                  {step === 3 ? 'Submit' : 'Next'}
+                  {step < 3 && <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                 </span>
               </button>
             </div>
