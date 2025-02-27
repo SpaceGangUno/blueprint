@@ -16,8 +16,10 @@
     "admin:setup": "ts-node -P tsconfig.admin.json src/scripts/setupAdmin.ts"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@types/react-helmet": "^6.1.11",
     "dotenv": "^16.3.1",
+    "emailjs-com": "^3.2.0",
     "firebase": "^10.5.2",
     "firebase-admin": "^11.11.0",
     "jspdf": "^2.5.1",

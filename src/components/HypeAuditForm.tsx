@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Phone, Store } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
+import { sendHypeAuditEmail } from '../config/emailjs';
 
 export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [step, setStep] = useState(1);
@@ -16,6 +17,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -27,6 +29,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     if (step === 2) {
       if (!formData.instagramHandle.trim()) newErrors.instagramHandle = 'Instagram handle is required';
       if (!formData.website.trim()) newErrors.website = 'Website is required';
+      if (!formData.email.trim()) newErrors.email = 'Email is required';
+      else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) newErrors.email = 'Please enter a valid email';
     }
     
     setErrors(newErrors);
@@ -38,11 +42,22 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     
     if (!validateStep()) return;
     
-    // Here you would typically send the data to your backend
-    console.log('Submitting hype audit request:', formData);
+    setIsSubmitting(true);
     
-    // Show success step
-    setStep(3);
+    try {
+      // Send email with form data
+      await sendHypeAuditEmail(formData);
+      
+      console.log('Submitting hype audit request:', formData);
+      
+      // Show success step
+      setStep(3);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('There was an error submitting your request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -72,8 +87,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto py-8">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto hover-lift animate-scale-up">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-blue-700/10">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Get Your Free Hype Audit</h2>
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-600/10 to-purple-600/10">
+          <h2 className="text-2xl font-bold gradient-text">Get Your Free Hype Audit</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 transition-colors hover:rotate-90 transition-transform duration-300"
@@ -90,7 +105,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 transform ${
                     step >= stepNumber 
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white scale-110 shadow-lg' 
+                      ? 'bg-gradient-primary animate-gradient text-white scale-110 shadow-lg' 
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -98,7 +113,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </div>
                 {stepNumber < 3 && (
                   <div className={`w-full h-1 transition-all duration-500 ${
-                    step > stepNumber ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 'bg-gray-200'
+                    step > stepNumber ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -108,7 +123,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mr-2">
+                <span className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white mr-2">
                   <Store className="w-4 h-4" />
                 </span>
                 Your Store
@@ -137,7 +152,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 2 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mr-2">
+                <span className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white mr-2">
                   <Globe className="w-4 h-4" />
                 </span>
                 Your Digital Presence
@@ -239,7 +254,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
 
           {step === 3 && (
             <div className="text-center py-8 animate-fade-in">
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
+              <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
                 <Check className="w-12 h-12 text-white animate-bounce-slow" />
               </div>
               <div className="relative">
@@ -248,7 +263,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                     <path d="M50 0 L95 25 L95 75 L50 100 L5 75 L5 25 Z" stroke="currentColor" strokeWidth="2" />
                   </svg>
                 </div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <h3 className="text-3xl font-bold gradient-text mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                   Audit Request Received!
                 </h3>
                 <p className="text-gray-600 mb-8 animate-slide-up text-lg" style={{ animationDelay: '0.3s' }}>
@@ -256,7 +271,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </p>
                 <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                   <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg blur-md animate-pulse-slow"></div>
+                    <div className="absolute inset-0 bg-gradient-primary rounded-lg blur-md animate-pulse-slow"></div>
                     <Button onClick={onClose} variant="gradient" className="relative">Close</Button>
                   </div>
                 </div>
@@ -280,10 +295,17 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
               
               <button
                 onClick={step === 2 ? handleSubmit : nextStep}
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group"
+                disabled={isSubmitting}
+                className="flex items-center px-6 py-3 bg-gradient-primary text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group animate-gradient"
               >
                 <span className="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
                 <span className="relative z-10 flex items-center">
+                  {isSubmitting ? (
+                    <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : null}
                   {step === 2 ? 'Submit' : 'Next'}
                   {step < 2 && <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />}
                 </span>
