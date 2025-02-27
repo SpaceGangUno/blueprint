@@ -2,9 +2,11 @@ import { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, MessageSquare, Clock, Ban, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
+import HypeAuditForm from '../components/HypeAuditForm';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showHypeAuditForm, setShowHypeAuditForm] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   
   // Function to scroll carousel
@@ -66,7 +68,7 @@ export default function Home() {
             </p>
             <div className="pt-4">
               <button
-                onClick={() => setShowQuoteModal(true)}
+                onClick={() => setShowHypeAuditForm(true)}
                 className="inline-block px-8 py-4 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 shadow-lg hover:shadow-[#FF6B00]/20 hover:-translate-y-1"
               >
                 Get Your Free Hype Audit
@@ -512,6 +514,12 @@ export default function Home() {
       <QuoteRequest 
         isOpen={showQuoteModal} 
         onClose={() => setShowQuoteModal(false)} 
+      />
+      
+      {/* Hype Audit Form */}
+      <HypeAuditForm
+        isOpen={showHypeAuditForm}
+        onClose={() => setShowHypeAuditForm(false)}
       />
 
       {/* Custom CSS is handled in index.css */}
