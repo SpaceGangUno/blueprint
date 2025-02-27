@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, MessageSquare, Clock, Ban, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
-import Button from '../components/Button';
 import ServiceCard from '../components/ServiceCard';
 
 export default function Home() {
