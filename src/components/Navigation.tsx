@@ -54,27 +54,11 @@ const Navigation: React.FC = () => {
               className="flex items-center space-x-2"
               onClick={() => setIsOpen(false)}
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center animate-gradient">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-orange-500 rounded-lg flex items-center justify-center">
                 <span className="text-gray-900 font-bold">BS</span>
               </div>
-              <span className="font-semibold text-lg sm:text-xl gradient-text animate-snake">
-                <span>B</span>
-                <span>l</span>
-                <span>u</span>
-                <span>e</span>
-                <span>p</span>
-                <span>r</span>
-                <span>i</span>
-                <span>n</span>
-                <span>t</span>
-                <span> </span>
-                <span>S</span>
-                <span>t</span>
-                <span>u</span>
-                <span>d</span>
-                <span>i</span>
-                <span>o</span>
-                <span>s</span>
+              <span className="font-bold text-xl sm:text-2xl gradient-text">
+                Blueprint Studios
               </span>
             </Link>
           </div>
@@ -91,7 +75,7 @@ const Navigation: React.FC = () => {
             </Link>
             <Link 
               to="/login" 
-              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient hover-lift"
+              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 hover-lift"
             >
               <LogIn className="w-4 h-4 mr-2" />
               Client Portal
@@ -126,11 +110,8 @@ const Navigation: React.FC = () => {
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100">
-            <span className="font-semibold text-lg gradient-text animate-snake">
-              <span>M</span>
-              <span>e</span>
-              <span>n</span>
-              <span>u</span>
+            <span className="font-bold text-xl gradient-text">
+              Menu
             </span>
             <button
               onClick={() => setIsOpen(false)}
@@ -155,7 +136,7 @@ const Navigation: React.FC = () => {
             <div className="px-4 pt-4">
               <Link
                 to="/login"
-                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient"
+                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 <LogIn className="w-5 h-5 mr-2" />
                 Client Portal

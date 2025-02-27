@@ -119,40 +119,43 @@
   @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 font-bold;
 }
 
-/* Snake animation for text */
-@keyframes snake-move {
+/* Futuristic text animation */
+@keyframes glow-pulse {
   0% {
-    transform: translateY(0);
+    text-shadow: 0 0 4px rgba(255, 215, 0, 0.8), 0 0 8px rgba(255, 140, 0, 0.4);
     background-position: 0% 50%;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
-  }
-  25% {
-    transform: translateY(-4px);
   }
   50% {
-    transform: translateY(0);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 1), 0 0 16px rgba(255, 140, 0, 0.8);
     background-position: 100% 50%;
-    text-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
-  }
-  75% {
-    transform: translateY(4px);
   }
   100% {
-    transform: translateY(0);
+    text-shadow: 0 0 4px rgba(255, 215, 0, 0.8), 0 0 8px rgba(255, 140, 0, 0.4);
     background-position: 0% 50%;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+  }
+}
+
+@keyframes letter-wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
   }
 }
 
 .animate-snake {
   background-size: 200% auto;
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+  animation: glow-pulse 3s ease infinite;
+  letter-spacing: 0.5px;
   display: inline-block;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.8), 0 0 8px rgba(255, 140, 0, 0.4);
 }
 
 .animate-snake span {
   display: inline-block;
-  animation: snake-move 2s ease-in-out infinite;
+  position: relative;
+  animation: letter-wave 3s ease-in-out infinite;
 }
 
 .animate-snake span:nth-child(1) { animation-delay: 0.0s; }
