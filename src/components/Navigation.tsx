@@ -57,7 +57,25 @@ const Navigation: React.FC = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center animate-gradient">
                 <span className="text-gray-900 font-bold">BS</span>
               </div>
-              <span className="font-semibold text-lg sm:text-xl gradient-text animate-snake">Blueprint Studios</span>
+              <span className="font-semibold text-lg sm:text-xl gradient-text animate-snake">
+                <span>B</span>
+                <span>l</span>
+                <span>u</span>
+                <span>e</span>
+                <span>p</span>
+                <span>r</span>
+                <span>i</span>
+                <span>n</span>
+                <span>t</span>
+                <span> </span>
+                <span>S</span>
+                <span>t</span>
+                <span>u</span>
+                <span>d</span>
+                <span>i</span>
+                <span>o</span>
+                <span>s</span>
+              </span>
             </Link>
           </div>
 
@@ -108,7 +126,12 @@ const Navigation: React.FC = () => {
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100">
-            <span className="font-semibold text-lg gradient-text animate-snake">Menu</span>
+            <span className="font-semibold text-lg gradient-text animate-snake">
+              <span>M</span>
+              <span>e</span>
+              <span>n</span>
+              <span>u</span>
+            </span>
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
