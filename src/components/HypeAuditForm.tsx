@@ -18,6 +18,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const validateStep = () => {
     const newErrors: Record<string, string> = {};
@@ -44,6 +45,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     
     setIsSubmitting(true);
     
+    setSubmissionError(null);
+    
     try {
       // Send email with form data
       await sendHypeAuditEmail(formData);
@@ -54,7 +57,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
       setStep(3);
     } catch (error) {
       console.error('Error sending email:', error);
-      alert('There was an error submitting your request. Please try again.');
+      setSubmissionError('There was an error submitting your request. Please check your internet connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -151,6 +154,16 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
 
           {step === 2 && (
             <div className="space-y-6 animate-fade-in">
+              {submissionError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 animate-fade-in">
+                  <p className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {submissionError}
+                  </p>
+                </div>
+              )}
               <h3 className="text-xl font-semibold mb-4 flex items-center">
                 <span className="w-8 h-8 bg-[#6b21a8] rounded-full flex items-center justify-center text-white mr-2">
                   <Globe className="w-4 h-4" />
