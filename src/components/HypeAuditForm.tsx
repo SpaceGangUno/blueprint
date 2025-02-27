@@ -1,20 +1,17 @@
-import { useState, useEffect } from 'react';
-import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, MapPin, Users, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Phone, Store } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
 
 export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: '',
+    storeName: '',
     email: '',
     phone: '',
-    company: '',
     instagramHandle: '',
     tiktokHandle: '',
     website: '',
-    storeLocation: '',
-    primaryAudience: '',
     currentChallenges: ''
   });
   
@@ -24,10 +21,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
     const newErrors: Record<string, string> = {};
     
     if (step === 1) {
-      if (!formData.name.trim()) newErrors.name = 'Name is required';
-      if (!formData.email.trim()) newErrors.email = 'Email is required';
-      else if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = 'Email is invalid';
-      if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
+      if (!formData.storeName.trim()) newErrors.storeName = 'Store Name is required';
     }
     
     if (step === 2) {
@@ -78,8 +72,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto py-8">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto hover-lift animate-scale-up">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-[#FF6B00]/10 to-[#00E0FF]/10">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] bg-clip-text text-transparent">Get Your Free Hype Audit</h2>
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-blue-700/10">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Get Your Free Hype Audit</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 transition-colors hover:rotate-90 transition-transform duration-300"
@@ -96,7 +90,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 transform ${
                     step >= stepNumber 
-                      ? 'bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] text-white scale-110 shadow-lg' 
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white scale-110 shadow-lg' 
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -104,7 +98,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </div>
                 {stepNumber < 3 && (
                   <div className={`w-full h-1 transition-all duration-500 ${
-                    step > stepNumber ? 'bg-gradient-to-r from-[#FF6B00] to-[#00E0FF]' : 'bg-gray-200'
+                    step > stepNumber ? 'bg-gradient-to-r from-blue-500 to-blue-700' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -114,53 +108,28 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] rounded-full flex items-center justify-center text-white mr-2">
-                  <Users className="w-4 h-4" />
+                <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mr-2">
+                  <Store className="w-4 h-4" />
                 </span>
-                Your Information
+                Your Store
               </h3>
               <div className="space-y-4">
-                <Input
-                  label="Name"
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  error={errors.name}
-                  required
-                />
-                
-                <Input
-                  label="Email"
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  error={errors.email}
-                  required
-                />
-                
-                <Input
-                  label="Phone"
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  error={errors.phone}
-                  required
-                />
-                
-                <Input
-                  label="Company/Brand Name"
-                  id="company"
-                  name="company"
-                  type="text"
-                  value={formData.company}
-                  onChange={handleInputChange}
-                />
+                <div className="relative">
+                  <div className="absolute left-3 top-9 text-gray-400">
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <Input
+                    label="Store Name"
+                    id="storeName"
+                    name="storeName"
+                    type="text"
+                    value={formData.storeName}
+                    onChange={handleInputChange}
+                    error={errors.storeName}
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -168,8 +137,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 2 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] rounded-full flex items-center justify-center text-white mr-2">
-                  <Zap className="w-4 h-4" />
+                <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white mr-2">
+                  <Globe className="w-4 h-4" />
                 </span>
                 Your Digital Presence
               </h3>
@@ -230,36 +199,36 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 
                 <div className="relative">
                   <div className="absolute left-3 top-9 text-gray-400">
-                    <MapPin className="w-5 h-5" />
+                    <Mail className="w-5 h-5" />
                   </div>
                   <Input
-                    label="Store Location (if applicable)"
-                    id="storeLocation"
-                    name="storeLocation"
-                    type="text"
-                    value={formData.storeLocation}
+                    label="Email"
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
                     onChange={handleInputChange}
+                    error={errors.email}
+                    required
                     className="pl-10"
                   />
                 </div>
                 
-                <div className="group">
-                  <label htmlFor="primaryAudience" className="block text-sm font-medium text-gray-700 transition-colors duration-300 group-focus-within:text-blue-600 flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
-                    Primary Audience
-                  </label>
-                  <div className="mt-1 relative">
-                    <textarea
-                      id="primaryAudience"
-                      name="primaryAudience"
-                      rows={2}
-                      value={formData.primaryAudience}
-                      onChange={handleInputChange}
-                      placeholder="Describe your target audience"
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-300"
-                    />
-                    <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] group-focus-within:w-full transition-all duration-300"></div>
+                <div className="relative">
+                  <div className="absolute left-3 top-9 text-gray-400">
+                    <Phone className="w-5 h-5" />
                   </div>
+                  <Input
+                    label="Phone"
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    error={errors.phone}
+                    required
+                    className="pl-10"
+                  />
                 </div>
                 
                 <div className="group">
@@ -277,7 +246,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                       placeholder="What are your biggest marketing challenges right now?"
                       className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-300"
                     />
-                    <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] group-focus-within:w-full transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-blue-500 to-blue-700 group-focus-within:w-full transition-all duration-300"></div>
                   </div>
                 </div>
               </div>
@@ -286,7 +255,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
 
           {step === 3 && (
             <div className="text-center py-8 animate-fade-in">
-              <div className="w-24 h-24 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
+              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
                 <Check className="w-12 h-12 text-white animate-bounce-slow" />
               </div>
               <div className="relative">
@@ -295,7 +264,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                     <path d="M50 0 L95 25 L95 75 L50 100 L5 75 L5 25 Z" stroke="currentColor" strokeWidth="2" />
                   </svg>
                 </div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] bg-clip-text text-transparent mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                   Audit Request Received!
                 </h3>
                 <p className="text-gray-600 mb-8 animate-slide-up text-lg" style={{ animationDelay: '0.3s' }}>
@@ -303,7 +272,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </p>
                 <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                   <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] rounded-lg blur-md animate-pulse-slow"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg blur-md animate-pulse-slow"></div>
                     <Button onClick={onClose} variant="gradient" className="relative">Close</Button>
                   </div>
                 </div>
@@ -327,7 +296,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
               
               <button
                 onClick={step === 2 ? handleSubmit : nextStep}
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group"
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group"
               >
                 <span className="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
                 <span className="relative z-10 flex items-center">
