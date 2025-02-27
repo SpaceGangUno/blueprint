@@ -54,10 +54,10 @@ const Navigation: React.FC = () => {
               className="flex items-center space-x-2"
               onClick={() => setIsOpen(false)}
             >
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center animate-gradient">
-                <span className="text-white font-bold">BS</span>
+              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center animate-gradient">
+                <span className="text-gray-900 font-bold">BS</span>
               </div>
-              <span className="font-semibold text-lg sm:text-xl gradient-text font-bold">Blueprint Studios</span>
+              <span className="font-semibold text-lg sm:text-xl gradient-text animate-snake">Blueprint Studios</span>
             </Link>
           </div>
 
@@ -73,7 +73,7 @@ const Navigation: React.FC = () => {
             </Link>
             <Link 
               to="/login" 
-              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-primary text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient hover-lift"
+              className="inline-flex items-center px-3 py-2 lg:px-4 lg:py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient hover-lift"
             >
               <LogIn className="w-4 h-4 mr-2" />
               Client Portal
@@ -108,7 +108,7 @@ const Navigation: React.FC = () => {
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-100">
-            <span className="font-semibold text-lg gradient-text font-bold">Menu</span>
+            <span className="font-semibold text-lg gradient-text animate-snake">Menu</span>
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
@@ -132,7 +132,7 @@ const Navigation: React.FC = () => {
             <div className="px-4 pt-4">
               <Link
                 to="/login"
-                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-primary text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient"
+                className="flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 animate-gradient"
               >
                 <LogIn className="w-5 h-5 mr-2" />
                 Client Portal

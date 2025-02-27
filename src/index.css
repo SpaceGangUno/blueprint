@@ -116,7 +116,29 @@
 
 /* Gradient text */
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300 font-bold;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 font-bold;
+}
+
+/* Snake animation for text */
+@keyframes snake-move {
+  0% {
+    background-position: 0% 50%;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+  }
+  50% {
+    background-position: 100% 50%;
+    text-shadow: 0 0 15px rgba(255, 140, 0, 0.9);
+  }
+  100% {
+    background-position: 0% 50%;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+  }
+}
+
+.animate-snake {
+  background-size: 200% auto;
+  animation: snake-move 3s ease infinite;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
 }
 
 /* Gradient borders */
