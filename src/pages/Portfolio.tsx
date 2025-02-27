@@ -98,7 +98,7 @@ export default function Portfolio() {
         videoUrl="https://www.instagram.com/reel/DGd4dbzP_HV/embed/"
       />
 
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <CategoryFilter
             selectedCategory={selectedCategory}
@@ -107,7 +107,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="py-16 bg-blue-50">
+      <section className="py-16 bg-[#1E0B2C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map(project => (
@@ -125,17 +125,17 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-500">
+      <section className="py-20 bg-gradient-to-br from-black via-black/90 to-[#1E0B2C]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Start Your Project?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-gray-200 mb-8">
             Let's create something amazing together
           </p>
           <a
             href="/contact"
-            className="inline-block px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="inline-block px-8 py-4 bg-[#FF6B00] text-white font-semibold rounded-lg hover:bg-[#E05A00] transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             Get in Touch
           </a>

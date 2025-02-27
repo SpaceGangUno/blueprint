@@ -161,25 +161,25 @@ export default function Services() {
         <meta name="description" content="Explore Blueprint Studios' comprehensive services including branding, marketing, digital tools, product design, and strategic guidance. Tailored solutions to transform your business." />
       </Helmet>
       {/* Hero Section */}
-      <section className="bg-blue-600 py-24">
+      <section className="bg-black py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Our Services
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-200 max-w-3xl mx-auto">
             Comprehensive digital solutions tailored to transform your business and drive innovation
           </p>
         </div>
       </section>
 
       {/* Service Categories */}
-      <section className="py-20 bg-gradient-to-b from-white to-blue-50 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(15)].map((_, i) => (
             <div 
               key={i}
-              className="absolute rounded-full bg-blue-400/10 animate-float"
+              className="absolute rounded-full bg-[#00E0FF]/10 animate-float"
               style={{
                 width: `${Math.random() * 100 + 50}px`,
                 height: `${Math.random() * 100 + 50}px`,
@@ -195,14 +195,14 @@ export default function Services() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-yellow-400 mr-2 animate-pulse" />
-              <h2 className="text-4xl font-bold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              <Sparkles className="w-8 h-8 text-[#FFEC00] mr-2 animate-pulse" />
+              <h2 className="text-4xl font-bold text-white">
                 Our Services
               </h2>
-              <Sparkles className="w-8 h-8 text-yellow-400 ml-2 animate-pulse" />
+              <Sparkles className="w-8 h-8 text-[#FFEC00] ml-2 animate-pulse" />
             </div>
-            <div className="w-24 h-2 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mb-8"></div>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            <div className="w-24 h-2 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] mx-auto rounded-full mb-8"></div>
+            <p className="text-gray-300 max-w-2xl mx-auto text-lg">
               Comprehensive digital solutions tailored to transform your business and drive innovation
             </p>
           </div>
@@ -211,13 +211,13 @@ export default function Services() {
               <div className="lg:flex gap-8 items-center mb-12">
                 {/* Category Image with Animation */}
                 <div className="lg:w-2/5 mb-8 lg:mb-0">
-                  <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96 transform transition-all duration-700 hover:scale-[1.02] group">
+                  <div className="relative rounded-xl overflow-hidden shadow-xl h-64 lg:h-96 transform transition-all duration-700 hover:scale-[1.02] group border border-gray-800">
                     <img 
                       src={category.image} 
                       alt={`${category.title} - ${category.description} services by Blueprint Studios`}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     />
-                    <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0 absolute top-4 left-4 z-10 bg-white/80 backdrop-blur-sm">
+                    <div className="w-14 h-14 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center text-[#FF6B00] flex-shrink-0 absolute top-4 left-4 z-10 bg-black/80 backdrop-blur-sm">
                       {category.icon}
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
@@ -236,27 +236,27 @@ export default function Services() {
                 <div className="lg:w-3/5">
                   <div className="space-y-6">
                     {category.services.map((service, serviceIndex) => (
-                      <div 
-                        key={`${category.id}-${serviceIndex}`}
-                        className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-500 
-                          border-l-4 border-blue-500 overflow-hidden
-                          ${expandedService?.category === category.id && expandedService?.service === serviceIndex ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
-                          transform hover:-translate-y-1`}
+                        <div 
+                          key={`${category.id}-${serviceIndex}`}
+                          className={`bg-gray-900 rounded-lg shadow-md hover:shadow-xl transition-all duration-500 
+                            border-l-4 border-[#00E0FF] overflow-hidden
+                            ${expandedService?.category === category.id && expandedService?.service === serviceIndex ? 'ring-2 ring-[#00E0FF] ring-opacity-50' : ''}
+                            transform hover:-translate-y-1`}
                       >
                         <div 
                           className="p-6 cursor-pointer"
                           onClick={() => toggleService(category.id, serviceIndex)}
                         >
                           <div className="flex justify-between items-center">
-                            <h4 className="text-xl font-semibold text-gray-900">{service.title}</h4>
-                            <button className="text-blue-500 hover:text-blue-700 transition-colors">
+                            <h4 className="text-xl font-semibold text-white">{service.title}</h4>
+                            <button className="text-[#00E0FF] hover:text-[#00E0FF]/80 transition-colors">
                               {expandedService?.category === category.id && expandedService?.service === serviceIndex ? 
                                 <Minus className="w-5 h-5" /> : 
                                 <Plus className="w-5 h-5" />
                               }
                             </button>
                           </div>
-                          <p className="text-gray-600 mt-2">{service.description}</p>
+                          <p className="text-gray-300 mt-2">{service.description}</p>
                         </div>
                         
                         {/* Expandable Features */}
@@ -264,11 +264,11 @@ export default function Services() {
                           className={`px-6 transition-all duration-500 ease-in-out overflow-hidden
                             ${expandedService?.category === category.id && expandedService?.service === serviceIndex ? 'max-h-40 pb-6 opacity-100' : 'max-h-0 opacity-0'}`}
                         >
-                          <ul className="space-y-3 border-t border-gray-100 pt-4">
+                          <ul className="space-y-3 border-t border-gray-800 pt-4">
                             {service.features.map((feature, index) => (
                               <li key={index} className="flex items-start">
-                                <ArrowRight className="w-4 h-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
-                                <span className="text-gray-700">{feature}</span>
+                                <ArrowRight className="w-4 h-4 text-[#FF6B00] mt-1 mr-2 flex-shrink-0" />
+                                <span className="text-gray-300">{feature}</span>
                               </li>
                             ))}
                           </ul>
@@ -279,8 +279,8 @@ export default function Services() {
                     <div className="text-center mt-10">
                       <a 
                         href="/contact" 
-                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg 
-                          hover:from-blue-700 hover:to-blue-800 transition-all duration-300 
+                        className="inline-flex items-center px-6 py-3 bg-[#FF6B00] text-white font-semibold rounded-lg 
+                          hover:bg-[#E05A00] transition-all duration-300 
                           shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                       >
                         <Zap className="w-5 h-5 mr-2" />
@@ -296,14 +296,14 @@ export default function Services() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-blue-600">
+      <section className="py-16 bg-[#1E0B2C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Transform Your Business?
           </h2>
           <a
             href="/contact"
-            className="inline-block px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="inline-block px-8 py-4 bg-[#00E0FF] text-black font-semibold rounded-lg hover:bg-[#00E0FF]/80 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             Schedule a Consultation
           </a>

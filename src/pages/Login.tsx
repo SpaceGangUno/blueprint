@@ -44,7 +44,7 @@ export default function Login() {
       </Helmet>
       <form className="space-y-6 animate-fade-in" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm animate-fade-in">
+          <div className="p-3 bg-red-900/30 text-red-400 rounded-lg text-sm animate-fade-in border border-red-800">
             {error}
           </div>
         )}
@@ -76,11 +76,11 @@ export default function Login() {
             <input
               id="remember-me"
               type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-300"
+              className="h-4 w-4 text-[#FF6B00] focus:ring-[#FF6B00] border-gray-800 rounded transition-colors duration-300"
               checked={form.rememberMe}
               onChange={e => setForm({ ...form, rememberMe: e.target.checked })}
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
               Remember me
             </label>
           </div>

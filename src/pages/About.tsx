@@ -67,7 +67,7 @@ export default function About() {
         <meta name="description" content="Meet the team behind Blueprint Studios. We're passionate creators, innovators, and problem solvers dedicated to bringing your digital vision to life through design and development." />
       </Helmet>
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-600">
+      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-black via-black/90 to-[#1E0B2C]">
         <div className="absolute inset-0">
           {[...Array(50)].map((_, i) => (
             <div
@@ -93,14 +93,14 @@ export default function About() {
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             We're Blueprint Studios
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
             A team of passionate creators, innovators, and problem solvers dedicated to bringing your digital vision to life.
           </p>
         </div>
       </section>
 
       {/* Fun Facts Counter */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-black text-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {funFacts.map((fact, index) => (
@@ -110,12 +110,12 @@ export default function About() {
                 onMouseEnter={() => setHoveredValue(index)}
                 onMouseLeave={() => setHoveredValue(null)}
               >
-                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2 transition-all duration-500">
+                <div className="text-4xl md:text-5xl font-bold text-[#00E0FF] mb-2 transition-all duration-500">
                   {hoveredValue === index ? (
                     <span className="animate-bounce inline-block">🎉</span>
                   ) : fact.number}
                 </div>
-                <p className="text-gray-600">{fact.label}</p>
+                <p className="text-gray-300">{fact.label}</p>
               </div>
             ))}
           </div>
@@ -123,27 +123,27 @@ export default function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-[#1E0B2C]">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16">Meet Our Team</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 text-white">Meet Our Team</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {team.map((member, index) => (
               <div
                 key={index}
                 className="relative group"
               >
-                <div className="bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <div className="bg-gray-900 rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
                   <div className="relative">
-                    <div className="w-24 h-24 bg-blue-100 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:rotate-12 transition-all duration-300">
-                      <member.icon className="w-12 h-12 text-blue-600" />
+                    <div className="w-24 h-24 bg-[#FF6B00]/10 rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:rotate-12 transition-all duration-300">
+                      <member.icon className="w-12 h-12 text-[#FF6B00]" />
                     </div>
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 bg-blue-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 bg-[#FF6B00] rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                   </div>
-                  <h3 className="text-xl font-semibold text-center mb-2">{member.name}</h3>
-                  <p className="text-blue-600 text-center mb-4">{member.role}</p>
-                  <p className="text-gray-600 text-center mb-4">{member.bio}</p>
+                  <h3 className="text-xl font-semibold text-center mb-2 text-white">{member.name}</h3>
+                  <p className="text-[#FF6B00] text-center mb-4">{member.role}</p>
+                  <p className="text-gray-300 text-center mb-4">{member.bio}</p>
                   <div className="text-center">
-                    <span className="inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm">
+                    <span className="inline-block px-4 py-2 bg-[#FF6B00]/10 text-[#FF6B00] rounded-full text-sm">
                       Superpower: {member.superpower}
                     </span>
                   </div>
@@ -155,21 +155,21 @@ export default function About() {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16">Our Values</h2>
+          <h2 className="text-4xl font-bold text-center mb-16 text-white">Our Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
               <div
                 key={index}
                 className="group cursor-pointer"
               >
-                <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 transition-all duration-300 hover:border-blue-500 hover:shadow-xl">
-                  <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-gray-900 rounded-2xl border-2 border-gray-800 p-8 transition-all duration-300 hover:border-[#00E0FF] hover:shadow-xl">
+                  <div className="w-16 h-16 bg-[#00E0FF]/10 rounded-xl flex items-center justify-center text-[#00E0FF] mb-6 group-hover:scale-110 transition-transform duration-300">
                     {value.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">{value.title}</h3>
-                  <p className="text-gray-600">{value.description}</p>
+                  <h3 className="text-xl font-semibold mb-4 text-white">{value.title}</h3>
+                  <p className="text-gray-300">{value.description}</p>
                 </div>
               </div>
             ))}
@@ -178,7 +178,7 @@ export default function About() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-br from-black via-black/90 to-[#1E0B2C] relative overflow-hidden">
         <div className="absolute inset-0">
           {[...Array(20)].map((_, i) => (
             <div
@@ -201,7 +201,7 @@ export default function About() {
           </h2>
           <a
             href="/contact"
-            className="inline-block px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300 transform hover:scale-105"
+            className="inline-block px-8 py-4 bg-[#FF6B00] text-white font-semibold rounded-xl hover:bg-[#E05A00] transition-all duration-300 transform hover:scale-105"
           >
             Let's Create Together
           </a>

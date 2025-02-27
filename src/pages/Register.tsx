@@ -43,7 +43,7 @@ export default function Register() {
       </Helmet>
       <form className="space-y-6" onSubmit={handleSubmit}>
         {error && (
-          <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+          <div className="p-3 bg-red-900/30 text-red-400 rounded-lg text-sm border border-red-800">
             {error}
           </div>
         )}
