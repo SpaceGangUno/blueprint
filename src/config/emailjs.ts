@@ -13,9 +13,12 @@ export const sendHypeAuditEmail = async (formData: {
   email: string;
   phone: string;
   instagramHandle: string;
-  tiktokHandle: string;
+  tiktokHandle?: string;
   website: string;
-  currentChallenges: string;
+  currentChallenges?: string;
+  marketingGoals?: string[];
+  targetAudience?: string;
+  competitorUrls?: string;
 }) => {
   // Use environment variables if available, otherwise use default values
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'blueprint_service';
@@ -33,6 +36,9 @@ export const sendHypeAuditEmail = async (formData: {
       tiktok: formData.tiktokHandle || 'Not provided',
       website: formData.website,
       challenges: formData.currentChallenges || 'Not provided',
+      marketing_goals: formData.marketingGoals ? formData.marketingGoals.join(', ') : 'Not provided',
+      target_audience: formData.targetAudience || 'Not provided',
+      competitor_urls: formData.competitorUrls || 'Not provided',
     }
   );
 };

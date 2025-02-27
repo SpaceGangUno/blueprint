@@ -3,12 +3,6 @@ import { X, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import Button from './Button';
 import { submitQuoteRequestForm } from '../config/forms';
 
-interface Service {
-  id: string;
-  title: string;
-  description: string;
-}
-
 export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -61,10 +55,7 @@ export default function QuoteRequest({ isOpen, onClose }: { isOpen: boolean; onC
     }
   ];
 
-  // Flatten services for selection tracking
-  const allServices: Service[] = serviceCategories.flatMap(category => 
-    category.services
-  );
+  // No need to flatten services since we're using the original structure
 
   const budgetRanges = [
     '< $10,000',
