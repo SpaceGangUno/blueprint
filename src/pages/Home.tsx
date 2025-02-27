@@ -165,29 +165,6 @@ export default function Home() {
       ],
       ctaText: 'Make It Real',
       ctaLink: '/services#products'
-    },
-    {
-      title: 'Guidance & Planning',
-      description: 'Get clear advice to make smart decisions.',
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80',
-      services: [
-        {
-          title: 'Tech Roadmaps',
-          description: 'Choose the right tools without overspending.',
-          features: [
-            'No confusing tech talk'
-          ]
-        },
-        {
-          title: 'Website Checkups',
-          description: 'Fix issues that might turn customers away.',
-          features: [
-            'Make your site faster and phone-friendly'
-          ]
-        }
-      ],
-      ctaText: 'Talk to Us',
-      ctaLink: '/contact'
     }
   ];
 
