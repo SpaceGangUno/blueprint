@@ -87,8 +87,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto py-8">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto hover-lift animate-scale-up">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-600/10 to-purple-600/10">
-          <h2 className="text-2xl font-bold gradient-text">Get Your Free Hype Audit</h2>
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-[#f0e7ff]">
+          <h2 className="text-2xl font-bold text-[#6b21a8]">Get Your Free Hype Audit</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-500 transition-colors hover:rotate-90 transition-transform duration-300"
@@ -105,7 +105,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 transform ${
                     step >= stepNumber 
-                      ? 'bg-gradient-primary animate-gradient text-white scale-110 shadow-lg' 
+                      ? 'bg-[#6b21a8] text-white scale-110 shadow-lg' 
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -113,7 +113,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </div>
                 {stepNumber < 3 && (
                   <div className={`w-full h-1 transition-all duration-500 ${
-                    step > stepNumber ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
+                    step > stepNumber ? 'bg-[#6b21a8]' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -123,7 +123,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white mr-2">
+                <span className="w-8 h-8 bg-[#6b21a8] rounded-full flex items-center justify-center text-white mr-2">
                   <Store className="w-4 h-4" />
                 </span>
                 Your Store
@@ -152,7 +152,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
           {step === 2 && (
             <div className="space-y-6 animate-fade-in">
               <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <span className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center text-white mr-2">
+                <span className="w-8 h-8 bg-[#6b21a8] rounded-full flex items-center justify-center text-white mr-2">
                   <Globe className="w-4 h-4" />
                 </span>
                 Your Digital Presence
@@ -254,7 +254,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
 
           {step === 3 && (
             <div className="text-center py-8 animate-fade-in">
-              <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
+              <div className="w-24 h-24 bg-[#6b21a8] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-slow shadow-xl">
                 <Check className="w-12 h-12 text-white animate-bounce-slow" />
               </div>
               <div className="relative">
@@ -263,7 +263,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                     <path d="M50 0 L95 25 L95 75 L50 100 L5 75 L5 25 Z" stroke="currentColor" strokeWidth="2" />
                   </svg>
                 </div>
-                <h3 className="text-3xl font-bold gradient-text mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <h3 className="text-3xl font-bold text-[#6b21a8] mb-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                   Audit Request Received!
                 </h3>
                 <p className="text-gray-600 mb-8 animate-slide-up text-lg" style={{ animationDelay: '0.3s' }}>
@@ -271,8 +271,8 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
                 </p>
                 <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                   <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-gradient-primary rounded-lg blur-md animate-pulse-slow"></div>
-                    <Button onClick={onClose} variant="gradient" className="relative">Close</Button>
+                    <div className="absolute inset-0 bg-[#6b21a8] rounded-lg blur-md animate-pulse-slow"></div>
+                    <Button onClick={onClose} variant="primary" className="relative">Close</Button>
                   </div>
                 </div>
               </div>
@@ -296,7 +296,7 @@ export default function HypeAuditForm({ isOpen, onClose }: { isOpen: boolean; on
               <button
                 onClick={step === 2 ? handleSubmit : nextStep}
                 disabled={isSubmitting}
-                className="flex items-center px-6 py-3 bg-gradient-primary text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group animate-gradient"
+                className="flex items-center px-6 py-3 bg-[#6b21a8] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative overflow-hidden group"
               >
                 <span className="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
                 <span className="relative z-10 flex items-center">
