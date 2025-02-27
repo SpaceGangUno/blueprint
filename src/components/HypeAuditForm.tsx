@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Phone, Store } from 'lucide-react';
+import { X, ArrowRight, Check, Instagram, Globe, MessageSquare, Mail, Store } from 'lucide-react';
 import Button from './Button';
 import Input from './Input';
 import { sendHypeAuditEmail } from '../config/emailjs';
