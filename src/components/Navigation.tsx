@@ -43,8 +43,8 @@ const Navigation: React.FC = () => {
   return (
     <nav className={`fixed w-full z-50 top-0 transition-all duration-300 ${
       scrolled 
-        ? 'bg-white/90 backdrop-blur-md shadow-lg' 
-        : 'bg-white shadow-md'
+        ? 'bg-gray-800/95 backdrop-blur-md shadow-lg' 
+        : 'bg-gray-800 shadow-md'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -63,13 +63,13 @@ const Navigation: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4 lg:space-x-8">
-            <Link to="/services" className="text-gray-800 hover:text-black font-medium transition-colors relative group">
+            <Link to="/services" className="text-gray-200 hover:text-white font-medium transition-colors relative group">
               Services
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-            <Link to="/contact" className="text-gray-800 hover:text-black font-medium transition-colors relative group">
+            <Link to="/contact" className="text-gray-200 hover:text-white font-medium transition-colors relative group">
               Contact
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-300 group-hover:w-full"></span>
             </Link>
             <Link 
               to="/login" 
@@ -84,7 +84,7 @@ const Navigation: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-gray-700 transition-colors"
               aria-expanded={isOpen}
             >
               <span className="sr-only">{isOpen ? 'Close menu' : 'Open menu'}</span>
