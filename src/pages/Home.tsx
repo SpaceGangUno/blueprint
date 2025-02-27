@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, MessageSquare, Clock, Ban, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
+import SmsTemplatesNotification from '../components/SmsTemplatesNotification';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -464,34 +465,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Email/SMS Popup */}
-      <div className="fixed bottom-6 right-6 z-40 max-w-sm">
-        <div className="bg-gray-900 p-6 rounded-lg shadow-lg border border-[#00E0FF] animate-slide-up">
-          <div className="flex items-start mb-4">
-            <span className="text-2xl mr-2">🔥</span>
-            <div>
-              <h3 className="font-bold text-white">Get Free SMS Templates for Your Next Drop</h3>
-              <p className="text-gray-400 text-sm">Enter your info to receive exclusive templates</p>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <input 
-              type="email" 
-              placeholder="Your Email" 
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-            />
-            <input 
-              type="tel" 
-              placeholder="Your Phone (for SMS)" 
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF6B00]"
-            />
-            <button className="w-full py-2 bg-[#FF6B00] text-white font-bold rounded-md hover:bg-[#E05A00] transition-all duration-300">
-              Send Me Templates
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* SMS Templates Notification */}
+      <SmsTemplatesNotification />
 
       {/* Footer CTA Bar */}
       <section className="py-8 bg-black border-t border-gray-800">
