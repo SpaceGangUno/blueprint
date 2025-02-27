@@ -2,12 +2,26 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ChevronDown, Plus, Minus, ArrowRight, Zap, Sparkles } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
+import CategoryFilter from '../components/portfolio/CategoryFilter';
+import ProjectCard from '../components/portfolio/ProjectCard';
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  image: string;
+  link: string;
+  tags: string[];
+  imageAlt?: string;
+}
 
 export default function Home() {
   // Meta description for the Home page
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [expandedService, setExpandedService] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Function to toggle expanded service
   const toggleService = (index: number) => {
@@ -177,6 +191,74 @@ export default function Home() {
     }
   ];
 
+  // Portfolio projects
+  const projects: Project[] = [
+    {
+      id: '1',
+      title: 'TechCorp Website Redesign',
+      description: 'Modern website redesign with enhanced user experience and performance optimization',
+      category: 'web',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['React', 'TypeScript', 'Tailwind CSS'],
+      imageAlt: 'TechCorp website redesign showing responsive layout on desktop and mobile devices with modern UI elements'
+    },
+    {
+      id: '2',
+      title: 'EcoTrack Mobile App',
+      description: 'Cross-platform mobile application for tracking environmental impact',
+      category: 'mobile',
+      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['React Native', 'Firebase', 'Maps API'],
+      imageAlt: 'EcoTrack mobile app interface showing environmental impact tracking dashboard with graphs and maps'
+    },
+    {
+      id: '3',
+      title: 'GreenLeaf Brand Identity',
+      description: 'Complete brand identity design including logo, guidelines, and marketing materials',
+      category: 'branding',
+      image: 'https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['Branding', 'Logo Design', 'Guidelines'],
+      imageAlt: 'GreenLeaf brand identity package showing logo variations, color palette, and marketing materials'
+    },
+    {
+      id: '4',
+      title: 'CloudSync Platform',
+      description: 'Enterprise-level cloud synchronization and management platform',
+      category: 'development',
+      image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['Cloud', 'React', 'Node.js'],
+      imageAlt: 'CloudSync platform dashboard showing cloud synchronization status and management controls'
+    },
+    {
+      id: '5',
+      title: 'FitLife Mobile App',
+      description: 'Fitness tracking and workout planning mobile application',
+      category: 'mobile',
+      image: 'https://images.unsplash.com/photo-1616348436168-de43ad0db179?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['iOS', 'Android', 'React Native'],
+      imageAlt: 'FitLife mobile app screens showing workout tracking, fitness goals, and health statistics'
+    },
+    {
+      id: '6',
+      title: 'ArtGallery Website',
+      description: 'Interactive virtual art gallery with 3D viewing experience',
+      category: 'web',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&h=1366',
+      link: '#',
+      tags: ['Three.js', 'WebGL', 'React'],
+      imageAlt: 'ArtGallery website showing 3D virtual gallery space with interactive art displays'
+    }
+  ];
+
+  const filteredProjects = projects.filter(
+    project => selectedCategory === 'all' || project.category === selectedCategory
+  );
+
   return (
     <div className="pt-16">
       <Helmet>
@@ -224,7 +306,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* What We Do Section - Interactive Version */}
+      {/* Our Work Section - Interactive Version */}
       <section className="py-20 bg-gradient-to-b from-white to-blue-50 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -249,7 +331,7 @@ export default function Home() {
             <div className="inline-flex items-center justify-center mb-4">
               <Sparkles className="w-8 h-8 text-yellow-400 mr-2 animate-pulse" />
               <h2 className="text-4xl font-bold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                What We Do
+                Our Work
               </h2>
               <Sparkles className="w-8 h-8 text-yellow-400 ml-2 animate-pulse" />
             </div>
@@ -359,6 +441,32 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Projects Section */}
+      <section className="py-16 bg-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-12">
+            <CategoryFilter
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredProjects.map(project => (
+              <ProjectCard
+                key={project.id}
+                title={project.title}
+                description={project.description}
+                image={project.image}
+                link={project.link}
+                tags={project.tags}
+                imageAlt={project.imageAlt}
+              />
+            ))}
           </div>
         </div>
       </section>

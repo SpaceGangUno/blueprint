@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
@@ -47,7 +47,7 @@ export default function App() {
                   <main className="flex-grow relative z-10">
                     <Routes>
                       <Route path="/" element={<Home />} />
-                      <Route path="/portfolio" element={<Portfolio />} />
+                      <Route path="/portfolio" element={<Navigate to="/" replace />} />
                       <Route path="/services" element={<Services />} />
                       <Route path="/contact" element={<Contact />} />
                     </Routes>

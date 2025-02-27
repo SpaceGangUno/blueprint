@@ -67,10 +67,6 @@ const Navigation: React.FC = () => {
               Services
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
-            <Link to="/portfolio" className="text-gray-600 hover:text-gray-900 transition-colors relative group">
-              Portfolio
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
             <Link to="/contact" className="text-gray-600 hover:text-gray-900 transition-colors relative group">
               Contact
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
@@ -126,12 +122,6 @@ const Navigation: React.FC = () => {
               className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
             >
               Services
-            </Link>
-            <Link
-              to="/portfolio"
-              className="block w-full text-left px-4 py-3 text-base sm:text-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-300 hover-lift"
-            >
-              Portfolio
             </Link>
             <Link
               to="/contact"

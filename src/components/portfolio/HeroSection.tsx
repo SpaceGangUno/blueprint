@@ -1,11 +1,12 @@
 interface HeroSectionProps {
   title: string;
   subtitle: string;
-  image: string;
+  image?: string;
   imageAlt?: string;
+  videoUrl?: string;
 }
 
-export default function HeroSection({ title, subtitle, image, imageAlt }: HeroSectionProps) {
+export default function HeroSection({ title, subtitle, image, imageAlt, videoUrl }: HeroSectionProps) {
   return (
     <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
       {/* Animated background elements */}
@@ -27,11 +28,24 @@ export default function HeroSection({ title, subtitle, image, imageAlt }: HeroSe
       </div>
       
       <div className="absolute inset-0 z-0">
-        <img
-          src={image}
-          alt={imageAlt || `${title} - ${subtitle}`}
-          className="w-full h-full object-cover scale-105 animate-pulse-slow"
-        />
+        {videoUrl ? (
+          <div className="w-full h-full">
+            <iframe
+              src={videoUrl}
+              className="w-full h-full object-cover"
+              frameBorder="0"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
+              title={title}
+            ></iframe>
+          </div>
+        ) : image ? (
+          <img
+            src={image}
+            alt={imageAlt || `${title} - ${subtitle}`}
+            className="w-full h-full object-cover scale-105 animate-pulse-slow"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-blue-800/70 to-blue-600/60 animate-gradient" />
       </div>
       

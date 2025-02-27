@@ -95,8 +95,7 @@ export default function Portfolio() {
       <HeroSection
         title="Our Work"
         subtitle="Showcasing our finest projects and creative solutions"
-        image="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&q=80&w=2426&h=1366"
-        imageAlt="Blueprint Studios portfolio showcase - creative design projects displayed on a modern workspace"
+        videoUrl="https://www.instagram.com/reel/DGd4dbzP_HV/embed/"
       />
 
       <section className="py-12 bg-white">
