@@ -28,11 +28,12 @@ export interface QuoteRequestFormData {
 // Submit Hype Audit form data to Firestore
 export const submitHypeAuditForm = async (formData: HypeAuditFormData) => {
   try {
+    // Use a single collection for all forms
     const formsRef = collection(db, 'forms');
-    const hypeAuditRef = collection(formsRef, 'hype-audits');
     
-    const docRef = await addDoc(hypeAuditRef, {
+    const docRef = await addDoc(formsRef, {
       ...formData,
+      formType: 'hype-audit',
       submittedAt: serverTimestamp()
     });
     
@@ -46,11 +47,12 @@ export const submitHypeAuditForm = async (formData: HypeAuditFormData) => {
 // Submit Quote Request form data to Firestore
 export const submitQuoteRequestForm = async (formData: QuoteRequestFormData) => {
   try {
+    // Use a single collection for all forms
     const formsRef = collection(db, 'forms');
-    const quoteRequestsRef = collection(formsRef, 'quote-requests');
     
-    const docRef = await addDoc(quoteRequestsRef, {
+    const docRef = await addDoc(formsRef, {
       ...formData,
+      formType: 'quote-request',
       submittedAt: serverTimestamp()
     });
     

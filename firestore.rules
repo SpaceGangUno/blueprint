@@ -2,6 +2,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow unauthenticated users to submit forms
+    match /forms/{formId} {
+      allow create: if true;
+      allow read: if hasTeamAccess();
+    }
+    
     // Helper functions
     function isAuthenticated() {
       return request.auth != null;
