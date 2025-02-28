@@ -78,43 +78,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Challenges Grid Section */}
-      <section className="py-20 bg-black text-white relative">
-        {/* Urban texture overlay */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl font-bold mb-4 text-center">Streetwear Stores Struggle With:</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#00E0FF]/10 rounded-lg flex items-center justify-center text-[#00E0FF] mb-6">
-                <MessageSquare className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Creating Digital Buzz for Physical Drops</h3>
-              <p className="text-gray-300">Online hype ≠ packed stores. We bridge the gap.</p>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center text-[#FF6B00] mb-6">
-                <Clock className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Selling Out Before Resellers Do</h3>
-              <p className="text-gray-300">Build urgency with content that rewards local loyalty.</p>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#FFEC00]/10 rounded-lg flex items-center justify-center text-[#FFEC00] mb-6">
-                <Ban className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Generic Marketing That Feels Corporate</h3>
-              <p className="text-gray-300">We speak hypebeast – no cringe, just culture.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Portfolio Section */}
       <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -236,6 +199,43 @@ export default function Home() {
               View All Projects
               <ArrowRight className="w-5 h-5 ml-2" />
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Challenges Grid Section */}
+      <section className="py-20 bg-black text-white relative">
+        {/* Urban texture overlay */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-3xl font-bold mb-4 text-center">Streetwear Stores Struggle With:</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
+              <div className="w-12 h-12 bg-[#00E0FF]/10 rounded-lg flex items-center justify-center text-[#00E0FF] mb-6">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-white">Creating Digital Buzz for Physical Drops</h3>
+              <p className="text-gray-300">Online hype ≠ packed stores. We bridge the gap.</p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
+              <div className="w-12 h-12 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center text-[#FF6B00] mb-6">
+                <Clock className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-white">Selling Out Before Resellers Do</h3>
+              <p className="text-gray-300">Build urgency with content that rewards local loyalty.</p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
+              <div className="w-12 h-12 bg-[#FFEC00]/10 rounded-lg flex items-center justify-center text-[#FFEC00] mb-6">
+                <Ban className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-white">Generic Marketing That Feels Corporate</h3>
+              <p className="text-gray-300">We speak hypebeast – no cringe, just culture.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -434,194 +434,3 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </div>
-              
-              <button
-                onClick={() => setShowQuoteModal(true)}
-                className="w-full py-3 bg-transparent border border-[#FFEC00] text-[#FFEC00] font-bold rounded-lg hover:bg-[#FFEC00]/10 transition-all duration-300"
-              >
-                Command the Culture
-              </button>
-            </div>
-          </div>
-          
-          {/* Add-Ons Section */}
-          <div className="mt-16">
-            <h3 className="text-2xl font-bold mb-8 text-center">Tailor Your Hype</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800 hover:border-[#FF6B00]/50 transition-all duration-300">
-                <p className="text-lg font-bold mb-2">📲 Custom App Development</p>
-                <p className="text-sm text-gray-400">Loyalty apps, drop alert systems</p>
-              </div>
-              
-              <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800 hover:border-[#00E0FF]/50 transition-all duration-300">
-                <p className="text-lg font-bold mb-2">🔍 Inventory Audit</p>
-                <p className="text-sm text-gray-400">Product line critique + buy/drop list</p>
-              </div>
-              
-              <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800 hover:border-[#FFEC00]/50 transition-all duration-300">
-                <p className="text-lg font-bold mb-2">📅 Hype Calendar</p>
-                <p className="text-sm text-gray-400">Seasonal drop planning + event promo</p>
-              </div>
-              
-              <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800 hover:border-[#FF6B00]/50 transition-all duration-300">
-                <p className="text-lg font-bold mb-2">🧳 Full Packaging Suite</p>
-                <p className="text-sm text-gray-400">Tissue paper, sticker sheets, thank-you cards</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-16">
-            <p className="text-xl font-bold text-white mb-6">Your next drop could break the internet. Let's plan it.</p>
-            <a 
-              href="/portfolio" 
-              className="inline-flex items-center px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-all duration-300 hover:-translate-y-1"
-            >
-              See Streetwear Portfolio
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Content Examples Carousel */}
-      <section className="py-20 bg-[#1E0B2C] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-4 text-center">Content That Converts</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
-          
-          <div className="relative">
-            {/* Carousel Navigation */}
-            <button 
-              onClick={() => scrollCarousel('left')}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-[#FF6B00]/80 transition-all"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            
-            <button 
-              onClick={() => scrollCarousel('right')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-[#FF6B00]/80 transition-all"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-            
-            {/* Carousel Content */}
-            <div 
-              ref={carouselRef}
-              className="flex overflow-x-auto hide-scrollbar gap-6 pb-4 snap-x snap-mandatory"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {/* Carousel Item 1 */}
-              <div className="min-w-[300px] sm:min-w-[350px] snap-start">
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-[#00E0FF]/20 hover:border-[#00E0FF]/50 transition-all duration-300">
-                  <div className="relative">
-                    <img 
-                      src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
-                      alt="Instagram Story mockup showing tap to unbox feature" 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-3 right-3 bg-[#00E0FF] text-black text-xs font-bold px-2 py-1 rounded">STORY</div>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-bold">Tap to Unbox Instagram Story</p>
-                    <p className="text-gray-400 text-sm">Tease drops with interactive Stories</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Carousel Item 2 */}
-              <div className="min-w-[300px] sm:min-w-[350px] snap-start">
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-[#FF6B00]/20 hover:border-[#FF6B00]/50 transition-all duration-300">
-                  <div className="relative">
-                    <img 
-                      src="https://resources.marsello.com/hs-fs/hubfs/SMS%20Campaign%20from%20Federation%20offering%20a%2020%25%20discount%20overlaid%20on%20a%20phone%20screen.png?width=672&height=352&name=SMS%20Campaign%20from%20Federation%20offering%20a%2020%25%20discount%20overlaid%20on%20a%20phone%20screen.png" 
-                      alt="SMS Campaign from Federation offering a 20% discount overlaid on a phone screen" 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-3 right-3 bg-[#FF6B00] text-white text-xs font-bold px-2 py-1 rounded">SMS</div>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-bold">SMS Campaign Example</p>
-                    <p className="text-gray-400 text-sm">Drive foot traffic with geo-targeted texts</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Carousel Item 3 */}
-              <div className="min-w-[300px] sm:min-w-[350px] snap-start">
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-[#FFEC00]/20 hover:border-[#FFEC00]/50 transition-all duration-300">
-                  <div className="relative">
-                    <img 
-                      src="https://images.unsplash.com/photo-1633422488318-bddc3a8d883a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
-                      alt="AR filter demo showing virtual try-on for clothing" 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-3 right-3 bg-[#FFEC00] text-black text-xs font-bold px-2 py-1 rounded">AR</div>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-bold">AR Filter Demo</p>
-                    <p className="text-gray-400 text-sm">Virtual try-ons for new collections</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Carousel Item 4 */}
-              <div className="min-w-[300px] sm:min-w-[350px] snap-start">
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-[#00E0FF]/20 hover:border-[#00E0FF]/50 transition-all duration-300">
-                  <div className="relative">
-                    <img 
-                      src="https://images.unsplash.com/photo-1556906781-9a412961c28c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2067&q=80" 
-                      alt="Social media content showing sneaker release" 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-3 right-3 bg-[#00E0FF] text-black text-xs font-bold px-2 py-1 rounded">SOCIAL</div>
-                  </div>
-                  <div className="p-4">
-                    <p className="font-bold">Social Media Content</p>
-                    <p className="text-gray-400 text-sm">Engaging posts that drive anticipation</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Footer CTA Bar */}
-      <section className="py-8 bg-black border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <p className="text-white text-lg font-bold mb-4 md:mb-0">
-              Your next drop could break the internet. Let's plan it.
-            </p>
-            <a
-              href="https://calendly.com/create-blueprintstudios"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-[#00E0FF] text-black font-bold rounded-lg hover:bg-[#00E0FF]/80 transition-all duration-300 inline-block"
-            >
-              Book Strategy Call →
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Quote Request Modal */}
-      <QuoteRequest 
-        isOpen={showQuoteModal} 
-        onClose={() => setShowQuoteModal(false)} 
-      />
-      
-      {/* Hype Audit Form */}
-      <HypeAuditForm
-        isOpen={showHypeAuditForm}
-        onClose={() => setShowHypeAuditForm(false)}
-      />
-
-      {/* Custom CSS is handled in index.css */}
-    </div>
-  );
-}
