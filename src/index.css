@@ -45,44 +45,35 @@
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
-  .mobile-nav-sticky {
-    position: sticky;
-    top: 4rem;
-    z-index: 10;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    padding: 0.5rem;
-    border-radius: 9999px;
-    margin: 0 0.5rem;
-  }
-  
-  /* Improved touch targets for mobile */
-  .touch-target {
+  /* Make carousel navigation buttons larger and easier to tap */
+  button[aria-label^="Previous"], 
+  button[aria-label^="Next"] {
     min-height: 44px;
     min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
-  /* Better spacing for mobile content */
-  .mobile-spacing {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  /* Improve spacing for mobile content */
+  .py-16 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
   
-  /* Improved mobile typography */
-  .mobile-text {
+  /* Reduce spacing between sections on mobile */
+  .mb-12 {
+    margin-bottom: 2rem;
+  }
+  
+  /* Make buttons more tappable on mobile */
+  button, a {
+    min-height: 44px;
+  }
+  
+  /* Improve readability on mobile */
+  p {
     font-size: 16px;
     line-height: 1.5;
-  }
-  
-  /* Mobile-friendly carousel navigation */
-  .carousel-nav-mobile {
-    position: sticky;
-    top: 4rem;
-    z-index: 10;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    padding: 0.5rem;
-    border-radius: 9999px;
-    margin: 0 0.5rem;
   }
 }

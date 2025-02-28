@@ -466,4 +466,5 @@ export default function Home() {
                   </div>
                   
                   <div className="p-6 relative">
-                    <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#FFEC00] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div
+                    <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#FFEC00] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div>
+                    <h3 className="text-xl font-semibold mb-2
