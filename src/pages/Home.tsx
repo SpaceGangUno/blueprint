@@ -1,15 +1,78 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showHypeAuditForm, setShowHypeAuditForm] = useState(false);
+  const [activeSection, setActiveSection] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  
+  const sections = ["hero", "challenges", "portfolio", "services"];
+  
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      // Swipe left - go to next section
+      if (activeSection < sections.length - 1) {
+        setActiveSection(activeSection + 1);
+      }
+    }
+    
+    if (touchEnd - touchStart > 75) {
+      // Swipe right - go to previous section
+      if (activeSection > 0) {
+        setActiveSection(activeSection - 1);
+      }
+    }
+  };
+  
+  // Navigate to specific section
+  const goToSection = (index: number) => {
+    setActiveSection(index);
+  };
+  
+  // Navigate to next section
+  const nextSection = () => {
+    if (activeSection < sections.length - 1) {
+      setActiveSection(activeSection + 1);
+    }
+  };
+  
+  // Navigate to previous section
+  const prevSection = () => {
+    if (activeSection > 0) {
+      setActiveSection(activeSection - 1);
+    }
+  };
+  
+  // Scroll to active section when it changes
+  useEffect(() => {
+    if (carouselRef.current) {
+      const sectionElement = document.getElementById(sections[activeSection]);
+      if (sectionElement) {
+        carouselRef.current.scrollTo({
+          left: sectionElement.offsetLeft,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [activeSection]);
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 h-screen flex flex-col overflow-hidden">
       <Helmet>
         <title>Streetwear Marketing Agency | Launch Events, SMS Campaigns & Hype Content</title>
         <meta 
@@ -17,9 +80,55 @@ export default function Home() {
           content="Specialized streetwear marketing agency creating digital buzz for physical drops, building hype, and driving foot traffic to your store." 
         />
       </Helmet>
-
+      
+      {/* Carousel Navigation */}
+      <div className="fixed top-1/2 left-4 z-50 transform -translate-y-1/2 flex flex-col gap-2">
+        <button 
+          onClick={prevSection}
+          className={`p-2 rounded-full bg-black/50 text-white ${activeSection === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+          disabled={activeSection === 0}
+        >
+          <ChevronLeft size={24} />
+        </button>
+      </div>
+      
+      <div className="fixed top-1/2 right-4 z-50 transform -translate-y-1/2 flex flex-col gap-2">
+        <button 
+          onClick={nextSection}
+          className={`p-2 rounded-full bg-black/50 text-white ${activeSection === sections.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+          disabled={activeSection === sections.length - 1}
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+      
+      {/* Section Indicators */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex gap-2">
+        {sections.map((section, index) => (
+          <button
+            key={section}
+            onClick={() => goToSection(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              activeSection === index 
+                ? 'bg-[#FF6B00] w-6' 
+                : 'bg-white/50 hover:bg-white/70'
+            }`}
+            aria-label={`Go to ${section} section`}
+          />
+        ))}
+      </div>
+      
+      {/* Carousel Container */}
+      <div 
+        ref={carouselRef}
+        className="flex-1 flex overflow-x-hidden snap-x snap-mandatory"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+      
       {/* Hero Section */}
-      <section className="relative min-h-[500px] md:h-[80vh] flex items-center overflow-hidden">
+      <section id="hero" className="relative min-h-[500px] w-full flex-shrink-0 snap-start flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
@@ -82,7 +191,7 @@ export default function Home() {
       </section>
 
       {/* Challenges Grid Section */}
-      <section className="py-20 bg-black text-white relative">
+      <section id="challenges" className="py-20 bg-black text-white relative w-full flex-shrink-0 snap-start">
         {/* Urban texture overlay */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
         
@@ -152,7 +261,7 @@ export default function Home() {
       </section>
 
       {/* Portfolio Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
+      <section id="portfolio" className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white w-full flex-shrink-0 snap-start">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4 text-center">Featured Projects</h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Check out some of our recent work for streetwear brands and retailers</p>
@@ -277,7 +386,7 @@ export default function Home() {
       </section>
 
       {/* Services Packages Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
+      <section id="services" className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white w-full flex-shrink-0 snap-start">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4 text-center">Pricing Packages</h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">No cookie-cutter templates – your brand, your rules. Choose the package that fits your streetwear ambitions.</p>
@@ -483,6 +592,8 @@ export default function Home() {
         </div>
       </section>
 
+      </div> {/* End of Carousel Container */}
+      
       {showQuoteModal && (
         <QuoteRequest isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
       )}
