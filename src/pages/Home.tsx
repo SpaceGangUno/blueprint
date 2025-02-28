@@ -64,6 +64,76 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Challenges Grid Section */}
+      <section className="py-20 bg-black text-white relative">
+        {/* Urban texture overlay */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-3xl font-bold mb-4 text-center">Streetwear Stores Struggle With:</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
+              <h3 className="text-xl font-bold mb-4 text-white">1. "Empty Stores"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Slow foot traffic & online sales</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>New drops go unnoticed (no email/SMS hype)</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Ads that don't convert to customers</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."</p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
+              <h3 className="text-xl font-bold mb-4 text-white">2. "No Hype"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Weak social media presence (no engagement/hype)</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Can't keep up with trends or content creation</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>No time to post consistently</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"We'll flood your IG with viral Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."</p>
+            </div>
+            
+            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
+              <h3 className="text-xl font-bold mb-4 text-white">3. "No Loyalty"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Low customer loyalty/repeat buys</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>No system to reward regulars</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Can't track what's hot vs. deadstock</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"Build a cult following with loyalty apps, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Portfolio Section */}
       <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,76 +255,6 @@ export default function Home() {
               View All Projects
               <ArrowRight className="w-5 h-5 ml-2" />
             </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Challenges Grid Section */}
-      <section className="py-20 bg-black text-white relative">
-        {/* Urban texture overlay */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl font-bold mb-4 text-center">Streetwear Stores Struggle With:</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
-              <h3 className="text-xl font-bold mb-4 text-white">1. "Empty Stores"</h3>
-              <ul className="space-y-2 mb-4">
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Slow foot traffic & online sales</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>New drops go unnoticed (no email/SMS hype)</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Ads that don't convert to customers</span>
-                </li>
-              </ul>
-              <p className="text-gray-300">"We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."</p>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
-              <h3 className="text-xl font-bold mb-4 text-white">2. "No Hype"</h3>
-              <ul className="space-y-2 mb-4">
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Weak social media presence (no engagement/hype)</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Can't keep up with trends or content creation</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>No time to post consistently</span>
-                </li>
-              </ul>
-              <p className="text-gray-300">"We'll flood your IG with viral Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."</p>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
-              <h3 className="text-xl font-bold mb-4 text-white">3. "No Loyalty"</h3>
-              <ul className="space-y-2 mb-4">
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Low customer loyalty/repeat buys</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>No system to reward regulars</span>
-                </li>
-                <li className="flex items-start text-sm text-gray-300">
-                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                  <span>Can't track what's hot vs. deadstock</span>
-                </li>
-              </ul>
-              <p className="text-gray-300">"Build a cult following with loyalty apps, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."</p>
-            </div>
           </div>
         </div>
       </section>
