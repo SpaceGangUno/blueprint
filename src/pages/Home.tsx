@@ -214,27 +214,60 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#00E0FF]/10 rounded-lg flex items-center justify-center text-[#00E0FF] mb-6">
-                <MessageSquare className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Creating Digital Buzz for Physical Drops</h3>
-              <p className="text-gray-300">Online hype ≠ packed stores. We bridge the gap.</p>
+              <h3 className="text-xl font-bold mb-4 text-white">1. "Empty Stores"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Slow foot traffic & online sales</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>New drops go unnoticed (no email/SMS hype)</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Ads that don't convert to customers</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."</p>
             </div>
             
             <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#FF6B00]/10 rounded-lg flex items-center justify-center text-[#FF6B00] mb-6">
-                <Clock className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Selling Out Before Resellers Do</h3>
-              <p className="text-gray-300">Build urgency with content that rewards local loyalty.</p>
+              <h3 className="text-xl font-bold mb-4 text-white">2. "No Hype"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Weak social media presence (no engagement/hype)</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Can't keep up with trends or content creation</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>No time to post consistently</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"We'll flood your IG with viral Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."</p>
             </div>
             
             <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-[#FFEC00]/10 rounded-lg flex items-center justify-center text-[#FFEC00] mb-6">
-                <Ban className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-white">Generic Marketing That Feels Corporate</h3>
-              <p className="text-gray-300">We speak hypebeast – no cringe, just culture.</p>
+              <h3 className="text-xl font-bold mb-4 text-white">3. "No Loyalty"</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Low customer loyalty/repeat buys</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>No system to reward regulars</span>
+                </li>
+                <li className="flex items-start text-sm text-gray-300">
+                  <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
+                  <span>Can't track what's hot vs. deadstock</span>
+                </li>
+              </ul>
+              <p className="text-gray-300">"Build a cult following with loyalty apps, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."</p>
             </div>
           </div>
         </div>
@@ -443,4 +476,17 @@ export default function Home() {
                 Command the Culture
               </button>
             </div>
-          </div
+          </div>
+        </div>
+      </section>
+
+      {showQuoteModal && (
+        <QuoteRequest isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
+      )}
+
+      {showHypeAuditForm && (
+        <HypeAuditForm isOpen={showHypeAuditForm} onClose={() => setShowHypeAuditForm(false)} />
+      )}
+    </div>
+  );
+}
