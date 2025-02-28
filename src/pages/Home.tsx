@@ -161,7 +161,7 @@ export default function Home() {
             <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1556906781-9a412961c28c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2067&q=80"
+                  src="https://i.imgur.com/nFotQHJ.jpeg"
                   alt="Streetwear brand social media campaign"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -180,7 +180,7 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#FFEC00] transition-colors">
                   Gear Locker 
                 </h3>
-                <p className="text-gray-400 mb-4">Complete brand refresh with website</p>
+                <p className="text-gray-400 mb-4">Complete brand refresh (Supreme Hype)</p>
                 <a
                   href="/portfolio"
                   className="inline-flex items-center text-[#FFEC00] hover:text-[#FFEC00]/80 font-medium relative group/link"
@@ -196,7 +196,7 @@ export default function Home() {
             <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1633422488318-bddc3a8d883a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                  src="https://assets.arpost.co/wp-content/uploads/2022/11/28182239/AR-Fashion-Platform-ZERO10.png"
                   alt="AR mobile app for virtual clothing try-on"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -213,9 +213,9 @@ export default function Home() {
               <div className="p-6 relative">
                 <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div>
                 <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#00E0FF] transition-colors">
-                  VirtualFit AR App
+                  Augmented Reality 
                 </h3>
-                <p className="text-gray-400 mb-4">AR-powered virtual try-on app for streetwear brands</p>
+                <p className="text-gray-400 mb-4">4D AR-powered Augmented Reality shirts</p>
                 <a
                   href="/portfolio"
                   className="inline-flex items-center text-[#00E0FF] hover:text-[#00E0FF]/80 font-medium relative group/link"
