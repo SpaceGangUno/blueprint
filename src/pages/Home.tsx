@@ -49,7 +49,7 @@ export default function Home() {
   const handleTouchStart = useRef<number>(0);
   const handleTouchMove = useRef<number>(0);
   
-  const onTouchStart = (e: React.TouchEvent, carouselType: 'challenges' | 'portfolio' | 'services') => {
+  const onTouchStart = (e: React.TouchEvent) => {
     handleTouchStart.current = e.targetTouches[0].clientX;
   };
   
@@ -237,7 +237,7 @@ export default function Home() {
           <div 
             ref={challengesCarouselRef}
             className="overflow-x-hidden"
-            onTouchStart={(e) => onTouchStart(e, 'challenges')}
+            onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={() => onTouchEnd('challenges')}
           >
@@ -358,7 +358,7 @@ export default function Home() {
           <div 
             ref={portfolioCarouselRef}
             className="overflow-x-hidden"
-            onTouchStart={(e) => onTouchStart(e, 'portfolio')}
+            onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={() => onTouchEnd('portfolio')}
           >
@@ -534,7 +534,7 @@ export default function Home() {
           <div 
             ref={servicesCarouselRef}
             className="overflow-x-hidden"
-            onTouchStart={(e) => onTouchStart(e, 'services')}
+            onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={() => onTouchEnd('services')}
           >
