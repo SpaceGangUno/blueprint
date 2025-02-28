@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, MessageSquare, Clock, Ban, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
-import SmsTemplatesNotification from '../components/SmsTemplatesNotification';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -465,8 +464,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SMS Templates Notification */}
-      <SmsTemplatesNotification />
 
       {/* Footer CTA Bar */}
       <section className="py-8 bg-black border-t border-gray-800">
