@@ -1,26 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, MessageSquare, Clock, Ban, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showHypeAuditForm, setShowHypeAuditForm] = useState(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  
-  // Function to scroll carousel
-  const scrollCarousel = (direction: 'left' | 'right') => {
-    if (carouselRef.current) {
-      const scrollAmount = 300; // Adjust as needed
-      const currentScroll = carouselRef.current.scrollLeft;
-      
-      carouselRef.current.scrollTo({
-        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   return (
     <div className="pt-16">
