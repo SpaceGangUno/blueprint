@@ -473,7 +473,9 @@ export default function Home() {
               Your next drop could break the internet. Let's plan it.
             </p>
             <a
-              href="/contact?openCalendly=true"
+              href="https://calendly.com/create-blueprintstudios"
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-6 py-3 bg-[#00E0FF] text-black font-bold rounded-lg hover:bg-[#00E0FF]/80 transition-all duration-300 inline-block"
             >
               Book Strategy Call →
