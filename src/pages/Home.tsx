@@ -434,3 +434,13 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
+              </div>
+              
+              <button
+                onClick={() => setShowQuoteModal(true)}
+                className="w-full py-3 bg-transparent border border-[#FFEC00] text-[#FFEC00] font-bold rounded-lg hover:bg-[#FFEC00]/10 transition-all duration-300"
+              >
+                Command the Culture
+              </button>
+            </div>
+          </div
