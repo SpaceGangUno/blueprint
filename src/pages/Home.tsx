@@ -7,6 +7,7 @@ import HypeAuditForm from '../components/HypeAuditForm';
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showHypeAuditForm, setShowHypeAuditForm] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Carousel state for each section
   const [activeChallengeIndex, setActiveChallengeIndex] = useState(0);
@@ -115,18 +116,42 @@ export default function Home() {
     }
   }, [activeServiceIndex]);
 
+  // Handle scroll animations
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollElements = document.querySelectorAll('.scroll-animate');
+      
+      scrollElements.forEach((element) => {
+        const elementPosition = element.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        
+        if (elementPosition < windowHeight * 0.85) {
+          element.classList.add('animate-in');
+        }
+      });
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    // Trigger once on load
+    setTimeout(handleScroll, 100);
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="pt-16">
+    <div className="pt-16 overflow-x-hidden">
       <Helmet>
         <title>Streetwear Marketing Agency | Launch Events, SMS Campaigns & Hype Content</title>
         <meta 
           name="description" 
           content="Specialized streetwear marketing agency creating digital buzz for physical drops, building hype, and driving foot traffic to your store." 
         />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="theme-color" content="#1E0B2C" />
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative min-h-[500px] md:h-[80vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[90vh] sm:min-h-[500px] md:h-[80vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
@@ -134,35 +159,35 @@ export default function Home() {
             loop
             playsInline
             className="w-full h-full object-cover hidden md:block"
+            poster="/public/images/hornets-hive-mentality.jpg"
           >
             <source src="https://player.vimeo.com/progressive_redirect/playback/735671584/rendition/720p/file.mp4?loc=external&oauth2_token_id=57447761&signature=e7e8d8f2e23f0b3bf04b7c6de6c2a7f8e0c65c9a9c8a0e1a0d6c8e8c8c8c8c8" type="video/mp4" />
-            {/* Fallback image if video doesn't load */}
-            <img
-              src="/public/images/hornets-hive-mentality.jpg"
-              alt="Streetwear fashion showcase with urban backdrop"
-              className="w-full h-full object-cover"
-            />
           </video>
           {/* Mobile-optimized image instead of video */}
           <img
             src="/public/images/hornets-hive-mentality.jpg"
             alt="Streetwear fashion showcase with urban backdrop"
             className="w-full h-full object-cover md:hidden"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-[#1E0B2C]" />
           
-          {/* Urban texture overlay */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-20"></div>
+          {/* Futuristic grid overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDBoMHY0MCIvPjwvZz48L3N2Zz4=')] opacity-30"></div>
+          
+          {/* Animated gradient accent */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#00E0FF] to-[#FFEC00] opacity-80"></div>
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-0">
-          <div className="space-y-4 md:space-y-6 max-w-3xl">
-            <div className="inline-block px-3 py-1 bg-[#FF6B00]/20 text-[#FF6B00] text-sm font-medium rounded-full mb-2">
+          <div className="space-y-5 md:space-y-6 max-w-3xl scroll-animate fade-up">
+            <div className="inline-flex items-center px-3 py-1 bg-[#FF6B00]/20 text-[#FF6B00] text-sm font-medium rounded-full mb-2 backdrop-blur-sm">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#FF6B00] mr-2 animate-pulse"></span>
               STREETWEAR MARKETING
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
               Turn Limited Drops into 
-              <span className="text-[#FF6B00] ml-2 block md:inline">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-[#FFEC00] ml-2 block md:inline">
                 Long Lines
               </span>
             </h1>
@@ -172,16 +197,16 @@ export default function Home() {
             <div className="pt-4 flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => setShowHypeAuditForm(true)}
-                className="inline-block px-6 py-3 md:px-8 md:py-4 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 shadow-lg hover:shadow-[#FF6B00]/20 hover:-translate-y-1"
+                className="inline-block px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-[#FF6B00] to-[#E05A00] text-white font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-[#FF6B00]/30 hover:-translate-y-1 active:translate-y-0 transform-gpu"
               >
                 Get Your Free Hype Audit
               </button>
               <a 
                 href="/portfolio" 
-                className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-transparent border border-white/30 text-white font-bold rounded-lg hover:bg-white/10 transition-all duration-300"
+                className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-transparent border border-white/30 text-white font-bold rounded-lg hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
               >
                 See Our Work
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
           </div>
@@ -189,23 +214,25 @@ export default function Home() {
       </section>
 
       {/* Challenges Grid Section */}
-      <section className="py-20 bg-black text-white relative">
-        {/* Urban texture overlay */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-5"></div>
+      <section className="py-16 sm:py-20 bg-black text-white relative">
+        {/* Futuristic grid overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDBoMHY0MCIvPjwvZz48L3N2Zz4=')] opacity-10"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-3xl font-bold mb-4 text-center">Streetwear Stores Struggle With:</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
+          <div className="scroll-animate fade-up">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-300">Streetwear Stores Struggle With:</h2>
+            <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">We'll tell you which pieces to burn 🔥 and which will sell out in 10 minutes.</p>
+          </div>
           
           {/* Challenges Carousel Navigation */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 px-2">
             <button 
               onClick={() => handleChallengeSwipe('right')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activeChallengeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+              className={`p-2 rounded-full bg-black/50 text-white backdrop-blur-sm ${activeChallengeIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
               disabled={activeChallengeIndex === 0}
               aria-label="Previous challenge"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             </button>
             
             <div className="flex gap-2">
@@ -215,7 +242,7 @@ export default function Home() {
                   onClick={() => setActiveChallengeIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     activeChallengeIndex === index 
-                      ? 'bg-[#FF6B00] w-4' 
+                      ? 'bg-[#FF6B00] w-6' 
                       : 'bg-white/50 hover:bg-white/70'
                   }`}
                   aria-label={`Go to challenge ${index + 1}`}
@@ -225,86 +252,101 @@ export default function Home() {
             
             <button 
               onClick={() => handleChallengeSwipe('left')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activeChallengeIndex === 2 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+              className={`p-2 rounded-full bg-black/50 text-white backdrop-blur-sm ${activeChallengeIndex === 2 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
               disabled={activeChallengeIndex === 2}
               aria-label="Next challenge"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={24} />
             </button>
           </div>
           
           {/* Challenges Carousel */}
           <div 
             ref={challengesCarouselRef}
-            className="overflow-x-hidden"
+            className="overflow-x-hidden scroll-animate fade-up"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={() => onTouchEnd('challenges')}
           >
-            <div className="flex transition-transform duration-300" style={{ width: '300%', transform: `translateX(-${activeChallengeIndex * 33.333}%)` }}>
+            <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activeChallengeIndex * 33.333}%)` }}>
               {/* Challenge 1 */}
               <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/10 transition-all duration-300 hover:-translate-y-2">
-                  <h3 className="text-xl font-bold mb-4 text-white">1. "Empty Stores"</h3>
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-start text-sm text-gray-300">
+                <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border-l-4 border-[#00E0FF] hover:shadow-lg hover:shadow-[#00E0FF]/20 transition-all duration-300 hover:-translate-y-2 transform-gpu">
+                  <div className="flex items-center mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[#00E0FF]/20 flex items-center justify-center mr-3">
+                      <span className="text-[#00E0FF] font-bold">01</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">"Empty Stores"</h3>
+                  </div>
+                  <ul className="space-y-3 mb-4">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Slow foot traffic & online sales</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
                       <span>New drops go unnoticed (no email/SMS hype)</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Ads that don't convert to customers</span>
                     </li>
                   </ul>
-                  <p className="text-gray-300">"We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."</p>
+                  <p className="text-gray-300 border-t border-gray-800 pt-4 italic">"We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."</p>
                 </div>
               </div>
               
               {/* Challenge 2 */}
               <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/10 transition-all duration-300 hover:-translate-y-2">
-                  <h3 className="text-xl font-bold mb-4 text-white">2. "No Hype"</h3>
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-start text-sm text-gray-300">
+                <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border-l-4 border-[#FF6B00] hover:shadow-lg hover:shadow-[#FF6B00]/20 transition-all duration-300 hover:-translate-y-2 transform-gpu">
+                  <div className="flex items-center mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[#FF6B00]/20 flex items-center justify-center mr-3">
+                      <span className="text-[#FF6B00] font-bold">02</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">"No Hype"</h3>
+                  </div>
+                  <ul className="space-y-3 mb-4">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Weak social media presence (no engagement/hype)</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Can't keep up with trends or content creation</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>No time to post consistently</span>
                     </li>
                   </ul>
-                  <p className="text-gray-300">"We'll flood your IG with viral Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."</p>
+                  <p className="text-gray-300 border-t border-gray-800 pt-4 italic">"We'll flood your IG with viral Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."</p>
                 </div>
               </div>
               
               {/* Challenge 3 */}
               <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/10 transition-all duration-300 hover:-translate-y-2">
-                  <h3 className="text-xl font-bold mb-4 text-white">3. "No Loyalty"</h3>
-                  <ul className="space-y-2 mb-4">
-                    <li className="flex items-start text-sm text-gray-300">
+                <div className="bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border-l-4 border-[#FFEC00] hover:shadow-lg hover:shadow-[#FFEC00]/20 transition-all duration-300 hover:-translate-y-2 transform-gpu">
+                  <div className="flex items-center mb-4">
+                    <div className="w-10 h-10 rounded-full bg-[#FFEC00]/20 flex items-center justify-center mr-3">
+                      <span className="text-[#FFEC00] font-bold">03</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white">"No Loyalty"</h3>
+                  </div>
+                  <ul className="space-y-3 mb-4">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Low customer loyalty/repeat buys</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>No system to reward regulars</span>
                     </li>
-                    <li className="flex items-start text-sm text-gray-300">
+                    <li className="flex items-start text-sm sm:text-base text-gray-300">
                       <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
                       <span>Can't track what's hot vs. deadstock</span>
                     </li>
                   </ul>
-                  <p className="text-gray-300">"Build a cult following with loyalty apps, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."</p>
+                  <p className="text-gray-300 border-t border-gray-800 pt-4 italic">"Build a cult following with loyalty apps, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."</p>
                 </div>
               </div>
             </div>
@@ -313,20 +355,22 @@ export default function Home() {
       </section>
 
       {/* Portfolio Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-4 text-center">Featured Projects</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Check out some of our recent work for streetwear brands and retailers</p>
+          <div className="scroll-animate fade-up">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-300">Featured Projects</h2>
+            <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Check out some of our recent work for streetwear brands and retailers</p>
+          </div>
           
           {/* Portfolio Carousel Navigation */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 px-2">
             <button 
               onClick={() => handlePortfolioSwipe('right')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activePortfolioIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+              className={`p-2 rounded-full bg-black/50 text-white backdrop-blur-sm ${activePortfolioIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
               disabled={activePortfolioIndex === 0}
               aria-label="Previous project"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             </button>
             
             <div className="flex gap-2">
@@ -336,7 +380,7 @@ export default function Home() {
                   onClick={() => setActivePortfolioIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     activePortfolioIndex === index 
-                      ? 'bg-[#FF6B00] w-4' 
+                      ? 'bg-[#FF6B00] w-6' 
                       : 'bg-white/50 hover:bg-white/70'
                   }`}
                   aria-label={`Go to project ${index + 1}`}
@@ -346,31 +390,32 @@ export default function Home() {
             
             <button 
               onClick={() => handlePortfolioSwipe('left')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activePortfolioIndex === 2 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+              className={`p-2 rounded-full bg-black/50 text-white backdrop-blur-sm ${activePortfolioIndex === 2 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
               disabled={activePortfolioIndex === 2}
               aria-label="Next project"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={24} />
             </button>
           </div>
           
           {/* Portfolio Carousel */}
           <div 
             ref={portfolioCarouselRef}
-            className="overflow-x-hidden"
+            className="overflow-x-hidden scroll-animate fade-up"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={() => onTouchEnd('portfolio')}
           >
-            <div className="flex transition-transform duration-300" style={{ width: '300%', transform: `translateX(-${activePortfolioIndex * 33.333}%)` }}>
+            <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activePortfolioIndex * 33.333}%)` }}>
               {/* Project 1 */}
               <div className="w-full flex-shrink-0 px-4">
-                <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="group bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 transform-gpu">
                   <div className="relative h-64 overflow-hidden">
                     <img
                       src="https://i.imgur.com/R2H6i7c.jpeg"
                       alt="Charlotte Hornets 'Hive Mentality' branding with logo and design elements"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-4 left-4 right-4">
@@ -402,12 +447,13 @@ export default function Home() {
               
               {/* Project 2 */}
               <div className="w-full flex-shrink-0 px-4">
-                <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div className="group bg-gray-900/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 transform-gpu">
                   <div className="relative h-64 overflow-hidden">
                     <img
                       src="https://i.imgur.com/nFotQHJ.jpeg"
                       alt="Streetwear brand social media campaign"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-4 left-4 right-4">
@@ -424,335 +470,4 @@ export default function Home() {
                     <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#FFEC00] transition-colors">
                       Gear Locker 
                     </h3>
-                    <p className="text-gray-400 mb-4">Complete brand refresh (Supreme Hype)</p>
-                    <a
-                      href="/portfolio"
-                      className="inline-flex items-center text-[#FFEC00] hover:text-[#FFEC00]/80 font-medium relative group/link"
-                    >
-                      <span>View Project</span>
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
-                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#FFEC00] to-[#FF6B00] group-hover/link:w-full transition-all duration-300"></span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Project 3 */}
-              <div className="w-full flex-shrink-0 px-4">
-                <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                  <div className="relative h-64 overflow-hidden">
-                    <img
-                      src="https://assets.arpost.co/wp-content/uploads/2022/11/28182239/AR-Fashion-Platform-ZERO10.png"
-                      alt="AR mobile app for virtual clothing try-on"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="flex flex-wrap gap-2">
-                          <span className="px-3 py-1 bg-[#00E0FF] text-black rounded-full text-sm">Mobile App</span>
-                          <span className="px-3 py-1 bg-[#FF6B00] text-white rounded-full text-sm">AR Technology</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 relative">
-                    <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div>
-                    <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#00E0FF] transition-colors">
-                      Augmented Reality 
-                    </h3>
-                    <p className="text-gray-400 mb-4">4D AR-powered Augmented Reality shirts</p>
-                    <a
-                      href="/portfolio"
-                      className="inline-flex items-center text-[#00E0FF] hover:text-[#00E0FF]/80 font-medium relative group/link"
-                    >
-                      <span>View Project</span>
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
-                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover/link:w-full transition-all duration-300"></span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-12">
-            <a 
-              href="/portfolio" 
-              className="inline-flex items-center px-6 py-3 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 hover:-translate-y-1"
-            >
-              View All Projects
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Packages Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-4 text-center">Pricing Packages</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">No cookie-cutter templates – your brand, your rules. Choose the package that fits your streetwear ambitions.</p>
-          
-          {/* Services Carousel Navigation */}
-          <div className="flex justify-between items-center mb-6">
-            <button 
-              onClick={() => handleServiceSwipe('right')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activeServiceIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
-              disabled={activeServiceIndex === 0}
-              aria-label="Previous service package"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            
-            <div className="flex gap-2">
-              {[0, 1, 2].map((index) => (
-                <button
-                  key={`service-${index}`}
-                  onClick={() => setActiveServiceIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    activeServiceIndex === index 
-                      ? 'bg-[#FF6B00] w-4' 
-                      : 'bg-white/50 hover:bg-white/70'
-                  }`}
-                  aria-label={`Go to service package ${index + 1}`}
-                />
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => handleServiceSwipe('left')}
-              className={`p-2 rounded-full bg-black/50 text-white ${activeServiceIndex === 2 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
-              disabled={activeServiceIndex === 2}
-              aria-label="Next service package"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-          
-          {/* Services Carousel */}
-          <div 
-            ref={servicesCarouselRef}
-            className="overflow-x-hidden"
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={() => onTouchEnd('services')}
-          >
-            <div className="flex transition-transform duration-300" style={{ width: '300%', transform: `translateX(-${activeServiceIndex * 33.333}%)` }}>
-              {/* Package 1: Hype Essentials */}
-              <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border border-[#00E0FF]/30 hover:border-[#00E0FF] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-[#00E0FF]/20">
-                  <div className="mb-6">
-                    <span className="inline-block px-3 py-1 bg-[#00E0FF]/10 text-[#00E0FF] text-sm font-medium rounded-full mb-3">BASIC</span>
-                    <h3 className="text-2xl font-bold mb-2">Hype Essentials</h3>
-                    <p className="text-sm text-gray-400 mb-3">Ignite Your Brand, No Fluff.</p>
-                    <p className="text-xl font-bold text-[#00E0FF]">Starting at $1,500</p>
-                  </div>
-                  
-                  <div className="mb-8">
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">🎨 Brand Identity Starter Kit:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Custom logo + brand color palette</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Instagram/TikTok profile optimization</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">📱 Weekly Content & Ads:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>5 Instagram posts + 2 Reels (trend-focused)</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>1 targeted ad campaign (creative + audience setup)</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <p className="font-semibold text-white mb-2">✉️ Weekly Engagement Blasts:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Email & SMS templates for drops/restocks</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#00E0FF] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Basic analytics (open rates, click-throughs)</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowQuoteModal(true)}
-                    className="w-full py-3 bg-transparent border border-[#00E0FF] text-[#00E0FF] font-bold rounded-lg hover:bg-[#00E0FF]/10 transition-all duration-300"
-                  >
-                    Spark Your Hype
-                  </button>
-                </div>
-              </div>
-              
-              {/* Package 2: Hype Suite */}
-              <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border border-[#FF6B00]/30 hover:border-[#FF6B00] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-[#FF6B00]/20 transform scale-105 z-10">
-                  <div className="mb-6">
-                    <span className="inline-block px-3 py-1 bg-[#FF6B00]/10 text-[#FF6B00] text-sm font-medium rounded-full mb-3">ADVANCED</span>
-                    <h3 className="text-2xl font-bold mb-2">Hype Suite</h3>
-                    <p className="text-sm text-gray-400 mb-3">From Closet to Cult Following.</p>
-                    <p className="text-xl font-bold text-[#FF6B00]">Starting at $3,500</p>
-                  </div>
-                  
-                  <div className="mb-8">
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">✅ Everything in Hype Essentials</p>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">🛠️ Custom Website & Shop Build:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Mobile-optimized site (Shopify/Webflow)</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Instagram Shop integration + product listings</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">📦 Signature Unboxing Experience:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Custom poly mailers, branded shipping supplies</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Mystery box template designs (limited editions)</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <p className="font-semibold text-white mb-2">📈 Smart Ad Strategy:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>2 ad campaigns/month with A/B testing</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FF6B00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Retargeting for drop-day FOMO</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowQuoteModal(true)}
-                    className="w-full py-3 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300"
-                  >
-                    Fuel the Frenzy
-                  </button>
-                </div>
-              </div>
-              
-              {/* Package 3: Empire Builder */}
-              <div className="w-full flex-shrink-0 px-4">
-                <div className="bg-gray-900 rounded-lg p-8 border border-[#FFEC00]/30 hover:border-[#FFEC00] transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:shadow-[#FFEC00]/20">
-                  <div className="mb-6">
-                    <span className="inline-block px-3 py-1 bg-[#FFEC00]/10 text-[#FFEC00] text-sm font-medium rounded-full mb-3">ENTERPRISE</span>
-                    <h3 className="text-2xl font-bold mb-2">Empire Builder</h3>
-                    <p className="text-sm text-gray-400 mb-3">Streetwear Domination, Full Throttle.</p>
-                    <p className="text-xl font-bold text-[#FFEC00]">Starting at $7,500</p>
-                  </div>
-                  
-                  <div className="mb-8">
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">✅ Everything in Hype Suite</p>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">💎 VIP Loyalty Ecosystem:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Tiered rewards program (points, early access)</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Custom "member-only" drop system</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">🏷️ Private Label Production:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Design-to-sourcing for 1 product line</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="font-semibold text-white mb-2">🎥 Premium Content Engine:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>15 posts/month + 3 viral Reels</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>3 ad campaigns with influencer collabs</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <p className="font-semibold text-white mb-2">🔥 Hype Forecasting:</p>
-                      <ul className="space-y-2 pl-5">
-                        <li className="flex items-start text-sm text-gray-300">
-                          <ArrowRight className="w-4 h-4 text-[#FFEC00] mr-2 flex-shrink-0 mt-0.5" />
-                          <span>Monthly trend reports + competitor breakdowns</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowQuoteModal(true)}
-                    className="w-full py-3 bg-transparent border border-[#FFEC00] text-[#FFEC00] font-bold rounded-lg hover:bg-[#FFEC00]/10 transition-all duration-300"
-                  >
-                    Command the Culture
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {showQuoteModal && (
-        <QuoteRequest isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />
-      )}
-
-      {showHypeAuditForm && (
-        <HypeAuditForm isOpen={showHypeAuditForm} onClose={() => setShowHypeAuditForm(false)} />
-      )}
-    </div>
-  );
-}
+                    <p className
