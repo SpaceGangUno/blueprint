@@ -19,46 +19,63 @@ export default function Home() {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative h-[80vh] min-h-[500px] flex items-center overflow-hidden">
+      <section className="relative min-h-[500px] md:h-[80vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
             muted
             loop
-            className="w-full h-full object-cover"
+            playsInline
+            className="w-full h-full object-cover hidden md:block"
           >
-            <source src="https://player.vimeo.com/external/370331493.sd.mp4?s=e90dcaba73c19e0e36f03406b47bbd6992dd6c1c&profile_id=164&oauth2_token_id=57447761" type="video/mp4" />
+            <source src="https://player.vimeo.com/progressive_redirect/playback/735671584/rendition/720p/file.mp4?loc=external&oauth2_token_id=57447761&signature=e7e8d8f2e23f0b3bf04b7c6de6c2a7f8e0c65c9a9c8a0e1a0d6c8e8c8c8c8c8" type="video/mp4" />
             {/* Fallback image if video doesn't load */}
             <img
-              src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-              alt="Crowded sneaker launch event with people waiting in line"
+              src="/public/images/hornets-hive-mentality.jpg"
+              alt="Streetwear fashion showcase with urban backdrop"
               className="w-full h-full object-cover"
             />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/90 to-[#1E0B2C]" />
+          {/* Mobile-optimized image instead of video */}
+          <img
+            src="/public/images/hornets-hive-mentality.jpg"
+            alt="Streetwear fashion showcase with urban backdrop"
+            className="w-full h-full object-cover md:hidden"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/80 to-[#1E0B2C]" />
           
           {/* Urban texture overlay */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-10"></div>
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-20"></div>
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-6 max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-0">
+          <div className="space-y-4 md:space-y-6 max-w-3xl">
+            <div className="inline-block px-3 py-1 bg-[#FF6B00]/20 text-[#FF6B00] text-sm font-medium rounded-full mb-2">
+              STREETWEAR MARKETING
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
               Turn Limited Drops into 
-              <span className="text-[#FF6B00] ml-2 sm:ml-4 block sm:inline">
+              <span className="text-[#FF6B00] ml-2 block md:inline">
                 Long Lines
               </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 leading-relaxed">
-              Streetwear marketing that fuels FOMO, community, and in-store hype.
+            <p className="text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-2xl">
+              We create digital buzz for physical drops, building hype that drives foot traffic to your store.
             </p>
-            <div className="pt-4">
+            <div className="pt-4 flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => setShowHypeAuditForm(true)}
-                className="inline-block px-8 py-4 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 shadow-lg hover:shadow-[#FF6B00]/20 hover:-translate-y-1"
+                className="inline-block px-6 py-3 md:px-8 md:py-4 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 shadow-lg hover:shadow-[#FF6B00]/20 hover:-translate-y-1"
               >
                 Get Your Free Hype Audit
               </button>
+              <a 
+                href="/portfolio" 
+                className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-transparent border border-white/30 text-white font-bold rounded-lg hover:bg-white/10 transition-all duration-300"
+              >
+                See Our Work
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </a>
             </div>
           </div>
         </div>
