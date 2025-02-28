@@ -140,9 +140,10 @@ export default function Home() {
 
   return (
     <div className="pt-16 overflow-x-hidden">
-      {/* Content removed for brevity */}
-      {/* Only fixing the style object issue */}
+      {/* Challenges Carousel */}
       <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activeChallengeIndex * 33.333}%)` }}></div>
+      
+      {/* Portfolio Carousel */}
       <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activePortfolioIndex * 33.333}%)` }}></div>
       
       {showQuoteModal && <QuoteRequest isOpen={showQuoteModal} onClose={() => setShowQuoteModal(false)} />}
