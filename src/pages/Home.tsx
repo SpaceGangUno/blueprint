@@ -472,12 +472,12 @@ export default function Home() {
             <p className="text-white text-lg font-bold mb-4 md:mb-0">
               Your next drop could break the internet. Let's plan it.
             </p>
-            <button
-              onClick={() => setShowQuoteModal(true)}
-              className="px-6 py-3 bg-[#00E0FF] text-black font-bold rounded-lg hover:bg-[#00E0FF]/80 transition-all duration-300"
+            <a
+              href="/contact?openCalendly=true"
+              className="px-6 py-3 bg-[#00E0FF] text-black font-bold rounded-lg hover:bg-[#00E0FF]/80 transition-all duration-300 inline-block"
             >
               Book Strategy Call →
-            </button>
+            </a>
           </div>
         </div>
       </section>

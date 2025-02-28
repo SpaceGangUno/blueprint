@@ -1,10 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Star, Coffee, Phone, Mail, Zap } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
+import { useLocation } from 'react-router-dom';
 
 export default function Contact() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const location = useLocation();
+  
+  // Function to open Calendly in a new window
+  const openCalendly = () => {
+    window.open('https://calendly.com/create-blueprintstudios', '_blank');
+  };
+  
+  // Check for openCalendly query parameter
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('openCalendly') === 'true') {
+      openCalendly();
+    }
+  }, [location]);
 
   return (
     <>
