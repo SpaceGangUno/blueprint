@@ -126,7 +126,7 @@ export default function Home() {
             <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="relative h-64 overflow-hidden">
                 <img
-                  src="https://imgur.com/a/WVTCbv8"
+                  src="https://i.imgur.com/R2H6i7c.jpeg"
                   alt="Charlotte Hornets 'Hive Mentality' branding with logo and design elements"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
