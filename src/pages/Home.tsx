@@ -115,6 +115,131 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Portfolio Section */}
+      <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-4 text-center">Featured Projects</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Check out some of our recent work for streetwear brands and retailers</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Project 1 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                  alt="Sneaker launch event with crowd waiting in line"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-[#FF6B00] text-white rounded-full text-sm">Event Marketing</span>
+                      <span className="px-3 py-1 bg-[#00E0FF] text-black rounded-full text-sm">Social Media</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 relative">
+                <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#FF6B00] to-[#00E0FF] group-hover:w-full transition-all duration-500"></div>
+                <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#FF6B00] transition-colors">
+                  HypeBeast Sneaker Drop
+                </h3>
+                <p className="text-gray-400 mb-4">Limited edition sneaker launch with line around the block</p>
+                <a
+                  href="/portfolio"
+                  className="inline-flex items-center text-[#00E0FF] hover:text-[#00E0FF]/80 font-medium relative group/link"
+                >
+                  <span>View Project</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover/link:w-full transition-all duration-300"></span>
+                </a>
+              </div>
+            </div>
+            
+            {/* Project 2 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1556906781-9a412961c28c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2067&q=80"
+                  alt="Streetwear brand social media campaign"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-[#FFEC00] text-black rounded-full text-sm">Branding</span>
+                      <span className="px-3 py-1 bg-[#FF6B00] text-white rounded-full text-sm">Content</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 relative">
+                <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#FFEC00] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div>
+                <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#FFEC00] transition-colors">
+                  StreetStyle Rebrand
+                </h3>
+                <p className="text-gray-400 mb-4">Complete brand refresh with social media strategy</p>
+                <a
+                  href="/portfolio"
+                  className="inline-flex items-center text-[#FFEC00] hover:text-[#FFEC00]/80 font-medium relative group/link"
+                >
+                  <span>View Project</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#FFEC00] to-[#FF6B00] group-hover/link:w-full transition-all duration-300"></span>
+                </a>
+              </div>
+            </div>
+            
+            {/* Project 3 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1633422488318-bddc3a8d883a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                  alt="AR mobile app for virtual clothing try-on"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-[#00E0FF] text-black rounded-full text-sm">Mobile App</span>
+                      <span className="px-3 py-1 bg-[#FF6B00] text-white rounded-full text-sm">AR Technology</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 relative">
+                <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover:w-full transition-all duration-500"></div>
+                <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#00E0FF] transition-colors">
+                  VirtualFit AR App
+                </h3>
+                <p className="text-gray-400 mb-4">AR-powered virtual try-on app for streetwear brands</p>
+                <a
+                  href="/portfolio"
+                  className="inline-flex items-center text-[#00E0FF] hover:text-[#00E0FF]/80 font-medium relative group/link"
+                >
+                  <span>View Project</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover/link:translate-x-1 transition-transform" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#00E0FF] to-[#FF6B00] group-hover/link:w-full transition-all duration-300"></span>
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center mt-12">
+            <a 
+              href="/portfolio" 
+              className="inline-flex items-center px-6 py-3 bg-[#FF6B00] text-white font-bold rounded-lg hover:bg-[#E05A00] transition-all duration-300 hover:-translate-y-1"
+            >
+              View All Projects
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Services Packages Section */}
       <section className="py-20 bg-gradient-to-b from-black to-[#1E0B2C] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
