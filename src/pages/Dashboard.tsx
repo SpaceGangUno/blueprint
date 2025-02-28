@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF6B00]"></div>
       </div>
     );
   }
@@ -41,25 +41,25 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       <Helmet>
         <title>Dashboard | Blueprint Studios</title>
         <meta name="description" content="Access your Blueprint Studios client dashboard. Manage projects, view team updates, track invoices, and collaborate with our creative team." />
       </Helmet>
-      <nav className="bg-white shadow">
+      <nav className="bg-gray-900 shadow">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-blue-600">Blueprint Studios</span>
+                <span className="text-xl font-bold text-[#FF6B00]">Blueprint Studios</span>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link
                   to="/dashboard"
                   className={`${
                     activeTab === 'overview'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-[#FF6B00] text-white'
+                      : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Overview
@@ -68,8 +68,8 @@ const Dashboard: React.FC = () => {
                   to="/dashboard/clients"
                   className={`${
                     activeTab === 'clients'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-[#FF6B00] text-white'
+                      : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Clients
@@ -78,8 +78,8 @@ const Dashboard: React.FC = () => {
                   to="/dashboard/team"
                   className={`${
                     activeTab === 'team'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-[#FF6B00] text-white'
+                      : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Team
@@ -88,8 +88,8 @@ const Dashboard: React.FC = () => {
                   to="/dashboard/invoices"
                   className={`${
                     activeTab === 'invoices'
-                      ? 'border-blue-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-[#FF6B00] text-white'
+                      : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                 >
                   Invoices
@@ -99,8 +99,8 @@ const Dashboard: React.FC = () => {
                     to="/dashboard/permissions"
                     className={`${
                       activeTab === 'permissions'
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? 'border-[#FF6B00] text-white'
+                        : 'border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
                     } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
                   >
                     Permissions
@@ -114,7 +114,7 @@ const Dashboard: React.FC = () => {
                   // Handle logout
                   navigate('/login');
                 }}
-                className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#FF6B00] hover:bg-[#E05A00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF6B00]"
               >
                 Logout
               </button>
