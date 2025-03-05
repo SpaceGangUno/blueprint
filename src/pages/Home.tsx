@@ -194,24 +194,7 @@ export default function Home() {
                   </p>
                 </div>
                 
-                {/* Sliding Scale Visual */}
-                <div className="mt-6 relative pt-1">
-                  <p className="text-xs text-gray-500 mb-1 flex justify-between">
-                    <span>What You're Doing Now</span>
-                    <span>What We'll Make Happen</span>
-                  </p>
-                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                    <div className="w-full flex">
-                      <div className="bg-red-300 h-full w-1/4 rounded-l"></div>
-                      <div className="bg-yellow-300 h-full w-1/4"></div>
-                      <div className="bg-green-300 h-full w-1/4"></div>
-                      <div className="bg-green-500 h-full w-1/4 rounded-r"></div>
-                    </div>
-                  </div>
-                  <div className="absolute right-0 -mt-6 transform translate-x-1/2">
-                    <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow"></div>
-                  </div>
-                </div>
+                {/* No visual element here */}
               </div>
             </div>
             
@@ -243,25 +226,7 @@ export default function Home() {
                   </p>
                 </div>
                 
-                {/* Hype Meter Visual */}
-                <div className="mt-6">
-                  <p className="text-xs text-gray-500 mb-1 text-center">Hype Meter</p>
-                  <div className="relative h-24">
-                    <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-red-500 via-yellow-400 to-green-500 h-full rounded"></div>
-                    <div className="absolute bottom-0 left-0 w-full bg-gray-200 h-full rounded transform scale-y-75 origin-bottom"></div>
-                    <div className="absolute bottom-0 left-0 w-full bg-blue-600 h-1/5 rounded transition-all duration-1000 animate-pulse-slow"></div>
-                    <div className="absolute top-0 left-0 w-full flex justify-center">
-                      <div className="px-2 py-1 bg-green-500 text-white text-xs rounded">
-                        Our Goal
-                      </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 w-full flex justify-center">
-                      <div className="px-2 py-1 bg-red-500 text-white text-xs rounded mb-1">
-                        Current
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* No visual element here */}
               </div>
             </div>
             
@@ -293,16 +258,7 @@ export default function Home() {
                   </p>
                 </div>
                 
-                {/* Loyalty Growth Visual */}
-                <div className="mt-6 relative pt-1">
-                  <p className="text-xs text-gray-500 mb-1 text-center">Customer Loyalty Growth</p>
-                  <div className="flex items-center justify-between space-x-2">
-                    <div className="flex-1 h-2 bg-gradient-to-r from-purple-300 to-purple-600 rounded"></div>
-                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-600 text-white text-xs">
-                      +
-                    </div>
-                  </div>
-                </div>
+                {/* No visual element here */}
               </div>
             </div>
           </div>
