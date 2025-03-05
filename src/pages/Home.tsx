@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Store, TrendingUp, Users, CheckCircle, AlertCircle } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
 import HeroSection from '../components/portfolio/HeroSection';
@@ -153,6 +153,183 @@ export default function Home() {
         image="/images/hornets-hive-mentality.jpg"
         imageAlt="Blueprint Digital Marketing and Web Development"
       />
+      
+      {/* Pain Points Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Common Challenges We Solve</h2>
+            <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
+            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+              We transform these everyday business struggles into opportunities for growth and success
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Pain Point 1: Empty Stores */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 scroll-animate">
+              <div className="p-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
+                  <Store className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Empty Stores</h3>
+                <ul className="mb-4 space-y-2">
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Slow foot traffic & online sales</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">New drops go unnoticed (no email/SMS hype)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Ads that don't convert to customers</span>
+                  </li>
+                </ul>
+                
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                  <p className="text-blue-700 font-medium">
+                    "We turn quiet stores into sold-out chaos with geo-targeted ads, FOMO SMS campaigns, and much more."
+                  </p>
+                </div>
+                
+                {/* Sliding Scale Visual */}
+                <div className="mt-6 relative pt-1">
+                  <p className="text-xs text-gray-500 mb-1 flex justify-between">
+                    <span>What You're Doing Now</span>
+                    <span>What We'll Make Happen</span>
+                  </p>
+                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                    <div className="w-full flex">
+                      <div className="bg-red-300 h-full w-1/4 rounded-l"></div>
+                      <div className="bg-yellow-300 h-full w-1/4"></div>
+                      <div className="bg-green-300 h-full w-1/4"></div>
+                      <div className="bg-green-500 h-full w-1/4 rounded-r"></div>
+                    </div>
+                  </div>
+                  <div className="absolute right-0 -mt-6 transform translate-x-1/2">
+                    <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Pain Point 2: No Hype */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 scroll-animate">
+              <div className="p-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 mb-4">
+                  <TrendingUp className="w-6 h-6 text-yellow-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">No Hype</h3>
+                <ul className="mb-4 space-y-2">
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Weak social media presence (no engagement/hype)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Can't keep up with trends or content creation</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">No time to post consistently</span>
+                  </li>
+                </ul>
+                
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                  <p className="text-blue-700 font-medium">
+                    "We'll flood your IG with Reels, trend-riding posts, and UGC that makes your brand the talk of the streets."
+                  </p>
+                </div>
+                
+                {/* Hype Meter Visual */}
+                <div className="mt-6">
+                  <p className="text-xs text-gray-500 mb-1 text-center">Hype Meter</p>
+                  <div className="relative h-24">
+                    <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-red-500 via-yellow-400 to-green-500 h-full rounded"></div>
+                    <div className="absolute bottom-0 left-0 w-full bg-gray-200 h-full rounded transform scale-y-75 origin-bottom"></div>
+                    <div className="absolute bottom-0 left-0 w-full bg-blue-600 h-1/5 rounded transition-all duration-1000 animate-pulse-slow"></div>
+                    <div className="absolute top-0 left-0 w-full flex justify-center">
+                      <div className="px-2 py-1 bg-green-500 text-white text-xs rounded">
+                        Our Goal
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-full flex justify-center">
+                      <div className="px-2 py-1 bg-red-500 text-white text-xs rounded mb-1">
+                        Current
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Pain Point 3: No Loyalty */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 scroll-animate">
+              <div className="p-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 mb-4">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">No Loyalty</h3>
+                <ul className="mb-4 space-y-2">
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Low customer loyalty/repeat buys</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">No system to reward regulars</span>
+                  </li>
+                  <li className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-600">Can't track what's hot vs. deadstock</span>
+                  </li>
+                </ul>
+                
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
+                  <p className="text-blue-700 font-medium">
+                    "Build a cult following with loyalty/reward system, 'Insider Only' drops, and our hype-forecasting audits that tell you what to stock next."
+                  </p>
+                </div>
+                
+                {/* Before/After Visual */}
+                <div className="mt-6 grid grid-cols-2 gap-2">
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1 text-center">Before</p>
+                    <div className="flex flex-col items-center">
+                      <div className="w-8 h-8 rounded-full bg-gray-300 mb-1"></div>
+                      <div className="w-8 h-8 rounded-full bg-gray-300 mb-1"></div>
+                      <div className="w-8 h-8 rounded-full bg-gray-300"></div>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 mb-1 text-center">After</p>
+                    <div className="flex flex-col items-center">
+                      <div className="w-8 h-8 rounded-full bg-blue-300 mb-1 relative">
+                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-blue-400 mb-1 relative">
+                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-blue-500 relative">
+                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-blue-600 mt-1 relative">
+                        <CheckCircle className="w-3 h-3 text-white absolute -right-1 -top-1" />
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-blue-700 mt-1 relative">
+                        <CheckCircle className="w-3 h-3 text-white absolute -right-1 -top-1" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* Challenges Carousel */}
       <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activeChallengeIndex * 33.333}%)` }}></div>
       
