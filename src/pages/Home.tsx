@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuoteRequest from '../components/QuoteRequest';
 import HypeAuditForm from '../components/HypeAuditForm';
+import HeroSection from '../components/portfolio/HeroSection';
 
 export default function Home() {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -139,7 +140,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="pt-16 overflow-x-hidden">
+    <div className="overflow-x-hidden">
+      <Helmet>
+        <title>Blueprint - Digital Marketing & Web Development</title>
+        <meta name="description" content="Blueprint helps businesses grow through strategic digital marketing and web development solutions." />
+      </Helmet>
+      
+      {/* Hero Banner */}
+      <HeroSection 
+        title="Transform Your Digital Presence"
+        subtitle="Strategic marketing solutions and custom web development to help your business thrive in the digital landscape"
+        image="/images/hornets-hive-mentality.jpg"
+        imageAlt="Blueprint Digital Marketing and Web Development"
+      />
       {/* Challenges Carousel */}
       <div className="flex transition-transform duration-500 ease-out" style={{ width: '300%', transform: `translateX(-${activeChallengeIndex * 33.333}%)` }}></div>
       
