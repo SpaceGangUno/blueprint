@@ -293,34 +293,13 @@ export default function Home() {
                   </p>
                 </div>
                 
-                {/* Before/After Visual */}
-                <div className="mt-6 grid grid-cols-2 gap-2">
-                  <div className="bg-gray-100 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1 text-center">Before</p>
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-gray-300 mb-1"></div>
-                      <div className="w-8 h-8 rounded-full bg-gray-300 mb-1"></div>
-                      <div className="w-8 h-8 rounded-full bg-gray-300"></div>
-                    </div>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-xs text-blue-500 mb-1 text-center">After</p>
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-blue-300 mb-1 relative">
-                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-blue-400 mb-1 relative">
-                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-blue-500 relative">
-                        <CheckCircle className="w-3 h-3 text-blue-600 absolute -right-1 -top-1" />
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-blue-600 mt-1 relative">
-                        <CheckCircle className="w-3 h-3 text-white absolute -right-1 -top-1" />
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-blue-700 mt-1 relative">
-                        <CheckCircle className="w-3 h-3 text-white absolute -right-1 -top-1" />
-                      </div>
+                {/* Loyalty Growth Visual */}
+                <div className="mt-6 relative pt-1">
+                  <p className="text-xs text-gray-500 mb-1 text-center">Customer Loyalty Growth</p>
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex-1 h-2 bg-gradient-to-r from-purple-300 to-purple-600 rounded"></div>
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-600 text-white text-xs">
+                      +
                     </div>
                   </div>
                 </div>
